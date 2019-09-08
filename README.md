@@ -1,2 +1,3 @@
-# sjtwo-c
+# sjdev-c
 
+SJ Two C Development Group
