@@ -1,0 +1,47 @@
+
+## Folder Structure
+
+The folder structure proposed below not only organizes the source code, but also promotes good practices of which code should invoke (or not invoke) code at other folders.
+
+The folder structure takes inspiration from code development at Lockheed Martin. Then, it was tried and tested further and many controllers at Tesla use similar directory structure as the one proposed below.
+
+- L0 - Low level
+- L1 - FreeRTOS
+- L2 - Standalone utilities
+- L3 - Drivers
+- L4 - I/O
+- L5 - Application
+
+The function invocations shall go from a layer **downwards**, but never upwards; so `L2 Standalone utilities` should never make a function call into the `L3 - drivers` or the Application functions.
+
+### `l0_low_level`
+
+Normally, you will not modify anything at this folder.
+
+`l0_low_level` is responsible to do the following:
+
+- Initialize RAM
+- Initialize the clock system
+- Jump to `main()`
+
+### `l1_rtos`
+
+Do not modify anything at this is the folder; it is for FreeRTOS source code only.
+
+### `l2_standalone_utilities`
+
+Input sources here that can be compiled **without** any other dependency on a library other than standard C library.
+
+This folder contains stand-alone libraries, such as `buffer.h` that the drivers or above layers can utilize. The distinction of this folder is that you should not include libraries that need other libraries to build (other than standard C). For instance, `buffer.h` is great if it is standalone, but if `buffer.h` will use a driver, or another library such as `foo.h` then it is not a standalone library.
+
+### `l3_drivers`
+
+We can state the obvious here: All drivers should be placed at this directory and it is allowed to use the RTOS and standalone utilities.
+
+### `l4_io`
+
+This is for sources that perform input-output, such as a CLI handler. You should not put tasks' code here, but rather helper code for the `l5`
+
+### `l5_application`
+
+This is mainly for task level code.
