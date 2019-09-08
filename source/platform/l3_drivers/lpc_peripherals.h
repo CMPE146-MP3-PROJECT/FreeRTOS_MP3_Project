@@ -14,7 +14,7 @@
  *
  * @warning these need to map to the same values as lpc40xx.h 'IRQn_Type'; we duplicate it
  *          here to avoid including lpc40xx.h and make unit-testing and mocking easier.
- /
+ */
 typedef enum {
   LPC_PERIPHERAL__UART0 = 5,
   LPC_PERIPHERAL__UART1 = 6,
@@ -25,6 +25,6 @@ typedef enum {
 /// Function pointer type for an interrupt; @see lpc_peripheral__enable_interrupt()
 typedef void (*lpc_peripheral__isr_callback_f)(void);
 
-void lpc_peripheral__turn_on_power_to(lpc_peripherals_e peripheral);
+void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral);
 
-void lpc_peripheral__enable_interrupt(lpc_peripherals_e peripheral, lpc_peripheral__isr_callback_f isr_callback);
+void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, lpc_peripheral__isr_callback_f isr_callback);
