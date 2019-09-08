@@ -42,7 +42,7 @@ SRC_DIRS_ROOT = [
 ]
 
 LINKER_FILES = [
-    SOURCE_DIR.File("platform/linker/layout_lpc4078.ld"),
+    SOURCE_DIR.File("l0_lowlevel/linker/layout_lpc4078.ld"),
 ]
 
 EXCLUDED_SRC_FILES = []
