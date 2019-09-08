@@ -1,0 +1,37 @@
+#include "sys_time.h"
+
+static const lpc_timer_e sys_time__hw_timer = lpc_timer0;
+static uint32_t sys_time_sec_counter = 0;
+
+static void sys_time__1sec_isr(void) { ++sys_time_sec_counter; }
+
+void sys_time__init(void) {
+  const uint32_t prescalar_for_1us = (sys_get_cpu_clock() / (UINT64_C(1000) * 1000 * us_per_tick));
+
+  // Enable the timer with 1uS resolution with an interrupt every one second
+  hw_timer__enable(sys_time__hw_timer, prescalar_for_1us, sys_time__1sec_isr);
+  hw_timer__enable_match_isr(sys_time__hw_timer, lpc_timer__mr0);
+}
+
+uint64_t sys_time__get_uptime_us(void) {
+  uint32_t before_us = 0;
+  uint32_t after_us = 0;
+  uint32_t seconds = 0;
+
+  /**
+   * Loop until we can safely read both the rollover value and the timer value.
+   * When the timer rolls over, the TC value will start from zero, and the "after"
+   * value will be less than the before value in which case, we will loop again
+   * and pick up the new rollover count.  This avoid critical section and simplifies
+   * the logic of reading higher 16-bit (roll-over) and lower 32-bit (timer value).
+   */
+  do {
+    before_us = hw_timer__get_value(sys_time__hw_timer);
+    seconds = sys_time_sec_counter;
+    after_us = hw_timer__get_value(sys_time__hw_timer);
+  } while (after < before);
+
+  uint64_t uptime_us = after_us;
+  uptime_us += (UINT64_C(1000) * 1000 * seconds);
+  return uptime_us;
+}

@@ -4,9 +4,7 @@
 
 static const LPC_GPIO_TypeDef *gpio_memory_map[] = {LPC_GPIO1, LPC_GPIO2, LPC_GPIO3, LPC_GPIO4, LPC_GPIO5};
 
-static LPC_GPIO_TypeDef *gpio__get_struct(gpio_s gpio) {
-  return (LPC_GPIO_TypeDef *)gpio_memory_map[gpio.port_number];
-}
+static LPC_GPIO_TypeDef *gpio__get_struct(gpio_s gpio) { return (LPC_GPIO_TypeDef *)gpio_memory_map[gpio.port_number]; }
 
 static uint32_t gpio__get_pin_mask(gpio_s gpio) { return (UINT32_C(1) << gpio.pin_number); }
 

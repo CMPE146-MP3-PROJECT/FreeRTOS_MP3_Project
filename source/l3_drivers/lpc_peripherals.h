@@ -1,5 +1,7 @@
 #pragma once
 
+#include "function_types.h"
+
 /**
  * @file
  * This file provides API to turn on peripheral power, and their interrupts
@@ -22,9 +24,6 @@ typedef enum {
   LPC_PERIPHERAL__UART3 = 8,
 } lpc_peripheral_e;
 
-/// Function pointer type for an interrupt; @see lpc_peripheral__enable_interrupt()
-typedef void (*lpc_peripheral__isr_callback_f)(void);
-
 void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral);
 
-void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, lpc_peripheral__isr_callback_f isr_callback);
+void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function_type__void isr_callback);

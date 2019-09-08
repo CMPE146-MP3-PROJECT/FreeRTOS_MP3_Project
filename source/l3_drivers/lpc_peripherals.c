@@ -23,7 +23,7 @@ static void lpc_peripheral__halt_handler(void) {
  * Map of the user ISR registrations
  * These will call the halt handler unless user changes their ISR slot by calling lpc_peripheral__enable_interrupt()
  */
-static lpc_peripheral__isr_callback_f lpc_peripheral__isr_registrations[32 + 9] = {
+static function_type__void lpc_peripheral__isr_registrations[32 + 9] = {
     lpc_peripheral__halt_handler, // 16 WDT
     lpc_peripheral__halt_handler, // 17 Timer 0
     lpc_peripheral__halt_handler, // 18 Timer 1
@@ -83,7 +83,7 @@ void lpc_peripheral__interrupt_dispatcher(void) {
   const uint8_t isr_num = (*((uint8_t *)0xE000ED04)) - 16; // (SCB->ICSR & 0xFF) - 16;
 
   /* Lookup the function pointer we want to call and make the call */
-  lpc_peripheral__isr_callback_f isr_to_service = lpc_peripheral__isr_registrations[isr_num];
+  function_type__void isr_to_service = lpc_peripheral__isr_registrations[isr_num];
   isr_to_service();
 }
 
@@ -94,7 +94,7 @@ void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral) {
   }
 }
 
-void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, lpc_peripheral__isr_callback_f isr_callback) {
+void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function_type__void isr_callback) {
   lpc_peripheral__isr_registrations[peripheral] = isr_callback;
   NVIC_EnableIRQ(peripheral); // Use CMS API
 }
