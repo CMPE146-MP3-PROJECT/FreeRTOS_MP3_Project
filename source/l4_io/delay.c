@@ -8,7 +8,7 @@
 #include "sys_time.h"
 
 void delay_ms(uint32_t ms) {
-  uint64_t us = UINT64_C(1000) * ms;
+  const uint64_t us = UINT64_C(1000) * ms;
   delay_us(us);
 }
 

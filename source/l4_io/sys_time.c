@@ -7,9 +7,9 @@ static const lpc_timer_e sys_time__hw_timer = lpc_timer0;
 
 static const uint32_t sys_time__us_per_sec = UINT32_C(1) * 1000 * 1000;
 
-static uint32_t sys_time_sec_counter = 0;
+static uint32_t sys_time__sec_counter = 0;
 
-static void sys_time__1sec_isr(void) { ++sys_time_sec_counter; }
+static void sys_time__1sec_isr(void) { ++sys_time__sec_counter; }
 
 /*******************************************************************************
  *
@@ -39,7 +39,7 @@ uint64_t sys_time__get_uptime_us(void) {
    */
   do {
     before_us = hw_timer__get_value(sys_time__hw_timer);
-    seconds = sys_time_sec_counter;
+    seconds = sys_time__sec_counter;
     after_us = hw_timer__get_value(sys_time__hw_timer);
   } while (after_us < before_us);
 
