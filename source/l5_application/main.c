@@ -1,11 +1,15 @@
 #include "lpc40xx.h"
 
+#include "sys_time.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 
 static void blink_task(void *params);
 
 int main(void) {
+  sys_time__init(configCPU_CLOCK_HZ);
+
   void *led1 = (void *)(1 << 26);
   void *led2 = (void *)(1 << 3);
 

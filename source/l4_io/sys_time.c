@@ -9,7 +9,10 @@ static const uint32_t sys_time__us_per_sec = UINT32_C(1) * 1000 * 1000;
 
 static uint32_t sys_time__sec_counter = 0;
 
-static void sys_time__1sec_isr(void) { ++sys_time__sec_counter; }
+static void sys_time__1sec_isr(void) {
+  ++sys_time__sec_counter;
+  hw_timer__acknowledge_interrupt(sys_time__hw_timer, lpc_timer__mr0);
+}
 
 /*******************************************************************************
  *
@@ -22,7 +25,7 @@ void sys_time__init(uint32_t cpu_clock_hz) {
 
   // Enable the timer with 1uS resolution with an interrupt every one second
   hw_timer__enable(sys_time__hw_timer, prescalar_for_1us, sys_time__1sec_isr);
-  hw_timer__enable_match_isr(sys_time__hw_timer, lpc_timer__mr0, sys_time__us_per_sec);
+  hw_timer__enable_match_isr_and_reset(sys_time__hw_timer, lpc_timer__mr0, sys_time__us_per_sec);
 }
 
 uint64_t sys_time__get_uptime_us(void) {
