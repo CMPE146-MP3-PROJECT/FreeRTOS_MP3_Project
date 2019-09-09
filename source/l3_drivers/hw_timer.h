@@ -40,6 +40,7 @@ void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, funct
  */
 void hw_timer__enable_match_isr_and_reset(lpc_timer_e timer, lpc_timer__mr_e mr_type, const uint32_t mr_value);
 
+/// When isr_callback fires that was set by hw_timer__enable(), then this should be used to clear the MR interrupt
 void hw_timer__acknowledge_interrupt(lpc_timer_e timer, lpc_timer__mr_e mr_type);
 
 uint32_t hw_timer__get_value(lpc_timer_e timer);

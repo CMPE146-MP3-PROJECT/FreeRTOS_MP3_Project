@@ -45,12 +45,13 @@ void gpio__set_as_input(gpio_s gpio) { gpio__get_struct(gpio)->DIR &= ~gpio__get
 
 void gpio__set_as_output(gpio_s gpio) { gpio__get_struct(gpio)->DIR |= gpio__get_pin_mask(gpio); }
 
+bool gpio_get(gpio_s gpio) { return (gpio__get_struct(gpio)->PIN & gpio__get_pin_mask(gpio)); }
 void gpio__set(gpio_s gpio) { gpio__get_struct(gpio)->SET = gpio__get_pin_mask(gpio); }
 void gpio__reset(gpio_s gpio) { gpio__get_struct(gpio)->CLR = gpio__get_pin_mask(gpio); }
 
 void gpio__toggle(gpio_s gpio) {
   // Avoiding XOR logic to make it thread safe
-  if (gpio__get_struct(gpio)->PIN & gpio__get_pin_mask(gpio)) {
+  if (gpio_get(gpio)) {
     gpio__reset(gpio);
   } else {
     gpio__set(gpio);

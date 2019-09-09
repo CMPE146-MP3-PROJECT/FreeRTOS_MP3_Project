@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /// Note that some ports may not be available on your microcontroller
@@ -55,6 +56,7 @@ void gpio__set_as_input(gpio_s gpio);
 void gpio__set_as_output(gpio_s gpio);
 /** @} */
 
-void gpio__set(gpio_s gpio);    ///< Sets the pin value as 'high' -> 3.3v
-void gpio__reset(gpio_s gpio);  ///< Sets the pin value as 'low' -> ground
-void gpio__toggle(gpio_s gpio); ///< Sets the pin value as 'low' -> ground
+bool gpio_get(gpio_s gpio);
+void gpio__set(gpio_s gpio);   ///< Sets the pin value as 'high' -> 3.3v
+void gpio__reset(gpio_s gpio); ///< Sets the pin value as 'low' -> ground
+void gpio__toggle(gpio_s gpio);
