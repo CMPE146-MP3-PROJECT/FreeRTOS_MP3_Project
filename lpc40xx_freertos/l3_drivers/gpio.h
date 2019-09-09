@@ -33,8 +33,8 @@ typedef enum {
  * All further APIs need instance of this struct to operate
  */
 typedef struct {
-  const uint8_t port_number;
-  const uint8_t pin_number;
+  uint8_t port_number;
+  uint8_t pin_number;
 } gpio_s;
 
 /**

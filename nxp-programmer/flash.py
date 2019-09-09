@@ -83,7 +83,7 @@ def main():
     if verbose:
         print("Using command:\n{}".format(" ".join(cmd)))
 
-    error = subprocess.call(cmd, shell=True)
+    error = subprocess.call(cmd)#, shell=True)
     return error
 
 
