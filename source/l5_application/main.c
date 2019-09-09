@@ -1,5 +1,6 @@
 #include "lpc40xx.h"
 
+#include "gpio.h"
 #include "sys_time.h"
 
 #include "FreeRTOS.h"
@@ -10,11 +11,11 @@ static void blink_task(void *params);
 int main(void) {
   sys_time__init(configCPU_CLOCK_HZ);
 
-  void *led1 = (void *)(1 << 26);
-  void *led2 = (void *)(1 << 3);
+  static gpio_s led1 = gpio__instantiate(gpio__port_1, 26);
+  static gpio_s led2 = gpio__instantiate(gpio__port_2, 3);
 
-  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, led1, PRIORITY_HIGH, NULL);
-  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, led2, PRIORITY_HIGH, NULL);
+  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, &led1, PRIORITY_HIGH, NULL);
+  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, &led2, PRIORITY_HIGH, NULL);
   vTaskStartScheduler();
 
   /**
@@ -30,11 +31,11 @@ int main(void) {
 }
 
 static void blink_task(void *params) {
-  const unsigned pin_number = (unsigned)params;
-  LPC_GPIO1->DIR |= pin_number;
+  const gpio_s gpio = *(gpio_s *)params;
 
+  gpio__set_as_output(gpio);
   while (1 == 1) {
-    LPC_GPIO1->PIN ^= pin_number;
+    gpio__toggle(gpio);
     vTaskDelay(1000U);
   }
 }
