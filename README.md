@@ -3,6 +3,15 @@
 This is a sample project for the SJ2 board, written in C that anyone can understand easily.
 
 
+## Compile & Flash
+
+1. Use any IDE and open up the `source` or `lpc40xx_freertos` folder
+2. Build the project:
+    * From the root directory of this `sjtwo-c` folder, type: `scons`
+3. Invoke the python script to flash your new program
+    * `python nxp-programmer/flash.py -d/--device <Device ID> --input _build/sjtwo-c.bin`
+    * See [nxp-programmer README](nxp-programmer/README.md) for more information
+
 ## Build System
 
 We use [SCons](https://scons.org/) as a build platform. The developers of SJ2-C applied experience of diverse set of build systems acquired over many years, and resorted to this one. The candidates were:

@@ -11,6 +11,7 @@ References:
 import os
 
 import fsops
+import osops
 
 """
 Define naming conventions
@@ -22,7 +23,7 @@ TARGET_NAME = Dir(".").name
 Define file nodes and directory nodes
 """
 PROJECT_DIR = Dir(".")
-SOURCE_DIR = PROJECT_DIR.Dir("source")
+SOURCE_DIR = PROJECT_DIR.Dir("lpc40xx_freertos")
 
 """ Build artifact nodes """
 VARIANT_DIR = PROJECT_DIR.Dir("_build")
@@ -53,6 +54,21 @@ Import build environment
 """
 SConscript(PROJECT_DIR.File("env_arm"))
 Import("env_arm")
+
+# JTron: Please clean up my hack
+if osops.is_windows():
+  print("-- Using ARM compiler on WINDOWS")
+  osops.prepend_env_var(env_arm, os.path.join('.', 'compiler', 'windows', 'gcc-arm-none-eabi-8-2019-q3-update', 'bin'))
+elif osops.is_linux():
+  print("-- Using ARM compiler on LINUX")
+  osops.prepend_env_var(env_arm, os.path.join('.', 'compiler', 'linux', 'gcc-arm-none-eabi-8-2019-q3-update', 'bin'))
+elif osops.is_macos():
+  print("-- Using ARM compiler on MAC")
+  osops.prepend_env_var(env_arm, os.path.join('.', 'compiler', 'macos', 'gcc-arm-none-eabi-8-2019-q3-update', 'bin'))
+  #print("PATH is: ", env_arm['ENV']['PATH'])
+else:
+  print("Unknown OS; check sys.platform")
+  exit(-1)
 
 env_arm.VariantDir(variant_dir=VARIANT_DIR, src_dir=Dir("."), duplicate=0)
 
