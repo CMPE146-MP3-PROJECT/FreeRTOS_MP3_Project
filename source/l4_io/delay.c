@@ -24,5 +24,6 @@ void delay_us(uint64_t us) {
   }
 
   // Eat the CPU for the remaining microseconds
-  while (sys_time__get_uptime_us() < time_to_wait_us) { }
+  while (sys_time__get_uptime_us() < time_to_wait_us) {
+  }
 }

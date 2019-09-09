@@ -2,6 +2,7 @@
 
 #include "lpc40xx.h"
 
+// clang-format off
 /**
  * The enumeration values correspond to the peripherals' power-on bit
  * Check UM10562.pdf, Chapter 3: System and clock control
@@ -17,6 +18,7 @@ static const uint8_t lpc_peripheral_pconp_bit_map[] = {
     [LPC_PERIPHERAL__UART2] = 24,
     [LPC_PERIPHERAL__UART3] = 25,
 };
+// clang-format on
 
 /// An unregistered interrupt handler is a forever loop
 static void lpc_peripheral__halt_handler(void) {

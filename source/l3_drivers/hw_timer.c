@@ -1,7 +1,7 @@
 #include "hw_timer.h"
 
-#include "lpc_peripherals.h"
 #include "lpc40xx.h"
+#include "lpc_peripherals.h"
 
 typedef struct {
   LPC_TIM_TypeDef *registers;
@@ -9,10 +9,10 @@ typedef struct {
 } hw_timer_s;
 
 static const hw_timer_s hw_timers[] = {
-  {LPC_TIM0, LPC_PERIPHERAL__TIMER0},
-  {LPC_TIM1, LPC_PERIPHERAL__TIMER1},
-  {LPC_TIM2, LPC_PERIPHERAL__TIMER2},
-  {LPC_TIM3, LPC_PERIPHERAL__TIMER3},
+    {LPC_TIM0, LPC_PERIPHERAL__TIMER0},
+    {LPC_TIM1, LPC_PERIPHERAL__TIMER1},
+    {LPC_TIM2, LPC_PERIPHERAL__TIMER2},
+    {LPC_TIM3, LPC_PERIPHERAL__TIMER3},
 };
 
 void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, function_type__void isr_callback) {
@@ -36,10 +36,10 @@ void hw_timer__enable_match_isr(lpc_timer_e timer, lpc_timer__mr_e mr_type, cons
   hw_timers[timer].registers->MCR |= (1 << interrupt_on_match);
 
   // Four MR registers are contiguous and they start from &MR0
-  volatile uint32_t * mr_base = &(hw_timers[timer].registers->MR0);
-  volatile uint32_t * mr_register = mr_base + mr_type;
+  volatile uint32_t *mr_base = &(hw_timers[timer].registers->MR0);
+  volatile uint32_t *mr_register = mr_base + mr_type;
 
   *mr_register = mr_value;
 }
 
-uint32_t hw_timer__get_value(lpc_timer_e timer) { return hw_timers[timer].registers->TC ; }
+uint32_t hw_timer__get_value(lpc_timer_e timer) { return hw_timers[timer].registers->TC; }
