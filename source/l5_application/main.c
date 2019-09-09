@@ -11,11 +11,11 @@ static void blink_task(void *params);
 int main(void) {
   sys_time__init(configCPU_CLOCK_HZ);
 
-  static gpio_s led1 = gpio__instantiate(gpio__port_1, 26);
-  static gpio_s led2 = gpio__instantiate(gpio__port_2, 3);
+  const gpio_s led1 = gpio__instantiate(gpio__port_1, 26);
+  const gpio_s led2 = gpio__instantiate(gpio__port_2, 3);
 
-  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, &led1, PRIORITY_HIGH, NULL);
-  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, &led2, PRIORITY_HIGH, NULL);
+  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, (void *)&led1, PRIORITY_HIGH, NULL);
+  xTaskCreate((TaskFunction_t)blink_task, "task", 512U, (void *)&led2, PRIORITY_HIGH, NULL);
   vTaskStartScheduler();
 
   /**
