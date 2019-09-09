@@ -15,7 +15,7 @@ typedef LPC_UART_TypeDef lpc_uart;
  */
 typedef struct {
   lpc_uart *registers;
-  lpc_peripherals_e peripheral_id;
+  lpc_peripheral_e peripheral_id;
   lpc_peripheral__isr_callback_f isr_callback;
 
   QueueHandle_t queue_transmit;
@@ -206,12 +206,12 @@ bool uart__enable_queues(uart_e uart, QueueHandle_t queue_receive, QueueHandle_t
     // Ensure that the queues are not already enabled
     if (!uart__is_receive_queue_enabled(uart) && NULL != queue_receive) {
       uart_type->queue_receive = queue_receive;
-      vTraceSetQueueName(queue_receive, "U RXQ"); // TODO: should be unique
+      // vTraceSetQueueName(queue_receive, "U RXQ"); // TODO: should be unique
     }
 
     if (!uart__is_transmit_queue_enabled(uart) && NULL != queue_transmit) {
       uart_type->queue_transmit = queue_transmit;
-      vTraceSetQueueName(queue_transmit, "U TXQ"); // TODO: should be unique
+      // vTraceSetQueueName(queue_transmit, "U TXQ"); // TODO: should be unique
     }
 
     // Enable peripheral_id interrupt if all is well
@@ -312,7 +312,7 @@ bool uart__put(uart_e uart, char output_byte, uint32_t timeout_ms) {
         /* Receive oldest char from the queue to send
          * Since we are inside a critical section, we use FromISR() FreeRTOS API  variant
          */
-        if (xQueueReceiveFromISR(transmit_queue, &output_byte, NULL)) {
+        if (xQueueReceiveFromISR(uarts[uart].queue_transmit, &output_byte, NULL)) {
           uart_regs->THR = output_byte;
         }
       }

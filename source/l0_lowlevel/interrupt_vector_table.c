@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "freertos_hooks.h"
+
 /**
  * _estack symbol is actually a pointer to the stack pointer value provided by the linker script.
  * Declaring as unsigned int to inform compiler that this symbol is constant and defined at link time.
@@ -29,11 +31,11 @@ void_func_ptr_t interrupt_vector_table[] = {
     halt,  // 8 ARM: Reserved
     halt,  // 9 ARM: Reserved
     halt,  // 10 ARM: Reserved
-    halt,  // 11 ARM: Supervisor call (SVCall)
+    vPortSVCHandler,  // 11 ARM: Supervisor call (SVCall)
     halt,  // 12 ARM: Debug monitor
     halt,  // 13 ARM: Reserved
-    halt, // 14 ARM: Pendable request for system service (PendableSrvReq)
-    halt, // 15 ARM: System Tick Timer (SysTick)
+    xPortPendSVHandler, // 14 ARM: Pendable request for system service (PendableSrvReq)
+    xPortSysTickHandler, // 15 ARM: System Tick Timer (SysTick)
 
     /**
      * Device interrupt vectors
