@@ -9,6 +9,7 @@ References:
 """
 
 import os
+import sys
 
 import fsops
 import osops
@@ -55,20 +56,19 @@ Import build environment
 SConscript(PROJECT_DIR.File("env_arm"))
 Import("env_arm")
 
-# JTron: Please clean up my hack
 if osops.is_windows():
   print("-- Using ARM compiler on WINDOWS")
-  osops.prepend_env_var(env_arm, os.path.join('.', 'compiler', 'windows', 'gcc-arm-none-eabi-8-2019-q3-update', 'bin'))
+  osops.prepend_env_var(env_arm, PROJECT_DIR.Dir("compiler/windows/gcc-arm-none-eabi-8-2019-q3-update/bin"))
 elif osops.is_linux():
   print("-- Using ARM compiler on LINUX")
-  osops.prepend_env_var(env_arm, os.path.join('.', 'compiler', 'linux', 'gcc-arm-none-eabi-8-2019-q3-update', 'bin'))
+  osops.prepend_env_var(env_arm, PROJECT_DIR.Dir("compiler/linux/gcc-arm-none-eabi-8-2019-q3-update/bin"))
 elif osops.is_macos():
   print("-- Using ARM compiler on MAC")
-  osops.prepend_env_var(env_arm, os.path.join('.', 'compiler', 'macos', 'gcc-arm-none-eabi-8-2019-q3-update', 'bin'))
-  #print("PATH is: ", env_arm['ENV']['PATH'])
+  osops.prepend_env_var(env_arm, PROJECT_DIR.Dir("compiler/mac/gcc-arm-none-eabi-8-2019-q3-update/bin"))
 else:
-  print("Unknown OS; check sys.platform")
+  print("[{}] is an unsupported OS!".format(sys.platform))
   exit(-1)
+
 
 env_arm.VariantDir(variant_dir=VARIANT_DIR, src_dir=Dir("."), duplicate=0)
 
@@ -118,7 +118,7 @@ for src_filenode in target_src_filenodes:
 
 elf_filenodes = env_arm.Program(target=VARIANT_DIR.File("{}.elf".format(TARGET_NAME)), source=obj_filenodes)
 hex_filenodes = env_arm.Objcopy(target=VARIANT_DIR.File("{}.hex".format(TARGET_NAME)), source=elf_filenodes)
-hex_filenodes = env_arm.Objcopy(target=VARIANT_DIR.File("{}.bin".format(TARGET_NAME)), source=elf_filenodes)
+bin_filenodes = env_arm.Objcopy(target=VARIANT_DIR.File("{}.bin".format(TARGET_NAME)), source=elf_filenodes)
 lst_filenodes = env_arm.Objdump(target=VARIANT_DIR.File("{}.lst".format(TARGET_NAME)), source=elf_filenodes)
 size_filenodes = env_arm.Size(target=VARIANT_DIR.File("{}.size".format(TARGET_NAME)), source=elf_filenodes)
 
