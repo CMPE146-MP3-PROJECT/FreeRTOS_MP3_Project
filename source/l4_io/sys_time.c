@@ -36,10 +36,9 @@ uint64_t sys_time__get_uptime_us(void) {
 
   /**
    * Loop until we can safely read both the rollover value and the timer value.
-   * When the timer rolls over, the TC value will start from zero, and the "after"
-   * value will be less than the before value in which case, we will loop again
-   * and pick up the new rollover count.  This avoid critical section and simplifies
-   * the logic of reading higher 16-bit (roll-over) and lower 32-bit (timer value).
+   * When the timer rolls over, the TC value will start from zero, and the 'after' value will be less than the 'before'
+   * value in which case, we will loop again and pick up the new rollover count.  This avoid critical section and
+   * simplifies the logic of reading sys_time__sec_counter and the 32-bit HW timer value.
    */
   do {
     before_us = hw_timer__get_value(sys_time__hw_timer);
@@ -49,5 +48,6 @@ uint64_t sys_time__get_uptime_us(void) {
 
   uint64_t uptime_us = after_us;
   uptime_us += ((uint64_t)sys_time__us_per_sec * seconds);
+
   return uptime_us;
 }
