@@ -72,6 +72,6 @@ def objcopy_generator(source, target, env, for_signature):
 
 env_arm["BUILDERS"]["Objcopy"] = Builder(generator=objcopy_generator)
 env_arm["BUILDERS"]["Objdump"] = Builder(action="$OBJDUMP --source --all-headers --demangle --line-numbers --wide $SOURCE > $TARGET")
-env_arm["BUILDERS"]["Size"] = Builder(action="$SIZE --format=berkeley $SOURCE > $TARGET")
+env_arm["BUILDERS"]["Size"] = Builder(action="$SIZE --format=berkeley $SOURCE")
 
 Export("env_arm")
