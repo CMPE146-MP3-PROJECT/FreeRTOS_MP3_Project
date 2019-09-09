@@ -15,7 +15,7 @@ static const hw_timer_s hw_timers[] = {
     {LPC_TIM3, LPC_PERIPHERAL__TIMER3},
 };
 
-void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, function_type__void isr_callback) {
+void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, function__void_f isr_callback) {
   // Peripheral must be turned on before accessing its registers
   lpc_peripheral__turn_on_power_to(hw_timers[timer].peripheral_id);
 
@@ -33,7 +33,7 @@ void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, funct
 
 void hw_timer__enable_match_isr_and_reset(lpc_timer_e timer, lpc_timer__mr_e mr_type, const uint32_t mr_value) {
   const uint32_t interrupt_on_match = (uint32_t)mr_type * 3; // 3 bits per MR
-  const uint32_t reset_on_match = ((uint32_t)mr_type * 3) + 1;
+  const uint32_t reset_on_match = 1 + interrupt_on_match;
 
   hw_timers[timer].registers->MCR |= (1 << interrupt_on_match) | (1 << reset_on_match);
 

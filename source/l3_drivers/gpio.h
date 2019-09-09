@@ -49,14 +49,13 @@ void gpio__set_function(gpio_s gpio, gpio__function_e function);
 /**
  * @{
  * @name Sets direction of the pin if used as an input/output pin
- *
  * @warning This API is not thread safe
  */
 void gpio__set_as_input(gpio_s gpio);
 void gpio__set_as_output(gpio_s gpio);
 /** @} */
 
-bool gpio_get(gpio_s gpio);
+bool gpio__get(gpio_s gpio);
 void gpio__set(gpio_s gpio);   ///< Sets the pin value as 'high' -> 3.3v
 void gpio__reset(gpio_s gpio); ///< Sets the pin value as 'low' -> ground
 void gpio__toggle(gpio_s gpio);

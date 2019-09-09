@@ -18,6 +18,7 @@ typedef enum {
  * If RTOS is being utilized, you can use uart__enable_queues() to enable event driven implementation
  *
  * @param peripheral_clock Provide the clock frequency the peripheral is running at in order to set the baud_rate
+ * @note Once UART is initialied to a baud rate, this API will not allow further changes to it
  */
 void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate);
 

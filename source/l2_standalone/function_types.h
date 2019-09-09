@@ -1,3 +1,3 @@
 #pragma once
 
-typedef void (*function_type__void)(void);
+typedef void (*function__void_f)(void);

@@ -16,7 +16,7 @@ typedef LPC_UART_TypeDef lpc_uart;
 typedef struct {
   lpc_uart *registers;
   lpc_peripheral_e peripheral_id;
-  function_type__void isr_callback;
+  function__void_f isr_callback;
 
   QueueHandle_t queue_transmit;
   QueueHandle_t queue_receive;
@@ -257,7 +257,7 @@ bool uart__polled_put(uart_e uart, char output_byte) {
   lpc_uart *uart_regs = uarts[uart].registers;
 
   const bool rtos_is_running = taskSCHEDULER_RUNNING == xTaskGetSchedulerState();
-  const bool queue_is_enabled = uart__is_receive_queue_enabled(uart);
+  const bool queue_is_enabled = uart__is_transmit_queue_enabled(uart);
 
   if (uart__is_initialized(uart)) {
     // See uart__polled_get() regards to why we are using uart_put() here
@@ -295,7 +295,7 @@ bool uart__put(uart_e uart, char output_byte, uint32_t timeout_ms) {
   bool status = false;
   const bool rtos_is_running = taskSCHEDULER_RUNNING == xTaskGetSchedulerState();
 
-  if (uart__is_receive_queue_enabled(uart) && rtos_is_running) {
+  if (uart__is_transmit_queue_enabled(uart) && rtos_is_running) {
     // Deposit to the transmit queue for now
     status = xQueueSend(uarts[uart].queue_transmit, &output_byte, uart__ms_to_os_ticks(timeout_ms));
 

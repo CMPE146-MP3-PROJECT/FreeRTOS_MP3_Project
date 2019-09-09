@@ -31,4 +31,4 @@ typedef enum {
 
 void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral);
 
-void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function_type__void isr_callback);
+void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback);
