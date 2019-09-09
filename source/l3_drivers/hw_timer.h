@@ -6,7 +6,7 @@
 
 /**
  * The type of timers supported by LPC40xx
- * Note that for the SJ-2 project, lpc_timer1 is being used by to keep track of 'up time'
+ * Note that for the SJ-2 project, lpc_timer1 is being used by to keep track of 'up time' (by sys_time.h)
  */
 typedef enum {
   lpc_timer0 = 0,
@@ -15,6 +15,7 @@ typedef enum {
   lpc_timer3,
 } lpc_timer_e;
 
+/// There are 4 match registers for HW timer on the LPC 40xx
 typedef enum {
   lpc_timer__mr0 = 0,
   lpc_timer__mr1,
@@ -25,6 +26,7 @@ typedef enum {
 /**
  * Enables and starts the timer
  * @param prescalar_divider This divider is applied to the clock source into the timer
+ *                          This is offset by 1, so 0 means divide by 1, and 1 means divide by 2
  *
  * @param isr_callback      The ISR callback for the timer, including all Match-Register interrupts
  * @note The isr_callback may be NULL if the timer will not be configured for any match interrupts

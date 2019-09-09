@@ -1,16 +1,28 @@
 #include "sys_time.h"
 
+#include "hw_timer.h"
+
+/// sys_time module uses this HW timer
 static const lpc_timer_e sys_time__hw_timer = lpc_timer0;
+
+static const uint32_t sys_time__us_per_sec = UINT32_C(1) * 1000 * 1000;
+
 static uint32_t sys_time_sec_counter = 0;
 
 static void sys_time__1sec_isr(void) { ++sys_time_sec_counter; }
 
-void sys_time__init(void) {
-  const uint32_t prescalar_for_1us = (sys_get_cpu_clock() / (UINT64_C(1000) * 1000 * us_per_tick));
+/*******************************************************************************
+ *
+ *                      P U B L I C    F U N C T I O N S
+ *
+ ******************************************************************************/
+
+void sys_time__init(uint32_t cpu_clock_hz) {
+  const uint32_t prescalar_for_1us = (cpu_clock_hz / sys_time__us_per_sec) - 1;
 
   // Enable the timer with 1uS resolution with an interrupt every one second
   hw_timer__enable(sys_time__hw_timer, prescalar_for_1us, sys_time__1sec_isr);
-  hw_timer__enable_match_isr(sys_time__hw_timer, lpc_timer__mr0);
+  hw_timer__enable_match_isr(sys_time__hw_timer, lpc_timer__mr0, sys_time__us_per_sec);
 }
 
 uint64_t sys_time__get_uptime_us(void) {
@@ -29,9 +41,9 @@ uint64_t sys_time__get_uptime_us(void) {
     before_us = hw_timer__get_value(sys_time__hw_timer);
     seconds = sys_time_sec_counter;
     after_us = hw_timer__get_value(sys_time__hw_timer);
-  } while (after < before);
+  } while (after_us < before_us);
 
   uint64_t uptime_us = after_us;
-  uptime_us += (UINT64_C(1000) * 1000 * seconds);
+  uptime_us += ((uint64_t)sys_time__us_per_sec * seconds);
   return uptime_us;
 }

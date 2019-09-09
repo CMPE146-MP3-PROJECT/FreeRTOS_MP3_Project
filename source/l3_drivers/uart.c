@@ -16,7 +16,7 @@ typedef LPC_UART_TypeDef lpc_uart;
 typedef struct {
   lpc_uart *registers;
   lpc_peripheral_e peripheral_id;
-  lpc_peripheral__isr_callback_f isr_callback;
+  function_type__void isr_callback;
 
   QueueHandle_t queue_transmit;
   QueueHandle_t queue_receive;
