@@ -18,6 +18,11 @@
  *          here to avoid including lpc40xx.h and make unit-testing and mocking easier.
  */
 typedef enum {
+  LPC_PERIPHERAL__TIMER0 = 1,
+  LPC_PERIPHERAL__TIMER1 = 2,
+  LPC_PERIPHERAL__TIMER2 = 3,
+  LPC_PERIPHERAL__TIMER3 = 4,
+
   LPC_PERIPHERAL__UART0 = 5,
   LPC_PERIPHERAL__UART1 = 6,
   LPC_PERIPHERAL__UART2 = 7,

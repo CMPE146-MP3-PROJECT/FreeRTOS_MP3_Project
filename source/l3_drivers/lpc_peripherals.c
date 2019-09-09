@@ -7,6 +7,11 @@
  * Check UM10562.pdf, Chapter 3: System and clock control
  */
 static const uint8_t lpc_peripheral_pconp_bit_map[] = {
+    [LPC_PERIPHERAL__TIMER0] = 1,
+    [LPC_PERIPHERAL__TIMER1] = 2,
+    [LPC_PERIPHERAL__TIMER2] = 22,
+    [LPC_PERIPHERAL__TIMER3] = 23,
+
     [LPC_PERIPHERAL__UART0] = 3,
     [LPC_PERIPHERAL__UART1] = 4,
     [LPC_PERIPHERAL__UART2] = 24,
