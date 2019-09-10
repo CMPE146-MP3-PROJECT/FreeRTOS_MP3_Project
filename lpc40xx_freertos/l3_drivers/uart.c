@@ -17,6 +17,7 @@ typedef struct {
   lpc_uart *registers;
   lpc_peripheral_e peripheral_id;
   function__void_f isr_callback;
+  bool initialized;
 
   QueueHandle_t queue_transmit;
   QueueHandle_t queue_receive;
@@ -61,8 +62,8 @@ static bool uart__is_receive_queue_enabled(uart_e uart) { return (NULL != uarts[
 static bool uart__is_transmit_queue_enabled(uart_e uart) { return (NULL != uarts[uart].queue_transmit); }
 
 static void uart__wait_for_transmit_to_complete(lpc_uart *uart_regs) {
-  const uint32_t char_sent_bitmask = (1 << 6);
-  while (!(uart_regs->LSR & char_sent_bitmask)) {
+  const uint32_t transmitter_empty = (1 << 5);
+  while (!(uart_regs->LSR & transmitter_empty)) {
   }
 }
 
@@ -180,22 +181,34 @@ static void uart__isr_common(uart_s *uart_type) {
 
 void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
   if (!uart__is_initialized(uart)) {
+    lpc_peripheral__turn_on_power_to(uarts[uart].peripheral_id);
+
     const float roundup_offset = 0.5;
-    const uint16_t divider = (peripheral_clock / (16 * baud_rate) + roundup_offset);
+    const uint16_t divider = (uint16_t)(peripheral_clock / (16 * baud_rate)) + roundup_offset;
     const uint8_t dlab_bit = (1 << 7);
     const uint8_t eight_bit_datalen = 3;
 
-    lpc_peripheral__turn_on_power_to(uarts[uart].peripheral_id);
+    // 2-stop bits helps improve baud rate error; you can remove this if bandwidth is critical to you
+    const uint8_t stop_bits_is_2 = (1 << 2);
+
     lpc_uart *uart_regs = uarts[uart].registers;
 
     uart_regs->LCR = dlab_bit; // Set DLAB bit to access DLM & DLL
     uart_regs->DLM = (divider >> 8) & 0xFF;
     uart_regs->DLL = (divider >> 0) & 0xFF;
-    uart_regs->LCR = eight_bit_datalen; // DLAB is reset back to zero also
+
+    /* Bootloader uses fractional dividers and can wreck havoc in our baud rate code, so re-initialize it
+     * Lesson learned: DO NOT RELY ON RESET VALUES
+     */
+    const uint32_t default_reset_fdr_value = (1 << 4);
+    uart_regs->FDR = default_reset_fdr_value;
+    uart_regs->LCR = eight_bit_datalen | stop_bits_is_2; // DLAB is reset back to zero also
+
+    uarts[uart].initialized = true;
   }
 }
 
-bool uart__is_initialized(uart_e uart) { return (0 != uarts[uart].registers->LCR); }
+bool uart__is_initialized(uart_e uart) { return uarts[uart].initialized; }
 
 bool uart__enable_queues(uart_e uart, QueueHandle_t queue_receive, QueueHandle_t queue_transmit) {
   bool status = false;

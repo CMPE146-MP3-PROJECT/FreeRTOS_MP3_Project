@@ -36,7 +36,7 @@ void gpio__set_function(gpio_s gpio, gpio__function_e function) {
   volatile uint32_t *pin_config = pin_offset;
 
   // Reference chapter 7: table 83
-  const uint32_t config_mask = UINT32_C(3);
+  const uint32_t config_mask = UINT32_C(7);
   *pin_config &= ~(config_mask << 0);
   *pin_config |= ((uint32_t)function & config_mask);
 }

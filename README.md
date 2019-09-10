@@ -3,6 +3,19 @@
 This is a sample project for the SJ2 board, written in C that anyone can understand easily.
 
 
+## Setup and Install
+
+Setup and install should be super simple unless you have windows, which is not suited for ideal software development, but these steps should still get you setup regardless of your OS.
+
+1. Install Python on windows (Mac and Linux should already have that)
+    * Skip this for Mac or Linux
+    * Follow [this guide](installs/README.md) for windows install guide
+2. Open up a terminal window, and type `pip install scons`
+3. Install the Board driver from the `drivers` directory.
+
+That is it, you should now be ready to build software for your board.
+
+
 ## Compile & Flash
 
 1. Use any IDE and open up the `source` or `lpc40xx_freertos` folder
