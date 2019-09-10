@@ -20,4 +20,4 @@ Installation of `scons` requires python to be invokable on your command-line. Py
 If you successfully installed using the steps above, then you do not have to follow this section.  The `scons-3.1.0.zip` is provided in case you want to install it manually, which can be done by doing:
 
 1. Extract the zip file
-2. `cd` into the zip file and then `python scons.py install`
+2. `cd` into the zip file and then `python setup.py install`

@@ -1,7 +1,7 @@
 
 ## Folder Structure
 
-The folder structure proposed below not only organizes the source code, but also promotes good practices of which code should invoke (or not invoke) code at other folders.
+The folder structure proposed below not only organizes the source code, but also promotes good practices indicating which code should invoke (or not invoke) code at other folders.
 
 The folder structure takes inspiration from code development at Lockheed Martin. Then, it was tried and tested further and many controllers at Tesla use similar directory structure as the one proposed below.
 

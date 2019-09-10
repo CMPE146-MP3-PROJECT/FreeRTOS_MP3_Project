@@ -1,6 +1,16 @@
 # SJ2-C
 
-This is a sample project for the SJ2 board, written in C that anyone can understand easily.
+This is the development infrastructure for the SJ2 board, written in C that anyone can understand easily. It was designed to **learn the low level workings of a microcontroller platform with an RTOS**:
+
+- Fully implemented in C
+- Minimalistic design, little to no abstractions
+- Follows good coding principles (such as YAGNI and DRY)
+- State of the art build system
+    - Support Mac, Linux, Windows out of the box
+    - No makefiles
+    - No compiler to install
+    - No VMs!
+    - No WSL required on windows
 
 
 ## Setup and Install
@@ -11,16 +21,17 @@ Setup and install should be super simple unless you have windows, which is not s
     * Skip this for Mac or Linux
     * Follow [this guide](installs/README.md) for windows install guide
 2. Open up a terminal window, and type `pip install scons`
-3. Install the Board driver from the `drivers` directory.
+3. Install the Board driver from the `drivers` directory
 
 That is it, you should now be ready to build software for your board.
 
 
 ## Compile & Flash
 
-1. Use any IDE and open up the `source` or `lpc40xx_freertos` folder
+1. Use any IDE and open up the `lpc40xx_freertos` folder
 2. Build the project:
     * From the root directory of this `sjtwo-c` folder, type: `scons`
+    * Once you get used to it, also try `scons -j4` to use more threads to build
 3. Invoke the python script to flash your new program
     * `python nxp-programmer/flash.py -d/--device <Device ID> --input _build/sjtwo-c.bin`
     * Note that input file defaults to `_build/sjtwo-c.bin`

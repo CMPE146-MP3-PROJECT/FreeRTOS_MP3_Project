@@ -10,7 +10,7 @@
  */
 extern unsigned int _estack;
 extern void cpu_startup_entry_point(void);
-extern void lpc_peripheral__interrupt_dispatcher(void);
+extern void lpc_peripheral__interrupt_dispatcher(void); /// Layer violation due to startup code
 
 static void halt(void);
 

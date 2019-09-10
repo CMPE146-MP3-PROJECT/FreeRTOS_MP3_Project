@@ -1,14 +1,11 @@
 #include <stdbool.h>
 
-#include "lpc40xx.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "clock.h"
 #include "delay.h"
 #include "gpio.h"
-#include "sys_time.h"
-#include "clock.h"
 
 #include "uart.h"
 #include "uart_printf.h"
@@ -22,19 +19,18 @@ static void uart0_init(void);
 static gpio_s led0, led1;
 
 int main(void) {
-  sys_time__init(clock__get_core_clock_hz());
-
-  led0 = gpio__instantiate(gpio__port_2, 3);
-  led1 = gpio__instantiate(gpio__port_1, 26);
-  gpio__set_as_output(led0);
-  gpio__set_as_output(led1);
-
   uart0_init();
+
+  // Construct the LEDs and blink a startup sequence
+  led0 = gpio__construct_as_output(gpio__port_2, 3);
+  led1 = gpio__construct_as_output(gpio__port_1, 26);
   blink_on_startup(led1);
 
-  xTaskCreate(blink_task, "led0", 512U, (void *)&led0, PRIORITY_LOW, NULL);
-  xTaskCreate(blink_task, "led1", 512U, (void *)&led1, PRIORITY_LOW, NULL);
-  xTaskCreate(uart_task, "uart", 512U, NULL, PRIORITY_LOW, NULL);
+  xTaskCreate(blink_task, "led0", 512U / sizeof(void *), (void *)&led0, PRIORITY_LOW, NULL);
+  xTaskCreate(blink_task, "led1", 512U / sizeof(void *), (void *)&led1, PRIORITY_LOW, NULL);
+
+  // printf() takes more stack space
+  xTaskCreate(uart_task, "uart", (512U * 4) / sizeof(void *), NULL, PRIORITY_LOW, NULL);
 
   vTaskStartScheduler();
 
@@ -44,17 +40,15 @@ int main(void) {
    * Otherwise, it returning indicates there is not enough free memory or scheduler was explicitly terminated
    * CPU will now halt forever at this point.
    */
-  while (1) {
-  }
 
-  return -1;
+  return 0;
 }
 
 static void blink_task(void *params) {
-  const gpio_s gpio = *((gpio_s *)params);
+  const gpio_s led = *((gpio_s *)params);
 
   while (true) {
-    gpio__toggle(gpio);
+    gpio__toggle(led);
     vTaskDelay(500);
   }
 }
@@ -79,15 +73,12 @@ static void blink_on_startup(gpio_s gpio) {
 }
 
 static void uart0_init(void) {
-  const gpio_s u0_txd = gpio__instantiate(gpio__port_0, 2); // P0.2
-  const gpio_s u0_rxd = gpio__instantiate(gpio__port_0, 3); // P0.3
-
-  gpio__set_function(u0_txd, gpio__function_1);
-  gpio__set_function(u0_rxd, gpio__function_1);
+  (void)gpio__construct_with_function(gpio__port_0, 2, gpio__function_1); // P0.2 - Uart-0 Tx
+  (void)gpio__construct_with_function(gpio__port_0, 3, gpio__function_1); // P0.3 - Uart-0 Rx
 
   uart__init(UART__0, clock__get_core_clock_hz(), 115200);
 
-  // Make UART more efficient by backing it with RTOS queues (optional but highly recommended)
+  // Make UART more efficient by backing it with RTOS queues (optional but highly recommended with RTOS)
   QueueHandle_t tx_queue = xQueueCreate(128, sizeof(char));
   QueueHandle_t rx_queue = xQueueCreate(32, sizeof(char));
   uart__enable_queues(UART__0, tx_queue, rx_queue);

@@ -3,6 +3,7 @@
 
 #include "uart_printf.h"
 
+// uart_printf API uses this sized stack buffer to print messages; this can be re-defined if you need to override it
 #ifndef UART_PRINT__BUFFER_SIZE_IN_BYTES
 #define UART_PRINT__BUFFER_SIZE_IN_BYTES 128
 #endif
