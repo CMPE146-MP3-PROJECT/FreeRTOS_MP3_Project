@@ -73,6 +73,7 @@ def main():
     verbose = args.verbose
 
     print("Flashing file [{}] using device ID [{}]".format(input_filepath, device_id))
+    sys.stdout.flush()
 
     cmd = [
         "python",
@@ -82,8 +83,9 @@ def main():
     ]
     if verbose:
         print("Using command:\n{}".format(" ".join(cmd)))
+        sys.stdout.flush()
 
-    error = subprocess.call(cmd)#, shell=True)
+    error = subprocess.call(cmd)
     return error
 
 

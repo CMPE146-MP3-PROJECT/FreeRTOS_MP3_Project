@@ -5,6 +5,7 @@ extern void main(void);
 void cpu_startup_entry_point(void)
 {
     startup__initialize_ram();
+    startup__initialize_fpu();
     startup__initialize_system_clock();
     main();
 
