@@ -7,7 +7,6 @@ static const lpc_timer_e sys_time__hw_timer = lpc_timer0;
 static const lpc_timer__mr_e sys_time__hw_timer_mr = lpc_timer__mr0;
 
 static const uint32_t sys_time__us_per_sec = UINT32_C(1) * 1000 * 1000;
-
 static uint32_t sys_time__sec_counter = 0;
 
 static void sys_time__1sec_isr(void) {

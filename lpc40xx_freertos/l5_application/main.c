@@ -3,10 +3,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "clock.h"
 #include "delay.h"
 #include "gpio.h"
-
 #include "uart.h"
 #include "uart_printf.h"
 
@@ -26,8 +24,8 @@ int main(void) {
   led1 = gpio__construct_as_output(gpio__port_1, 26);
   blink_on_startup(led1);
 
-  xTaskCreate(blink_task, "led0", 512U / sizeof(void *), (void *)&led0, PRIORITY_LOW, NULL);
-  xTaskCreate(blink_task, "led1", 512U / sizeof(void *), (void *)&led1, PRIORITY_LOW, NULL);
+  xTaskCreate(blink_task, "led0", (512U / sizeof(void *)), (void *)&led0, PRIORITY_LOW, NULL);
+  xTaskCreate(blink_task, "led1", (512U / sizeof(void *)), (void *)&led1, PRIORITY_LOW, NULL);
 
   // printf() takes more stack space
   xTaskCreate(uart_task, "uart", (512U * 4) / sizeof(void *), NULL, PRIORITY_LOW, NULL);

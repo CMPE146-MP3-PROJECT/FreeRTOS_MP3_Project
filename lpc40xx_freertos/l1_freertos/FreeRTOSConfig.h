@@ -15,6 +15,8 @@
 #define configTICK_RATE_HZ                      ((TickType_t) 1000)
 #define configMAX_PRIORITIES                    ((PRIORITY_CRITICAL ) + 1)
 #define configMINIMAL_STACK_SIZE                ((unsigned short) 128)
+#define configCHECK_FOR_STACK_OVERFLOW          (2)
+
 #define configMAX_TASK_NAME_LEN                 (8)
 #define configIDLE_SHOULD_YIELD                 1
 #define configSUPPORT_DYNAMIC_ALLOCATION        1

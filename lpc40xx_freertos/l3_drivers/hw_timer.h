@@ -34,9 +34,12 @@ typedef enum {
 void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, function__void_f isr_callback);
 
 /**
- * When the HW timer counts up and matches the mr_value of type lpc_timer__mr_e then it will
+ * When the HW timer counts up and matches the mr_value of type lpc_timer__mr_e then it will:
  *   - Generate an interrupt and invoke the callback registerd during hw_timer__enable()
  *   - Reset the TC on match
+ *
+ * Unfortunately with this API, it only makes sense to use one match register, as the first one will reset the HW timer
+ * and not allow further match registers to work, but that is all we needed for now, and rest is YAGNI
  */
 void hw_timer__enable_match_isr_and_reset(lpc_timer_e timer, lpc_timer__mr_e mr_type, const uint32_t mr_value);
 

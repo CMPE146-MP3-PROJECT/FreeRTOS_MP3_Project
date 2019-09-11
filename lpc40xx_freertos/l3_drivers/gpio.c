@@ -67,7 +67,7 @@ void gpio__set(gpio_s gpio) { gpio__get_struct(gpio)->SET = gpio__get_pin_mask(g
 void gpio__reset(gpio_s gpio) { gpio__get_struct(gpio)->CLR = gpio__get_pin_mask(gpio); }
 
 void gpio__toggle(gpio_s gpio) {
-  // Avoiding XOR logic to make it thread safe
+  // Avoiding XOR logic with PIN register to make it thread safe
   if (gpio__get(gpio)) {
     gpio__reset(gpio);
   } else {

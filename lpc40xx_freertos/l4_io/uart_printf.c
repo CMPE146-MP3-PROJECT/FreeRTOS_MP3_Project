@@ -24,6 +24,14 @@ int uart_printf(uart_e uart, const char *format, ...) {
   return would_print;
 }
 
+void uart_puts(uart_e uart, const char *message) {
+  const size_t message_length = strlen(message);
+  for (size_t byte = 0; byte < message_length; byte++) {
+    uart__put(uart, message[byte], UINT32_MAX);
+  }
+  uart__put(uart, '\n', UINT32_MAX);
+}
+
 int uart_printf__polled(uart_e uart, const char *format, ...) {
   char print_buffer[UART_PRINT__BUFFER_SIZE_IN_BYTES];
 
@@ -38,4 +46,12 @@ int uart_printf__polled(uart_e uart, const char *format, ...) {
   }
 
   return would_print;
+}
+
+void uart_puts__polled(uart_e uart, const char *message) {
+  const size_t message_length = strlen(message);
+  for (size_t byte = 0; byte < message_length; byte++) {
+    uart__polled_put(uart, message[byte]);
+  }
+  uart__polled_put(uart, '\n');
 }
