@@ -21,6 +21,7 @@ Setup and install should be super simple unless you have windows, which is not s
     * Skip this for Mac or Linux
     * Follow [this guide](installs/README.md) for windows install guide
 2. Open up a terminal window, and type `pip install scons`
+    * If any issues on Ubuntu(linux), try `sudo apt install scons`
 3. Install the Board driver from the `drivers` directory
 
 That is it, you should now be ready to build software for your board.
