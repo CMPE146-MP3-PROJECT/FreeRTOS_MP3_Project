@@ -184,7 +184,7 @@ void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
     lpc_peripheral__turn_on_power_to(uarts[uart].peripheral_id);
 
     const float roundup_offset = 0.5;
-    const uint16_t divider = (uint16_t)(peripheral_clock / (16 * baud_rate)) + roundup_offset;
+    const uint16_t divider = (uint16_t)((peripheral_clock / (16 * baud_rate)) + roundup_offset);
     const uint8_t dlab_bit = (1 << 7);
     const uint8_t eight_bit_datalen = 3;
 
@@ -197,7 +197,7 @@ void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
     uart_regs->DLM = (divider >> 8) & 0xFF;
     uart_regs->DLL = (divider >> 0) & 0xFF;
 
-    /* Bootloader uses fractional dividers and can wreck havoc in our baud rate code, so re-initialize it
+    /* Bootloader uses Uart0 fractional dividers and can wreck havoc in our baud rate code, so re-initialize it
      * Lesson learned: DO NOT RELY ON RESET VALUES
      */
     const uint32_t default_reset_fdr_value = (1 << 4);
