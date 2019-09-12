@@ -1,41 +1,47 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "freertos_hooks.h"
+#include "freertos_interrupt_handlers.h"
+#include "function_types.h"
 
 /**
- * _estack symbol is actually a pointer to the stack pointer value provided by the linker script.
+ * _estack symbol is actually a pointer to the start of the stack memory (provided by the linker script).
  * Declaring as unsigned int to inform compiler that this symbol is constant and defined at link time.
  * To get value, reference &_estack.
  */
-extern unsigned int _estack;
-extern void cpu_startup_entry_point(void);
-extern void lpc_peripheral__interrupt_dispatcher(void); /// Layer violation due to startup code
+extern void *_estack;
+
+/**
+ * @{
+ * These functions are from entry_point.c and lpc_peripherals.c but they are not declared in the header
+ * file to sort of hide them from the public API
+ */
+extern void entry_point(void);
+extern void lpc_peripheral__interrupt_dispatcher(void);
+/** @} */
 
 static void halt(void);
 
-typedef void (*void_func_ptr_t)(void);
-
-__attribute__((section(".interrupt_vector_table"))) void_func_ptr_t interrupt_vector_table[] = {
+__attribute__((section(".interrupt_vector_table"))) function__void_f interrupt_vector_table[] = {
     /**
      * Core interrupt vectors
      */
-    (void_func_ptr_t)&_estack, // 0 ARM: Initial stack pointer
-    cpu_startup_entry_point,   // 1 ARM: Initial program counter
-    halt,                      // 2 ARM: Non-maskable interrupt
-    halt,                      // 3 ARM: Hard fault
-    halt,                      // 4 ARM: Memory management fault
-    halt,                      // 5 ARM: Bus fault
-    halt,                      // 6 ARM: Usage fault
-    halt,                      // 7 ARM: Reserved
-    halt,                      // 8 ARM: Reserved
-    halt,                      // 9 ARM: Reserved
-    halt,                      // 10 ARM: Reserved
-    vPortSVCHandler,           // 11 ARM: Supervisor call (SVCall)
-    halt,                      // 12 ARM: Debug monitor
-    halt,                      // 13 ARM: Reserved
-    xPortPendSVHandler,        // 14 ARM: Pendable request for system service (PendableSrvReq)
-    xPortSysTickHandler,       // 15 ARM: System Tick Timer (SysTick)
+    (function__void_f)&_estack, // 0 ARM: Initial stack pointer
+    entry_point,                // 1 ARM: Initial program counter; your board will explode if you change this
+    halt,                       // 2 ARM: Non-maskable interrupt
+    halt,                       // 3 ARM: Hard fault
+    halt,                       // 4 ARM: Memory management fault
+    halt,                       // 5 ARM: Bus fault
+    halt,                       // 6 ARM: Usage fault
+    halt,                       // 7 ARM: Reserved
+    halt,                       // 8 ARM: Reserved
+    halt,                       // 9 ARM: Reserved
+    halt,                       // 10 ARM: Reserved
+    vPortSVCHandler,            // 11 ARM: Supervisor call (SVCall)
+    halt,                       // 12 ARM: Debug monitor
+    halt,                       // 13 ARM: Reserved
+    xPortPendSVHandler,         // 14 ARM: Pendable request for system service (PendableSrvReq)
+    xPortSysTickHandler,        // 15 ARM: System Tick Timer (SysTick)
 
     /**
      * Device interrupt vectors

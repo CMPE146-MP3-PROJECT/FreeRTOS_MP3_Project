@@ -1,12 +1,10 @@
+#include "clock.h"
 #include "startup.h"
-
-// note: This layer violates directory structure due to the low level initialization that needs to take place
-#include "clock.h"    // Layer violation
-#include "sys_time.h" // Layer violation
+#include "sys_time.h"
 
 extern void main(void);
 
-void cpu_startup_entry_point(void) {
+void entry_point(void) {
   startup__initialize_ram();
   startup__initialize_fpu();
 

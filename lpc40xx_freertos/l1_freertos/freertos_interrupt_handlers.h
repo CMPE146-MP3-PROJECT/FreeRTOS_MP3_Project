@@ -10,7 +10,8 @@
 void vPortSVCHandler(void);
 
 /**
- * Pend Supervisor Call - Acts like a service request for the supervisor; intent is to avoid preempting in interrupt context.
+ * Pend Supervisor Call - Acts like a service request for the supervisor;
+ * intent is to avoid preempting in interrupt context.
  */
 void xPortPendSVHandler(void);
 
