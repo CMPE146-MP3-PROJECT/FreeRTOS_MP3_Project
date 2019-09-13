@@ -7,4 +7,4 @@
 #pragma once
 
 void startup__initialize_ram(void);
-void startup__initialize_fpu(void);
+void startup__initialize_cpu(void);

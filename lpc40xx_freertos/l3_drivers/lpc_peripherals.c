@@ -107,5 +107,7 @@ void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral) {
 
 void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback) {
   lpc_peripheral__isr_registrations[peripheral] = isr_callback;
-  NVIC_EnableIRQ(peripheral); // Use CMS API
+
+  const IRQn_Type irq_type = (IRQn_Type)peripheral;
+  NVIC_EnableIRQ(irq_type); // Use CMS API
 }

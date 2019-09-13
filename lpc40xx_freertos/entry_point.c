@@ -6,7 +6,7 @@ extern void main(void);
 
 void entry_point(void) {
   startup__initialize_ram();
-  startup__initialize_fpu();
+  startup__initialize_cpu();
 
   clock__initialize_system_clock_96mhz();
   sys_time__init(clock__get_core_clock_hz());
