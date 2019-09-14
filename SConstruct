@@ -51,7 +51,7 @@ def has_subsidary_scons(dirnode):
     """
     dirnode = Dir(dirnode)
     filenames = os.listdir(dirnode.abspath)
-    return len(filter(lambda filename: filename == "SConscript", filenames)) > 0
+    return len(list(filter(lambda filename: filename == "SConscript", filenames))) > 0
 
 
 main()
