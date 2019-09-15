@@ -143,7 +143,19 @@ static void prvTaskExitError( void );
 
 /* Each task maintains its own interrupt status in the critical nesting
 variable. */
-static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
+
+/**
+ * SJ2-C modification:
+ * The value of this should not be 0xaaaaaaaa because when we invoke FreeRTOS API, such as xQueueCreate(),
+ * it will then invoke vPortEnterCritical() which increments this value based on initial value of 0.
+ *
+ * Due to this side effect, interrupts would be disabled on startup below the configMAX_SYSCALL_INTERRUPT_PRIORITY
+ * even though the RTOS has not started. When the RTOS starts, this varaible takes the sane value of 0.
+ *
+ * Long story short, if we do not default this to zero value, then interrupts with a priority below
+ * configMAX_SYSCALL_INTERRUPT_PRIORITY are non operational until FreeRTOS starts.
+ */
+static UBaseType_t uxCriticalNesting = 0; // 0xaaaaaaaa;
 
 /*
  * The number of SysTick increments that make up one tick period.

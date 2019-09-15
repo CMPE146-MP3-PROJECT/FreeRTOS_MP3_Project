@@ -14,7 +14,10 @@ static void halt(const char *message) {
 
 #if (configCHECK_FOR_STACK_OVERFLOW != 0)
 /// Invoked by FreeRTOS when it detects stack overflow
-void vApplicationStackOverflowHook(TaskHandle_t task_handle, signed char *task_name) { halt((const char *)task_name); }
+void vApplicationStackOverflowHook(TaskHandle_t task_handle, signed char *task_name) {
+  uart_puts__polled(UART__0, "stack overflow");
+  halt((const char *)task_name);
+}
 #endif
 
 #if (configUSE_MALLOC_FAILED_HOOK == 1)
@@ -35,4 +38,8 @@ void vApplicationIdleHook(void) {
 #if (configUSE_TICK_HOOK == 1)
 /// Called upon each interrupt that invokes the FreeRTOS tick handler
 void vApplicationTickHook(void) {}
+#endif
+
+#ifdef configASSERT
+void configASSERT_callback(unsigned line, const char *message) { halt(message); }
 #endif

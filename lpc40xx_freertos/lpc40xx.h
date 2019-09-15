@@ -101,7 +101,7 @@ typedef enum IRQn
 /* Configuration of the Cortex-M4 Processor and Core Peripherals */
 #define __CM4_REV              0x0000       /*!< Cortex-M4 Core Revision               */
 #define __MPU_PRESENT             1         /*!< MPU present or not                               */
-#define __NVIC_PRIO_BITS          4         /*!< Number of Bits used for Priority Levels          */
+#define __NVIC_PRIO_BITS          5         /*!< Number of Bits used for Priority Levels          */
 #define __Vendor_SysTickConfig    0         /*!< Set to 1 if different SysTick Config is used     */
 #define __FPU_PRESENT             1         /*!< FPU present or not                    */
 

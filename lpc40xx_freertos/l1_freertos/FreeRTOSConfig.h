@@ -30,19 +30,30 @@
 /**
  * @{
  * @name Important priority configuration for Cortex M
- * 
- * Priority 5, or 160 as only the top three bits are implemented
  * @see http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
  */
 #include "lpc40xx.h"
 #ifndef __NVIC_PRIO_BITS
   #error "__NVIC_PRIO_BITS must be defined"
 #else
-  #define configPRIO_BITS __NVIC_PRIO_BITS
+  #define configPRIO_BITS   __NVIC_PRIO_BITS
+  #if (5 != __NVIC_PRIO_BITS)
+    #error "Unexpected value of __NVIC_PRIO_BITS, lpc40xx has 5-bit priorities (32 levels)"
+  #endif
 #endif
 
-#define configKERNEL_INTERRUPT_PRIORITY 	    (31 << (8 - configPRIO_BITS))
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	( 5 << (8 - configPRIO_BITS))
+/**
+ * All interrupts of higher priority (or lower number) must not use RTOS API
+ * All interrupts of lower or equal priority (higher number) can use FreeRTOS FromISR() API
+ *
+ * Based on the value of 3, we can have priority 1, and priority 2 nest, which means these
+ * interrupts are higher than RTOS interrupts
+ */
+#define RTOS_HIGHEST_INTERRUPT_PRIORITY         (0x03) /* Your interrupts must be equal or lower priority (higher number) than this */
+#define configPRIO_BITS_NOT_IMPLEMENTED         (8 - configPRIO_BITS) /* Number of un-implemented priority bits */
+
+#define configKERNEL_INTERRUPT_PRIORITY         (0x1F << configPRIO_BITS_NOT_IMPLEMENTED)
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    (RTOS_HIGHEST_INTERRUPT_PRIORITY << configPRIO_BITS_NOT_IMPLEMENTED)
 /** @} */
 
 #define configUSE_MUTEXES                       1
@@ -70,13 +81,19 @@
 #define INCLUDE_uxTaskGetStackHighWaterMark     1
 #define INCLUDE_eTaskGetState                   1
 
-// TODO: need to fix interrupt priorities
-#if 0
-#define configASSERT(condition) \
-do {                 \
-  if(!(condition)) { \
-    while(1) {}      \
-  }                  \
+/**
+ * When FreeRTOS runs into an assertion that should never occur
+ * You can change #if 0 to #if 1 for production, but NEVER change it during development
+ */
+#if 1
+void configASSERT_callback(unsigned line, const char *message);
+
+#define configASSERT(condition)                   \
+do {                                              \
+  if(!(condition)) {                              \
+    configASSERT_callback(__LINE__, #condition);  \
+    while(1) {}                                   \
+  }                                               \
 } while(0)
 #endif
 
@@ -87,6 +104,10 @@ do {                 \
   #error "Max priority must be greater than CRITICAL!"
 #endif
 
+/**
+ * Priority 0 (highest priority) interrupt cannot be masked
+ * SYSCALL interrupt priority needs to be higher than that
+ */
 #if (0 == configMAX_SYSCALL_INTERRUPT_PRIORITY)
   #error "configMAX_SYSCALL_INTERRUPT_PRIORITY must not be 0"
 #endif

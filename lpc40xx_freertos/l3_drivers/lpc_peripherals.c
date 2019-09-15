@@ -108,6 +108,20 @@ void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral) {
 void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback) {
   lpc_peripheral__isr_registrations[peripheral] = isr_callback;
 
+  /**
+   * @note:
+   * lpc_peripheral_e should match IRQn_Type; we are not exposing NXP header file in our lpc_peripherals.h
+   * and therefore we create a mirror image of this enumeration.
+   *
+   * @warning
+   * startup.c sets up interrupt priorities of all peripherals which needs to be at or lower priority than
+   * RTOS_HIGHEST_INTERRUPT_PRIORITY (configMAX_SYSCALL_INTERRUPT_PRIORITY). Make sure you DO NOT set the
+   * priority higher than the RTOS interrupt (note that higher priority means lower number)
+   *
+   * Unless you really know what you are doing, never call NVIC_SetPriority() with a priority other than:
+   *    NVIC_SetPriority(peripheral, RTOS_HIGHEST_INTERRUPT_PRIORITY + 1);
+   */
   const IRQn_Type irq_type = (IRQn_Type)peripheral;
+
   NVIC_EnableIRQ(irq_type); // Use CMS API
 }

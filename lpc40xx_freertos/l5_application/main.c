@@ -1,35 +1,37 @@
-#include <stdbool.h>
-
 #include "FreeRTOS.h"
 #include "task.h"
 
 #include "delay.h"
 #include "gpio.h"
+
 #include "uart.h"
 #include "uart_printf.h"
 
 static void blink_task(void *params);
 static void uart_task(void *params);
 
-static void blink_on_startup(gpio_s gpio);
+static void blink_on_startup(gpio_s gpio, int count);
 static void uart0_init(void);
 
 static gpio_s led0, led1;
 
 int main(void) {
   uart0_init();
+  uart_puts__polled(UART__0, "Startup");
 
   // Construct the LEDs and blink a startup sequence
   led0 = gpio__construct_as_output(gpio__port_2, 3);
   led1 = gpio__construct_as_output(gpio__port_1, 26);
-  blink_on_startup(led1);
+  blink_on_startup(led1, 2);
 
+  uart_puts__polled(UART__0, "Creating tasks");
   xTaskCreate(blink_task, "led0", (512U / sizeof(void *)), (void *)&led0, PRIORITY_LOW, NULL);
   xTaskCreate(blink_task, "led1", (512U / sizeof(void *)), (void *)&led1, PRIORITY_LOW, NULL);
 
   // printf() takes more stack space
   xTaskCreate(uart_task, "uart", (512U * 4) / sizeof(void *), NULL, PRIORITY_LOW, NULL);
 
+  uart_puts__polled(UART__0, "Starting RTOS");
   vTaskStartScheduler();
 
   /**
@@ -52,20 +54,24 @@ static void blink_task(void *params) {
 }
 
 static void uart_task(void *params) {
+  TickType_t previous_tick = 0;
+
   while (true) {
-    vTaskDelay(500);
+    vTaskDelayUntil(&previous_tick, 500);
 
     // Wait until the data is fully printed before moving on
-    uart_printf__polled(UART__0, "Hello world\n");
+    const unsigned ticks = xTaskGetTickCount();
+    uart_printf__polled(UART__0, "%6u: Hello world\n", ticks);
 
     // This deposits data to an outgoing queue and doesn't block the CPU
     uart_printf(UART__0, " ... and a more efficient printf...\n");
   }
 }
 
-static void blink_on_startup(gpio_s gpio) {
-  for (int i = 0; i < 10; i++) {
-    delay__ms(100);
+static void blink_on_startup(gpio_s gpio, int blinks) {
+  const int toggles = (2 * blinks);
+  for (int i = 0; i < toggles; i++) {
+    delay__ms(250);
     gpio__toggle(gpio);
   }
 }

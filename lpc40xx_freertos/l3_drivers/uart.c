@@ -269,20 +269,10 @@ bool uart__polled_put(uart_e uart, char output_byte) {
   bool status = false;
   lpc_uart *uart_regs = uarts[uart].registers;
 
-  const bool rtos_is_running = taskSCHEDULER_RUNNING == xTaskGetSchedulerState();
-  const bool queue_is_enabled = uart__is_transmit_queue_enabled(uart);
-
   if (uart__is_initialized(uart)) {
-    // See uart__polled_get() regards to why we are using uart_put() here
-    if (rtos_is_running && queue_is_enabled) {
-      status = uart__put(uart, output_byte, UINT32_MAX);
-    } else {
-      // Wait for any prior transmission to complete
-      uart__wait_for_transmit_to_complete(uart_regs);
-      uart_regs->THR = output_byte;
-    }
-
-    // Regardless if RTOS is enabled, for this polled version, wait for transmit holding register to be empty
+    // Wait for any prior transmission to complete
+    uart__wait_for_transmit_to_complete(uart_regs);
+    uart_regs->THR = output_byte;
     uart__wait_for_transmit_to_complete(uart_regs);
   }
 
