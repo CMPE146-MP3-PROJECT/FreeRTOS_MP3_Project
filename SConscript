@@ -72,12 +72,10 @@ Search and group files to build
 """
 
 """ Search and group source files and source directories """
-target_src_filenodes = []
-target_src_dirnodes = []
+target_source_filenodes = []
 for dir in SRC_DIRS_ROOT:
-    src_filenodes, src_dirnodes, _, _ = fsops.scan_tree(dir)
-    target_src_filenodes.extend(src_filenodes)
-    target_src_dirnodes.extend(src_dirnodes)
+    sources = fsops.scan_tree(dir)
+    target_source_filenodes.extend(sources.source_filenodes)
 
 """ Group linker scripts """
 for linker_file in LINKER_FILES:
@@ -86,12 +84,12 @@ for linker_file in LINKER_FILES:
 """ Search and group include paths """
 env_arm["CPPPATH"].extend(INCLUDE_DIRS)
 for dir in INCLUDE_DIRS_ROOT:
-    _, _, _, include_dirnodes = fsops.scan_tree(dir)
-    env_arm["CPPPATH"].extend(include_dirnodes)
+    sources = fsops.scan_tree(dir)
+    env_arm["CPPPATH"].extend(sources.include_dirnodes)
 
 """ Filter build files """
-target_src_filenodes = fsops.filter_files(target_src_filenodes, EXCLUDED_SRC_FILES)
-target_src_filenodes = fsops.remove_duplicate_filenodes(target_src_filenodes)
+target_source_filenodes = fsops.filter_files(target_source_filenodes, EXCLUDED_SRC_FILES)
+target_source_filenodes = fsops.remove_duplicate_filenodes(target_source_filenodes)
 
 
 """
@@ -100,7 +98,7 @@ Perform builds
 
 """ Compile all sources -> objects """
 obj_filenodes = []
-for src_filenode in target_src_filenodes:
+for src_filenode in target_source_filenodes:
     dest_filepath = fsops.ch_target_filenode(src_filenode, OBJ_DIR, "o")
     new_obj_filenodes = env_arm.Object(target=dest_filepath, source=src_filenode)
     obj_filenodes.extend(new_obj_filenodes)

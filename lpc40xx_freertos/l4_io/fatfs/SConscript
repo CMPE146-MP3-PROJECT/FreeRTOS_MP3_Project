@@ -1,0 +1,12 @@
+import fsops
+from sources import Sources
+
+ROOT_DIR = Dir("ff13c/source")
+
+EXCLUDED_FILES = [
+    ROOT_DIR.File("diskio.c"),
+]
+
+sources = fsops.scan_tree(ROOT_DIR)
+sources.source_filenodes = fsops.filter_files(filenodes=sources.source_filenodes, exclude_filenodes=EXCLUDED_FILES)
+Return("sources")
