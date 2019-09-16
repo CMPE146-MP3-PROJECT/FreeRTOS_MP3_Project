@@ -1,3 +1,6 @@
+# SJ2-C SCons Documentation
+
+
 ## Introduction
 
 SCons is a lightweight build system implemented in Python. Its minimalistic paradigm and full support of native Python enables fast prototyping of both simple and complex projects that may depend on factors ranging from cross-compiler support to supplementary software tools.
@@ -24,6 +27,7 @@ scons
 This repository's SCons infrastructure consists of multiple files:
 
 - SConstruct - SCons entry point.
+- SConscript - Supplementary files that extend the build system.
 - env_arm - Definition of ARM construction environment and supplementary builders.
 - site_scons - A directory which contains supplementary artifacts (i.e. modules, SCons construction environments, tools/builders, etc.).
 - site_tools/site_init.py - First file to be executed on SCons entry.
