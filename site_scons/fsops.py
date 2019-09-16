@@ -5,10 +5,6 @@ fsops - file system operations - SCons file nodes and directory nodes related op
 import fnmatch
 import glob
 import os
-try:
-    from os import scandir
-except ImportError:
-    import scandir
 
 from SCons.Script import *
 
@@ -42,8 +38,7 @@ def scan_tree(
     """
     dirnode = Dir(dirnode)
     sources = Sources()
-
-    for dirpath, dirnames, filenames in scandir.walk(os.path.relpath(dirnode.abspath)):
+    for dirpath, dirnames, filenames in os.walk(os.path.relpath(dirnode.abspath)):
         if "SConscript" in filenames:
             subsidary_sources = SConscript(Dir(dirpath).File("SConscript"))
             if isinstance(subsidary_sources, Sources):
