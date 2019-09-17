@@ -10,7 +10,6 @@ from SCons.Script import *
 
 from sources import Sources
 
-
 DEFAULT_SOURCE_PATTERNS = ["*.c", "*.cpp"]
 DEFAULT_INCLUDE_PATTERNS = ["*.h", "*.hpp"]
 DEFAULT_ASSEMBLY_PATTERNS = ["*.s", "*.S"]
@@ -68,25 +67,37 @@ def scan_tree(
     return sources
 
 
-def filter_files(filenodes, exclude_filenodes=None, exclude_filename_pattern=None):
+def filter_files(filenodes, exclude_filenodes=None, exclude_dirnodes=None, exclude_filename_pattern=None):
     """
     Filter file nodes
     :param filenodes: A list of file nodes (list of File)
     :param exclude_filenodes: A list of file nodes to filter out (list of File)
+    :param exclude_dirnodes: A list of directory nodes to filter out (list of Dir)
     :param exclude_filename_pattern: A file name pattern to filter out files with a matching file name pattern (str)
     :return: A list of filtered file nodes (list of File)
     """
-    if exclude_filenodes is None:
-        exclude_filenodes = []
+    exclude_filenodes = exclude_filenodes if (exclude_filenodes is not None) else []
+    exclude_dirnodes = exclude_dirnodes if (exclude_dirnodes is not None) else []
 
     filenodes = list(map(File, filenodes))
     exclude_filenodes = list(map(File, exclude_filenodes))
+    exclude_dirnodes = list(map(Dir, exclude_dirnodes))
 
     filtered_filenodes = []
     filtered_filenodes.extend(list(filter(lambda filenode: filenode not in exclude_filenodes, filenodes)))
 
     if exclude_filename_pattern is not None:
         filtered_filenodes.extend(list(filter(lambda filenode: not fnmatch(filenode.name, exclude_filename_pattern), filtered_filenodes)))
+
+    new_filtered_filenodes = []
+    if exclude_dirnodes is not None:
+        for filenode in filtered_filenodes:
+            for dirnode in exclude_dirnodes:
+                if dirnode.abspath in filenode.abspath:
+                    break
+            else:
+                new_filtered_filenodes.append(filenode)
+        filtered_filenodes = new_filtered_filenodes
 
     return filtered_filenodes
 

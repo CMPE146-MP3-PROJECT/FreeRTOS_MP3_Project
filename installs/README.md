@@ -21,3 +21,11 @@ If you successfully installed using the steps above, then you do not have to fol
 
 1. Extract the zip file
 2. `cd` into the zip file and then `python setup.py install`
+
+
+## Clang Format (Windows only)
+
+Clang Format for Windows may require VC runtime libraries. Install `vc_redistx64.exe` if you encounter the error:
+```
+The program can't start because MSVCP140.dll is missing from your computer.
+```

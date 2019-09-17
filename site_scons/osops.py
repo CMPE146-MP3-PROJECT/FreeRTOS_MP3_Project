@@ -33,7 +33,7 @@ def is_windows():
 
 
 def is_linux():
-    return "linux" in sys.platform
+    return sys.platform.startswith("linux")
 
 
 def is_macos():
