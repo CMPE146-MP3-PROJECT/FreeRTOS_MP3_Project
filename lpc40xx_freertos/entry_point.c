@@ -1,3 +1,4 @@
+#include "board_io.h"
 #include "clock.h"
 #include "startup.h"
 #include "sys_time.h"
@@ -9,6 +10,7 @@ void entry_point(void) {
 
   clock__initialize_system_clock_96mhz();
   sys_time__init(clock__get_core_clock_hz());
+  board_io__initialize();
 
   main();
 
