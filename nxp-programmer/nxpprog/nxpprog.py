@@ -757,14 +757,14 @@ class SerialDevice(object):
     # this is of course only possible if the signals are connected in
     # this way
     def isp_mode(self):
-        self.reset(0)
-        time.sleep(.1)
-        self.reset(1)
-        self.int0(1)
-        time.sleep(.1)
-        self.reset(0)
-        time.sleep(.1)
-        self.int0(0)
+        self._serial.dtr = 1
+        self._serial.rts = 1
+        time.sleep(0.1)
+        self._serial.reset_input_buffer()
+        self._serial.reset_output_buffer()
+        self._serial.dtr = 0
+        time.sleep(0.1)
+        self._serial.rts = 0
 
     def reset(self, level):
         if self.reset_pin == "rts":
