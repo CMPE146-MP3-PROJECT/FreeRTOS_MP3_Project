@@ -30,24 +30,16 @@ Environment functions
 """
 
 
-def clang_format_method(self, filenode):
+def clang_format_method(self, filenode, verbose=False):
     """
-    Perform auto formatter against an input file.
+    Auto format an input file.
     Note, this operation will change the contents in the source file.
 
     :param filenode: Source or header file to be formatted (File)
-    :return: Results
     """
     filenode = File(filenode)
-    clang_format_binary_filenode = get_clang_format_binary_filenode()
-    # cmd = "{} -i={}".format(clang_format_binary_filenode.abspath, filenode.abspath)
-    cmd = [
-        clang_format_binary_filenode.abspath,
-        "-i",
-        filenode.abspath,
-    ]
-    print(" ".join(cmd))
-    subprocess.call(cmd)
+    if is_format_necessary(filenode=filenode):
+        perform_format(filenode=filenode, verbose=verbose)
 
 
 """
@@ -64,3 +56,34 @@ def get_clang_format_binary_filenode():
     else:  # osops.is_linux()
         ret = SELF_DIRNODE.File("linux/clang-format")
     return ret
+
+
+def is_format_necessary(filenode):
+    clang_format_binary_filenode = get_clang_format_binary_filenode()
+    cmd = [
+        clang_format_binary_filenode.abspath,
+        "-i",
+        filenode.abspath,
+        "--output-replacements-xml",
+    ]
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while process.poll() is None:
+        pass
+    stdout, stderr = process.communicate()
+    lines = stdout.split("\n")
+
+    # If number of "<replacement>" node in XML string is greater than 1, then clang format is required
+    return sum("<replacement" in line for line in lines) > 1
+
+
+def perform_format(filenode, verbose=False):
+    clang_format_binary_filenode = get_clang_format_binary_filenode()
+    cmd = [
+        clang_format_binary_filenode.abspath,
+        "-i",
+        filenode.abspath,
+    ]
+    print("Clang formatting: [{}]".format(os.path.relpath(filenode.abspath)))
+    if verbose:
+        print(" ".join(cmd))
+    return subprocess.call(cmd)

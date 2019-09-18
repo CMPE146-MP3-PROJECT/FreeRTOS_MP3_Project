@@ -7,6 +7,7 @@ from sources import Sources
 """
 CLI
 """
+verbose = GetOption("verbose")
 no_format = GetOption("no_format")
 
 
@@ -147,4 +148,4 @@ format_filenodes = fsops.filter_files(
 # If "--no-format" provided as command line argument, then do not run Clang Format builders
 if not no_format:
     for filenode in format_filenodes:
-        env_arm.ClangFormat(filenode=filenode)
+        env_arm.ClangFormat(filenode=filenode, verbose=verbose)
