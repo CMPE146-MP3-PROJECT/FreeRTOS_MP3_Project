@@ -10,7 +10,20 @@
 #define PRIORITY_MEDIUM                         2
 #define PRIORITY_HIGH                           3
 #define PRIORITY_CRITICAL                       4
-#define configMAX_PRIORITIES                    (1 + PRIORITY_CRITICAL) // +1 for idle task
+
+/**
+ * Priorities used by the periodic_scheduler.h
+ * Your tasks should not use these priorities as the 'periodic scheduler' that
+ * invokes the callbacks at their respective time are meant to be super precise
+ * callbacks with higher priorities than the priorities defined above (1-4)
+ */
+#define PRIORITY_PERIODIC_1HZ                   5
+#define PRIORITY_PERIODIC_10HZ                  6
+#define PRIORITY_PERIODIC_100HZ                 7
+#define PRIORITY_PERIODIC_1000HZ                8
+#define PRIORITY_PERIODIC_MONITOR               9
+
+#define configMAX_PRIORITIES                    (1 + PRIORITY_PERIODIC_MONITOR) // +1 for idle task
 
 /**
  * port.c sets up CPU HW timer interrupt to occur at configTICK_RATE_HZ

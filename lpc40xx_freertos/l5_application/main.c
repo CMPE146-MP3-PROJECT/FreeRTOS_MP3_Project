@@ -1,6 +1,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "board_io.h"
 #include "delay.h"
 #include "gpio.h"
 
@@ -20,8 +21,8 @@ int main(void) {
   uart_puts__polled(UART__0, "Startup");
 
   // Construct the LEDs and blink a startup sequence
-  led0 = gpio__construct_as_output(gpio__port_2, 3);
-  led1 = gpio__construct_as_output(gpio__port_1, 26);
+  led0 = board_io__get_led0();
+  led1 = board_io__get_led1();
   blink_on_startup(led1, 2);
 
   uart_puts__polled(UART__0, "Creating tasks");
@@ -77,9 +78,7 @@ static void blink_on_startup(gpio_s gpio, int blinks) {
 }
 
 static void uart0_init(void) {
-  (void)gpio__construct_with_function(gpio__port_0, 2, gpio__function_1); // P0.2 - Uart-0 Tx
-  (void)gpio__construct_with_function(gpio__port_0, 3, gpio__function_1); // P0.3 - Uart-0 Rx
-
+  // Note: PIN functions are initialized by board_io__initialize() for P0.2(Tx) and P0.3(Rx)
   uart__init(UART__0, clock__get_peripheral_clock_hz(), 115200);
 
   // Make UART more efficient by backing it with RTOS queues (optional but highly recommended with RTOS)

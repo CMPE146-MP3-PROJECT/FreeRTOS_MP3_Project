@@ -22,7 +22,7 @@ extern void lpc_peripheral__interrupt_dispatcher(void);
 
 static void halt(void);
 
-__attribute__((section(".interrupt_vector_table"))) function__void_f interrupt_vector_table[] = {
+__attribute__((section(".interrupt_vector_table"))) const function__void_f interrupt_vector_table[] = {
     /**
      * Core interrupt vectors
      */

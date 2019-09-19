@@ -1,12 +1,14 @@
 /**
  * @file
  * Analog to Digital Converter driver for LPC40xx
- * 
+ *
  * @note
  * This driver is intentionally simplified, and is meant to be used as a reference.
  * Burst mode should be enabled for a better implementation
  */
 #pragma once
+
+#include <stdint.h>
 
 // Only Channel2, Channel4 and Channel5 pins are avaible for use on SJ2 Development board
 typedef enum {
