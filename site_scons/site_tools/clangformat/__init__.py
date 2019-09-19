@@ -69,8 +69,8 @@ def is_format_necessary(filenode):
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while process.poll() is None:
         pass
-    stdout, stderr = process.communicate()
-    lines = stdout.split("\n")
+    stdout, _ = process.communicate()
+    lines = str(stdout).split("\n")
 
     # If number of "<replacement>" node in XML string is greater than 1, then clang format is required
     return sum("<replacement" in line for line in lines) > 1
