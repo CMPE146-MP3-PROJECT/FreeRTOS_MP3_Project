@@ -17,15 +17,25 @@ References:
 ## Usage
 
 ```bash
-> python flash.py -d/--device <Device ID> -i/--input <.bin file path>
+> python flash.py -p/--port <Device ID> -i/--input <.bin file path>
 ```
 
-### Example Usage
+### Examples
 
-```powershell
-> python flash.py -d COM6 -i ..\_build_lpc40xx_freertos\lpc40xx_freertos.bin
-```
+You would have to know the `COM` port, which is named differently for each OS.
+
+Windows:
 
 ```bash
-> python flash.py -d /dev/ttyUSB0 -i ../_build_lpc40xx_freertos/lpc40xx_freertos.bin
+> python flash.py -p COM6 -i ..\_build_lpc40xx_freertos\lpc40xx_freertos.bin
+```
+
+Linux:
+```bash
+> python flash.py -p /dev/ttyUSB0 -i ../_build_lpc40xx_freertos/lpc40xx_freertos.bin
+```
+
+Mac:
+```bash
+> python flash.py -p /dev/cu.SLAB_USBtoUART -i ../_build_lpc40xx_freertos/lpc40xx_freertos.bin
 ```
