@@ -80,7 +80,7 @@ static void uart0_init(void) {
   (void)gpio__construct_with_function(gpio__port_0, 2, gpio__function_1); // P0.2 - Uart-0 Tx
   (void)gpio__construct_with_function(gpio__port_0, 3, gpio__function_1); // P0.3 - Uart-0 Rx
 
-  uart__init(UART__0, clock__get_core_clock_hz(), 115200);
+  uart__init(UART__0, clock__get_peripheral_clock_hz(), 115200);
 
   // Make UART more efficient by backing it with RTOS queues (optional but highly recommended with RTOS)
   QueueHandle_t tx_queue = xQueueCreate(128, sizeof(char));

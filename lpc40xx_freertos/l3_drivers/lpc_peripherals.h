@@ -27,6 +27,8 @@ typedef enum {
   LPC_PERIPHERAL__UART1 = 6,
   LPC_PERIPHERAL__UART2 = 7,
   LPC_PERIPHERAL__UART3 = 8,
+
+  LPC_PERIPHERAL__ADC = 22,
 } lpc_peripheral_e;
 
 void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral);

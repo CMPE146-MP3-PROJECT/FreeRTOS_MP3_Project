@@ -17,6 +17,8 @@ static const uint8_t lpc_peripheral_pconp_bit_map[] = {
     [LPC_PERIPHERAL__UART1] = 4,
     [LPC_PERIPHERAL__UART2] = 24,
     [LPC_PERIPHERAL__UART3] = 25,
+
+    [LPC_PERIPHERAL__ADC] = 12,
 };
 // clang-format on
 

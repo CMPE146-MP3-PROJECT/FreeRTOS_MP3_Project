@@ -11,6 +11,9 @@
  */
 uint32_t clock__get_core_clock_hz(void) { return (UINT32_C(96) * 1000 * 1000); }
 
+// We set PCLKSEL to 1, and hence peripheral clock is the same as core clock
+uint32_t clock__get_peripheral_clock_hz(void) { return clock__get_core_clock_hz(); }
+
 void clock__initialize_system_clock_96mhz(void) {
   // Step 3 from UM: Write PLL new setup values to the PLL CFG register
   const uint8_t multiplier = 8; // 8 * 12Mhz = 96Mhz
