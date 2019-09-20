@@ -12,17 +12,12 @@
 
 void pwm1__init_single_edge(uint32_t frequency_in_hertz) {
   const uint32_t pwm_bits_9_to_14 = 0x3F;
-  const uint32_t clock_div_by_1 = 1;
 
   lpc_peripheral__turn_on_power_to(LPC_PERIPHERAL__PWM1);
   pwm1__set_frequency(frequency_in_hertz);
 
-  LPC_SC->PCLKSEL = clock_div_by_1;
-
-  LPC_PWM1->MCR |= (1 << 1); // Enable PWM reset when it matches MR0
-
-  LPC_PWM1->TCR = (1 << 0) | (1 << 3); // Enable PWM counter
-
+  LPC_PWM1->MCR |= (1 << 1);                // Enable PWM reset when it matches MR0
+  LPC_PWM1->TCR = (1 << 0) | (1 << 3);      // Enable PWM counter
   LPC_PWM1->PCR |= (pwm_bits_9_to_14 << 9); // Enable the PWM (bits 9-14)
 }
 
@@ -33,15 +28,13 @@ void pwm1__set_frequency(uint32_t frequency_in_hertz) {
   if (0 == frequency_in_hertz) {
     valid_frequency_in_hertz = default_frequency_in_hertz;
   }
-  const uint32_t match_reg_value = (clock__get_core_clock_hz() / valid_frequency_in_hertz);
+  const uint32_t match_reg_value = (clock__get_peripheral_clock_hz() / valid_frequency_in_hertz);
 
   // MR0 holds the value that Timer Counter should count upto
   // This will get us the desired PWM pulses per second
   // Ex: If CPU freq = 10Hz, desired frequency = 2Hz
   // MR0 = 10/2 = 5. This means, TC will count upto 5 per pulse, generating 2 pulse per second
   LPC_PWM1->MR0 = match_reg_value;
-
-  return;
 }
 
 void pwm1__set_duty_cycle(pwm1_e pwm1_pin, double duty_cycle_in_percent) {
