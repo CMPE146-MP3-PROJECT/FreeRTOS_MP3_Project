@@ -4,9 +4,8 @@
 #include "lpc40xx.h"
 #include "lpc_peripherals.h"
 
-/// For simple single edge PWM, all channels share the same frequency
 void pwm1__init_single_edge(uint32_t frequency_in_hertz) {
-  const uint32_t pwm_output_enable_mask = 0x3F;
+  const uint32_t pwm_channel_output_enable_mask = 0x3F;
   const uint32_t default_frequency_in_hertz = 50;
   uint32_t valid_frequency_in_hertz = frequency_in_hertz;
 
@@ -21,11 +20,13 @@ void pwm1__init_single_edge(uint32_t frequency_in_hertz) {
   // This will get us the desired PWM pulses per second
   // Ex: If CPU freq = 10Hz, desired frequency = 2Hz
   // MR0 = 10/2 = 5. This means, TC will count upto 5 per pulse, generating 2 pulse per second
-  LPC_PWM1->MR0 = match_reg_value;
+  if (match_reg_value > 0) {
+    LPC_PWM1->MR0 = (match_reg_value - 1);
+  }
 
-  LPC_PWM1->MCR |= (1 << 1);                      ///< Enable PWM reset when it matches MR0
-  LPC_PWM1->TCR = (1 << 0) | (1 << 3);            ///< Enable PWM counter
-  LPC_PWM1->PCR |= (pwm_output_enable_mask << 9); ///< Enable the PWM (bits 9-14)
+  LPC_PWM1->MCR |= (1 << 1);                              ///< Enable PWM reset when it matches MR0
+  LPC_PWM1->TCR = (1 << 0) | (1 << 3);                    ///< Enable PWM counter
+  LPC_PWM1->PCR |= (pwm_channel_output_enable_mask << 9); ///< Enable the PWM (bits 9-14)
 }
 
 void pwm1__set_duty_cycle(pwm1_channel_e pwm1_channel, double duty_cycle_in_percent) {

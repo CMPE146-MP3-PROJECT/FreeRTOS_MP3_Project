@@ -14,5 +14,6 @@ typedef enum {
   PWM1__2_5 = 5, ///< Controls P2.5
 } pwm1_channel_e;
 
+/// For simple single edge PWM, all channels share the same frequency
 void pwm1__init_single_edge(uint32_t frequency_in_hertz);
 void pwm1__set_duty_cycle(pwm1_channel_e pwm1_channel, double duty_cycle_in_percent);
