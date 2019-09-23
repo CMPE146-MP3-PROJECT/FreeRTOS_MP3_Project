@@ -210,6 +210,8 @@ void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
 
 bool uart__is_initialized(uart_e uart) { return uarts[uart].initialized; }
 
+bool uart__is_transmit_queue_initialized(uart_e uart) { return uart__is_transmit_queue_enabled(uart); }
+
 bool uart__enable_queues(uart_e uart, QueueHandle_t queue_receive, QueueHandle_t queue_transmit) {
   bool status = false;
   uart_s *uart_type = &uarts[uart];

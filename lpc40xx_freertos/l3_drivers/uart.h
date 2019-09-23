@@ -23,6 +23,7 @@ typedef enum {
 void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate);
 
 bool uart__is_initialized(uart_e uart);
+bool uart__is_transmit_queue_initialized(uart_e uart);
 
 /**
  * If the RTOS is going to be used, then enabling the queues provides event driven implementation such that uart_get()
