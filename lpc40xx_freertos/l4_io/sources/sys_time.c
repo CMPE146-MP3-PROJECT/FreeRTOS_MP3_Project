@@ -7,10 +7,15 @@ static const lpc_timer_e sys_time__hw_timer = lpc_timer0;
 static const lpc_timer__mr_e sys_time__hw_timer_mr = lpc_timer__mr0;
 
 static const uint32_t sys_time__us_per_sec = UINT32_C(1) * 1000 * 1000;
-static volatile uint32_t sys_time__sec_counter = 0;
+static volatile uint32_t sys_time__one_minute_counter = 0;
 
-static void sys_time__1sec_isr(void) {
-  ++sys_time__sec_counter;
+static void sys_time__one_minute_isr(void) {
+  /* Somehow, we have to call hw_timer__acknowledge_interrupt() first, before doing '++sys_time__one_minute_counter'
+   * The other option is to call hw_timer__acknowledge_interrupt() twice to clear the interrupt.
+   * TODO: If not, the interrupt seems to enter twice ... this needs proper investigation
+   */
+  ++sys_time__one_minute_counter;
+  hw_timer__acknowledge_interrupt(sys_time__hw_timer, sys_time__hw_timer_mr);
   hw_timer__acknowledge_interrupt(sys_time__hw_timer, sys_time__hw_timer_mr);
 }
 
@@ -20,18 +25,19 @@ static void sys_time__1sec_isr(void) {
  *
  ******************************************************************************/
 
-void sys_time__init(uint32_t cpu_clock_hz) {
-  const uint32_t prescalar_for_1us = (cpu_clock_hz / sys_time__us_per_sec) - 1;
+void sys_time__init(uint32_t peripheral_clock_hz) {
+  const uint32_t prescalar_for_1us = (peripheral_clock_hz / sys_time__us_per_sec) - 1;
+  const uint32_t one_minute_in_us = UINT32_C(60) * 1000 * 1000;
 
-  // Enable the timer with 1uS resolution with an interrupt every one second
-  hw_timer__enable(sys_time__hw_timer, prescalar_for_1us, sys_time__1sec_isr);
-  hw_timer__enable_match_isr_and_reset(sys_time__hw_timer, sys_time__hw_timer_mr, sys_time__us_per_sec);
+  // Enable the timer with 1uS resolution with an interrupt
+  hw_timer__enable(sys_time__hw_timer, prescalar_for_1us, sys_time__one_minute_isr);
+  hw_timer__enable_match_isr_and_reset(sys_time__hw_timer, sys_time__hw_timer_mr, one_minute_in_us);
 }
 
 uint64_t sys_time__get_uptime_us(void) {
   uint32_t before_us = 0;
   uint32_t after_us = 0;
-  uint32_t seconds = 0;
+  uint32_t minutes = 0;
 
   /**
    * Loop until we can safely read both the rollover value and the timer value.
@@ -41,12 +47,17 @@ uint64_t sys_time__get_uptime_us(void) {
    */
   do {
     before_us = hw_timer__get_value(sys_time__hw_timer);
-    seconds = sys_time__sec_counter;
+    minutes = sys_time__one_minute_counter;
     after_us = hw_timer__get_value(sys_time__hw_timer);
   } while (after_us < before_us);
 
   uint64_t uptime_us = after_us;
-  uptime_us += ((uint64_t)sys_time__us_per_sec * seconds);
+  uptime_us += ((uint64_t)minutes * 60 * sys_time__us_per_sec);
 
   return uptime_us;
+}
+
+uint64_t sys_time__get_uptime_ms(void) {
+  const uint64_t us = sys_time__get_uptime_us();
+  return (us / 1000);
 }
