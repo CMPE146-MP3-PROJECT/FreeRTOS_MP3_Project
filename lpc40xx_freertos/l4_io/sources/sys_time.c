@@ -10,12 +10,10 @@ static const uint32_t sys_time__us_per_sec = UINT32_C(1) * 1000 * 1000;
 static volatile uint32_t sys_time__one_minute_counter = 0;
 
 static void sys_time__one_minute_isr(void) {
-  /* Somehow, we have to call hw_timer__acknowledge_interrupt() first, before doing '++sys_time__one_minute_counter'
-   * The other option is to call hw_timer__acknowledge_interrupt() twice to clear the interrupt.
-   * TODO: If not, the interrupt seems to enter twice ... this needs proper investigation
-   */
   ++sys_time__one_minute_counter;
-  hw_timer__acknowledge_interrupt(sys_time__hw_timer, sys_time__hw_timer_mr);
+
+  // Reset the HW timer manually and then clear the interrupt
+  hw_timer__set_value(sys_time__hw_timer, 0);
   hw_timer__acknowledge_interrupt(sys_time__hw_timer, sys_time__hw_timer_mr);
 }
 
@@ -31,7 +29,7 @@ void sys_time__init(uint32_t peripheral_clock_hz) {
 
   // Enable the timer with 1uS resolution with an interrupt
   hw_timer__enable(sys_time__hw_timer, prescalar_for_1us, sys_time__one_minute_isr);
-  hw_timer__enable_match_isr_and_reset(sys_time__hw_timer, sys_time__hw_timer_mr, one_minute_in_us);
+  hw_timer__enable_match_isr(sys_time__hw_timer, sys_time__hw_timer_mr, one_minute_in_us);
 }
 
 uint64_t sys_time__get_uptime_us(void) {

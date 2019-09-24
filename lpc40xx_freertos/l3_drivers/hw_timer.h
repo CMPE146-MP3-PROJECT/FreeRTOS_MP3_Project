@@ -35,15 +35,17 @@ void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, funct
 
 /**
  * When the HW timer counts up and matches the mr_value of type lpc_timer__mr_e then it will:
- *   - Generate an interrupt and invoke the callback registerd during hw_timer__enable()
- *   - Reset the TC on match
+ *   - Generate an interrupt and invoke the callback registered during hw_timer__enable()
  *
- * Unfortunately with this API, it only makes sense to use one match register, as the first one will reset the HW timer
- * and not allow further match registers to work, but that is all we needed for now, and rest is YAGNI
+ * @note All match registers use the same interrupt registered through hw_timer__enable()
  */
-void hw_timer__enable_match_isr_and_reset(lpc_timer_e timer, lpc_timer__mr_e mr_type, const uint32_t mr_value);
+void hw_timer__enable_match_isr(lpc_timer_e timer, lpc_timer__mr_e mr_type, const uint32_t mr_value);
 
 /// When isr_callback fires that was set by hw_timer__enable(), then this should be used to clear the MR interrupt
 void hw_timer__acknowledge_interrupt(lpc_timer_e timer, lpc_timer__mr_e mr_type);
 
+/// @returns the HW timer value
 uint32_t hw_timer__get_value(lpc_timer_e timer);
+
+/// Sets (overwrites) the current HW timer value (TC register)
+void hw_timer__set_value(lpc_timer_e timer, uint32_t tc_value);

@@ -99,6 +99,11 @@ void lpc_peripheral__interrupt_dispatcher(void) {
   /* Lookup the function pointer we want to call and make the call */
   function__void_f isr_to_service = lpc_peripheral__isr_registrations[isr_num];
   isr_to_service();
+
+  // http://www.keil.com/support/docs/3928.htm
+  volatile int memory_write_to_avoid_spurious_interrupt = 0;
+  ++memory_write_to_avoid_spurious_interrupt;
+  (void)memory_write_to_avoid_spurious_interrupt; // Avoid unused warning
 }
 
 void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral) {
