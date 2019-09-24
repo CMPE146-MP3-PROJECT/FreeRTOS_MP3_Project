@@ -68,7 +68,7 @@
 / Locale and Namespace Configurations
 /---------------------------------------------------------------------------*/
 
-#define FF_CODE_PAGE	932
+#define FF_CODE_PAGE	437
 /* This option specifies the OEM code page to be used on the target system.
 /  Incorrect code page setting can cause a file open failure.
 /
@@ -97,8 +97,8 @@
 */
 
 
-#define FF_USE_LFN		0
-#define FF_MAX_LFN		255
+#define FF_USE_LFN		2
+#define FF_MAX_LFN		128
 /* The FF_USE_LFN switches the support for LFN (long file name).
 /
 /   0: Disable LFN. FF_MAX_LFN has no effect.
@@ -129,7 +129,7 @@
 /  When LFN is not enabled, this option has no effect. */
 
 
-#define FF_LFN_BUF		255
+#define FF_LFN_BUF		128
 #define FF_SFN_BUF		12
 /* This set of options defines size of file name members in the FILINFO structure
 /  which is used to read out directory items. These values should be suffcient for
@@ -263,9 +263,14 @@
 
 
 /* #include <somertos.h>	// O/S definitions */
-#define FF_FS_REENTRANT	0
-#define FF_FS_TIMEOUT	1000
-#define FF_SYNC_t		HANDLE
+#define FF_FS_REENTRANT	1
+#define FF_FS_TIMEOUT	3000
+#define FF_SYNC_t		SemaphoreHandle_t
+
+#if FF_FS_REENTRANT
+#include "FreeRTOS.h"
+#include "semphr.h"
+#endif
 /* The option FF_FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
 /  volume is always re-entrant and volume control functions, f_mount(), f_mkfs()

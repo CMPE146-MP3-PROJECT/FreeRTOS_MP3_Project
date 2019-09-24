@@ -19,18 +19,17 @@ static gpio_s led0, led1;
 int main(void) {
   /// UART initialization is required in order to use <stdio.h> puts, printf() etc; @see system_calls.c
   uart0_init();
-  puts("\n--------\nStartup");
 
   // Construct the LEDs and blink a startup sequence
   led0 = board_io__get_led0();
   led1 = board_io__get_led1();
   blink_on_startup(led1, 2);
 
-  puts("Creating tasks");
+  puts("\n--------\nStartup");
   xTaskCreate(blink_task, "led0", (512U / sizeof(void *)), (void *)&led0, PRIORITY_LOW, NULL);
   xTaskCreate(blink_task, "led1", (512U / sizeof(void *)), (void *)&led1, PRIORITY_LOW, NULL);
 
-  // printf() takes more stack space
+  // printf() takes more stack space, size this tasks' stack higher
   xTaskCreate(uart_task, "uart", (512U * 8) / sizeof(void *), NULL, PRIORITY_LOW, NULL);
 
   puts("Starting RTOS");
@@ -61,7 +60,7 @@ static void uart_task(void *params) {
 
   while (true) {
     // This loop will repeat every 500 ticks, even if the logic below takes variable amount of ticks
-    vTaskDelayUntil(&previous_tick, 500);
+    vTaskDelayUntil(&previous_tick, 2000);
 
     /* Calls to fprintf(stderr, ...) uses polled UART driver, so this entire output will be fully sent out
      * before this function returns. See system_calls.c for actual implementation.

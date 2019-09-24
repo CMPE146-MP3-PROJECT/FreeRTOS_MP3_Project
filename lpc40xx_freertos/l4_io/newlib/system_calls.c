@@ -19,8 +19,8 @@
  */
 typedef enum {
   file_id__stdin = 0,
-  file_id__stderr = 1,
-  file_id__stdout = 2,
+  file_id__stdout = 1,
+  file_id__stderr = 2,
 } file_id_e;
 
 /// printf(), scanf() for standard output uses this UART

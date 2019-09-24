@@ -31,6 +31,12 @@ typedef enum {
   LPC_PERIPHERAL__PWM1 = 9,
   LPC_PERIPHERAL__ADC = 22,
   LPC_PERIPHERAL__GPIO = (54 - 16),
+
+  LPC_PERIPHERAL__SSP0 = 14,
+  LPC_PERIPHERAL__SSP1 = 15,
+  LPC_PERIPHERAL__SSP2 = 36,
+
+  LPC_PERIPHERAL__GPDMA = 26,
 } lpc_peripheral_e;
 
 void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral);

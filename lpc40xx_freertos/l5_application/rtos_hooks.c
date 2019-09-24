@@ -15,7 +15,7 @@ static void halt(const char *message) {
 #if (configCHECK_FOR_STACK_OVERFLOW != 0)
 /// Invoked by FreeRTOS when it detects stack overflow
 void vApplicationStackOverflowHook(TaskHandle_t task_handle, signed char *task_name) {
-  uart_puts__polled(UART__0, "stack overflow");
+  uart_puts__polled(UART__0, "stack overflow by this task:");
   halt((const char *)task_name);
 }
 #endif
@@ -41,5 +41,8 @@ void vApplicationTickHook(void) {}
 #endif
 
 #ifdef configASSERT
-void configASSERT_callback(unsigned line, const char *message) { halt(message); }
+void configASSERT_callback(unsigned line, const char *message) {
+  uart_puts__polled(UART__0, "FreeRTOS ASSERT() occurred indicating an error condition that should NEVER occur");
+  halt(message);
+}
 #endif

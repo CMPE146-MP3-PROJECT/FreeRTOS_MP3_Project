@@ -18,8 +18,13 @@ static const uint8_t lpc_peripheral_pconp_bit_map[] = {
     [LPC_PERIPHERAL__UART2] = 24,
     [LPC_PERIPHERAL__UART3] = 25,
 
+    [LPC_PERIPHERAL__SSP0] = 21,
+    [LPC_PERIPHERAL__SSP1] = 10,
+    [LPC_PERIPHERAL__SSP2] = 20,
+
     [LPC_PERIPHERAL__PWM1] = 6,
     [LPC_PERIPHERAL__ADC] = 12,
+    [LPC_PERIPHERAL__GPDMA] = 29,
 };
 // clang-format on
 
@@ -101,9 +106,9 @@ void lpc_peripheral__interrupt_dispatcher(void) {
   isr_to_service();
 
   // http://www.keil.com/support/docs/3928.htm
-  volatile int memory_write_to_avoid_spurious_interrupt = 0;
-  ++memory_write_to_avoid_spurious_interrupt;
-  (void)memory_write_to_avoid_spurious_interrupt; // Avoid unused warning
+  static volatile int memory_write_to_avoid_spurious_interrupt;
+  memory_write_to_avoid_spurious_interrupt = 0;
+  (void)memory_write_to_avoid_spurious_interrupt; // Avoid 'variable set but not used' warning
 }
 
 void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral) {
@@ -130,6 +135,5 @@ void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__voi
    *    NVIC_SetPriority(peripheral, RTOS_HIGHEST_INTERRUPT_PRIORITY + 1);
    */
   const IRQn_Type irq_type = (IRQn_Type)peripheral;
-
   NVIC_EnableIRQ(irq_type); // Use CMS API
 }
