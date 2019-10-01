@@ -6,21 +6,21 @@
 
 /**
  * The type of timers supported by LPC40xx
- * Note that for the SJ-2 project, lpc_timer1 is being used by to keep track of 'up time' (by sys_time.h)
+ * @note For this SJ-2 project, lpc_timer1 is being used by to keep track of 'up time' (by sys_time.h)
  */
 typedef enum {
-  lpc_timer0 = 0,
-  lpc_timer1,
-  lpc_timer2,
-  lpc_timer3,
+  LPC_TIMER__0 = 0,
+  LPC_TIMER__1,
+  LPC_TIMER__2,
+  LPC_TIMER__3,
 } lpc_timer_e;
 
-/// There are 4 match registers for HW timer on the LPC 40xx
+/// There are 4 match registers for HW timer on the LPC40xx
 typedef enum {
-  lpc_timer__mr0 = 0,
-  lpc_timer__mr1,
-  lpc_timer__mr2,
-  lpc_timer__mr3,
+  LPC_TIMER__MR0 = 0,
+  LPC_TIMER__MR1,
+  LPC_TIMER__MR2,
+  LPC_TIMER__MR3,
 } lpc_timer__mr_e;
 
 /**

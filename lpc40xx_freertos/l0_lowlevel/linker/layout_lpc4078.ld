@@ -24,11 +24,13 @@ MEMORY
   __base_Flash = 0x0 ; /* Flash */
   __top_MFlash512 = 0x0 + 0x80000 ; /* 512K bytes */
   __top_Flash = 0x0 + 0x80000 ; /* 512K bytes */
+
   __base_RamLoc64 = 0x10000000  ; /* RamLoc64 */
   __base_RAM = 0x10000000 ; /* RAM */
   __top_RamLoc64 = 0x10000000 + 0x10000 ; /* 64K bytes */
   __top_RAM = 0x10000000 + 0x10000 ; /* 64K bytes */
   __base_RamPeriph32 = 0x20000000  ; /* RamPeriph32 */
+
   __base_RAM2 = 0x20000000 ; /* RAM2 */
   __top_RamPeriph32 = 0x20000000 + 0x8000 ; /* 32K bytes */
   __top_RAM2 = 0x20000000 + 0x8000 ; /* 32K bytes */
@@ -67,33 +69,33 @@ SECTIONS
         *(.after_vectors*)
 
         /* C++ constructors etc */
-    . = ALIGN(4);
-    KEEP(*(.init))
+        . = ALIGN(4);
+        KEEP(*(.init))
 
-    . = ALIGN(4);
-    __preinit_array_start = .;
-    KEEP (*(.preinit_array))
-    __preinit_array_end = .;
+        . = ALIGN(4);
+        __preinit_array_start = .;
+        KEEP (*(.preinit_array))
+        __preinit_array_end = .;
 
-    . = ALIGN(4);
-    __init_array_start = .;
-    KEEP (*(SORT(.init_array.*)))
-    KEEP (*(.init_array))
-    __init_array_end = .;
+        . = ALIGN(4);
+        __init_array_start = .;
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array))
+        __init_array_end = .;
 
-    KEEP(*(.fini));
+        KEEP(*(.fini));
 
-    . = ALIGN(4);
-    KEEP (*crtbegin.o(.ctors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-    KEEP (*(SORT(.ctors.*)))
-    KEEP (*crtend.o(.ctors))
+        . = ALIGN(4);
+        KEEP (*crtbegin.o(.ctors))
+        KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+        KEEP (*(SORT(.ctors.*)))
+        KEEP (*crtend.o(.ctors))
 
-    . = ALIGN(4);
-    KEEP (*crtbegin.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
-    KEEP (*(SORT(.dtors.*)))
-    KEEP (*crtend.o(.dtors))
+        . = ALIGN(4);
+        KEEP (*crtbegin.o(.dtors))
+        KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+        KEEP (*(SORT(.dtors.*)))
+        KEEP (*crtend.o(.dtors))
         /* End C++ */
     } >MFlash512
 
@@ -103,6 +105,7 @@ SECTIONS
         *(.rodata .rodata.* .constdata .constdata.*)
         . = ALIGN(4);
     } > MFlash512
+
     /*
      * for exception handling/unwind - some Newlib functions (in common
      * with C++ and STDC++) use this.

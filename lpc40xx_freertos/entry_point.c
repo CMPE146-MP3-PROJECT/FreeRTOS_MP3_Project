@@ -10,6 +10,7 @@
 #include "ff.h"
 
 extern void main(void);
+static void entry_point__halt(void);
 static void entry_point__mount_sd_card(void);
 
 void entry_point(void) {
@@ -27,11 +28,15 @@ void entry_point(void) {
   setvbuf(stdin, 0, _IONBF, 0);
 
   main();
+  entry_point__halt();
+}
 
+static void entry_point__halt(void) {
   /**
    * main() should never return.
    * CPU will now halt forever at this point.
    */
+  fprintf(stderr, "ERROR: main() should never return, program has been halted");
   while (1) {
     ;
   }
@@ -41,7 +46,7 @@ static void entry_point__mount_sd_card(void) {
   // This FATFS object should never go out of scope
   static FATFS sd_card_drive;
 
-  const BYTE option_mount_later = 0;
+  const BYTE option_mount_later = 0; // Actually mounts later when the first file is accessed
   const TCHAR *default_drive = (const TCHAR *)"";
 
   f_mount(&sd_card_drive, default_drive, option_mount_later);

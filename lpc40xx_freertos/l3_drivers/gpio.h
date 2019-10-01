@@ -5,12 +5,12 @@
 
 /// Note that some ports may not be available on your microcontroller
 typedef enum {
-  gpio__port_0 = 0,
-  gpio__port_1,
-  gpio__port_2,
-  gpio__port_3,
-  gpio__port_4,
-  gpio__port_5,
+  GPIO__PORT_0 = 0,
+  GPIO__PORT_1,
+  GPIO__PORT_2,
+  GPIO__PORT_3,
+  GPIO__PORT_4,
+  GPIO__PORT_5,
 } gpio__port_e;
 
 /**
@@ -18,14 +18,14 @@ typedef enum {
  * The functions are specific to a pin and vary; only function 0 is common, which is a GPIO
  */
 typedef enum {
-  gpio__function_0_io_pin = 0,
-  gpio__function_1,
-  gpio__function_2,
-  gpio__function_3,
-  gpio__function_4,
-  gpio__function_5,
-  gpio__function_6,
-  gpio__function_7,
+  GPIO__FUNCITON_0_IO_PIN = 0,
+  GPIO__FUNCTION_1,
+  GPIO__FUNCTION_2,
+  GPIO__FUNCTION_3,
+  GPIO__FUNCTION_4,
+  GPIO__FUNCTION_5,
+  GPIO__FUNCTION_6,
+  GPIO__FUNCTION_7,
 } gpio__function_e;
 
 /**

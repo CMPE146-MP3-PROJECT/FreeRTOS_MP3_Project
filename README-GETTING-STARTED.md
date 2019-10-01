@@ -23,9 +23,10 @@ That is it, you should now be ready to build software for your board.
 2. Build the project:
     * **From the root directory** of this `sjtwo-c` folder, type: `scons`
     * Once you get used to it, also try `scons -j4` to use more threads to build.
-    * You can type `scons -clean` to clean the project
+    * You can type `scons --clean` to clean the project
 3. Invoke the python script to flash your new program
     * From the root of `sjtwo-c` folder, type: `python nxp-programmer/flash.py` and it might just work :)
+    * The `flash.py` defaults to `lpc40xx_freertos.bin` file and auto detects your SJ2 serial port
     * See [nxp-programmer README](nxp-programmer/README.md) and more examples in the following `Examples` section
 4. After flashing your new program, use your favorite serial terminal to watch the output from your board.
 

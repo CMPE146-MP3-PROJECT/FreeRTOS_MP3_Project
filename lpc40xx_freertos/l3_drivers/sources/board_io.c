@@ -35,30 +35,30 @@ static gpio_s board_io__led0, board_io__led1, board_io__led2, board_io__led3;
 void board_io__initialize(void) {
   // Note: return type of gpio__construct_with_function() because we do not need GPIO instance after its configuration
 
-  gpio__construct_with_function(gpio__port_0, 2, gpio__function_1); // P0.2 - Uart-0 Tx
-  gpio__construct_with_function(gpio__port_0, 3, gpio__function_1); // P0.3 - Uart-0 Rx
+  gpio__construct_with_function(GPIO__PORT_0, 2, GPIO__FUNCTION_1); // P0.2 - Uart-0 Tx
+  gpio__construct_with_function(GPIO__PORT_0, 3, GPIO__FUNCTION_1); // P0.3 - Uart-0 Rx
 
   // SPI bus 2 (SSP2)
-  gpio__construct_with_function(gpio__port_1, 0, gpio__function_4); // P1.0 - SCK2
-  gpio__construct_with_function(gpio__port_1, 1, gpio__function_4); // P1.1 - MOSI2
-  gpio__construct_with_function(gpio__port_1, 4, gpio__function_4); // P1.4 - MISO2
+  gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCTION_4); // P1.0 - SCK2
+  gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCTION_4); // P1.1 - MOSI2
+  gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCTION_4); // P1.4 - MISO2
 
   // SD card
-  gpio__construct_as_output(gpio__port_1, 8); // SD card CS
+  gpio__construct_as_output(GPIO__PORT_1, 8); // SD card CS
   board_io__sd_card_ds();
-  gpio__construct_as_input(gpio__port_1, 9); // SD card detect
+  gpio__construct_as_input(GPIO__PORT_1, 9); // SD card detect
 
   // Output pins
-  board_io__led3 = gpio__construct_as_output(gpio__port_2, 3);
-  board_io__led2 = gpio__construct_as_output(gpio__port_1, 26);
-  board_io__led1 = gpio__construct_as_output(gpio__port_1, 24);
-  board_io__led0 = gpio__construct_as_output(gpio__port_1, 18);
+  board_io__led3 = gpio__construct_as_output(GPIO__PORT_2, 3);
+  board_io__led2 = gpio__construct_as_output(GPIO__PORT_1, 26);
+  board_io__led1 = gpio__construct_as_output(GPIO__PORT_1, 24);
+  board_io__led0 = gpio__construct_as_output(GPIO__PORT_1, 18);
 
   // Input pins
-  gpio__construct_as_input(gpio__port_1, 10); // SW3
-  gpio__construct_as_input(gpio__port_1, 15); // SW2
-  gpio__construct_as_input(gpio__port_0, 30); // SW1
-  gpio__construct_as_input(gpio__port_0, 29); // SW0
+  gpio__construct_as_input(GPIO__PORT_1, 10); // SW3
+  gpio__construct_as_input(GPIO__PORT_1, 15); // SW2
+  gpio__construct_as_input(GPIO__PORT_0, 30); // SW1
+  gpio__construct_as_input(GPIO__PORT_0, 29); // SW0
 }
 
 // Note: Not using gpio.h API here to optimize the speed of SSP CS selection

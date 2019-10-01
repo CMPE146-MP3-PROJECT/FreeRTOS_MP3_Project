@@ -3,16 +3,19 @@
 This is the development infrastructure for the SJ2 board, written in C that anyone can understand easily. It was designed to **learn the low level workings of a microcontroller platform with an RTOS**:
 
 Project highlights:
+
 - Fully implemented in C
 - Minimalistic design with little to no abstractions
 - Follows good coding principles (such as YAGNI and DRY)
 
 Infrastructure highlights:
-    - Support Mac, Linux, Windows out of the box
-    - Version controlled toolchains and other supplementary tools
-    - No VMs
-    - No WSL dependency on Windows
 
+- Support Mac, Linux, Windows out of the box
+- Version controlled toolchains and other supplementary tools
+- No VMs
+- No WSL dependency on Windows
+
+----
 
 ## Build System
 
@@ -26,6 +29,7 @@ SCons discusses the advantages and disadvantages of other existing build systems
 
 From experience, we can state that `bazel` is really cool, but hard to extend. SCons dependencies are tricky, but it is based on python and easy to understand and extend. SCons takes advantage of a Python interpreter making it portable across multiple platforms (Mac, Linux, Windows).
 
+----
 
 ## History
 
