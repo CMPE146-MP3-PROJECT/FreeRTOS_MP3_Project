@@ -27,9 +27,10 @@ env_arm = Environment(
     LINKFLAGS=[
         "-nostartfiles",
         "-specs=nano.specs",
+        "-u", "_printf_float",
+        "-u", "_scanf_float",
         "-specs=nosys.specs",
         "-Wl,--gc-sections",
-        "-Wl,-u _printf_float",
     ],
     CPPPATH=[],
     CPPDEFINES=[],
