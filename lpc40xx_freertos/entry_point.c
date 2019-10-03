@@ -1,16 +1,17 @@
 #include <stdio.h>
 
-#include "board_io.h"
+#include "ff.h"
 #include "ssp2.h"
+#include "uart.h"
 
+#include "board_io.h"
 #include "clock.h"
 #include "startup.h"
 #include "sys_time.h"
 
-#include "ff.h"
-
 extern void main(void);
 static void entry_point__halt(void);
+static void entry_point__uart0_init(void);
 static void entry_point__mount_sd_card(void);
 
 void entry_point(void) {
@@ -24,8 +25,8 @@ void entry_point(void) {
   ssp2__initialize(spi_sd_max_speed_khz);
   entry_point__mount_sd_card();
 
-  // Do not do any bufferring for standard input otherwise getchar(), scanf() may not work
-  setvbuf(stdin, 0, _IONBF, 0);
+  /// UART initialization is required in order to use <stdio.h> puts, printf() etc; @see system_calls.c
+  entry_point__uart0_init();
 
   main();
   entry_point__halt();
@@ -40,6 +41,31 @@ static void entry_point__halt(void) {
   while (1) {
     ;
   }
+}
+
+static void entry_point__uart0_init(void) {
+  // Do not do any bufferring for standard input otherwise getchar(), scanf() may not work
+  setvbuf(stdin, 0, _IONBF, 0);
+
+  // Note: PIN functions are initialized by board_io__initialize() for P0.2(Tx) and P0.3(Rx)
+  uart__init(UART__0, clock__get_peripheral_clock_hz(), 115200);
+
+  // You can use xQueueCreate() that uses malloc() as it is an easier API to work with, however, we opt to
+  // use xQueueCreateStatic() to provide reference on how to create RTOS queue without dynamic memory allocation
+
+  // Memory for the queue data structure
+  static StaticQueue_t rxq_struct;
+  static StaticQueue_t txq_struct;
+
+  // Memory where the queue actually stores the data
+  static uint8_t rxq_storage[32];
+  static uint8_t txq_storage[128];
+
+  // Make UART more efficient by backing it with RTOS queues (optional but highly recommended with RTOS)
+  QueueHandle_t rxq_handle = xQueueCreateStatic(sizeof(rxq_storage), sizeof(char), rxq_storage, &rxq_struct);
+  QueueHandle_t txq_handle = xQueueCreateStatic(sizeof(txq_storage), sizeof(char), txq_storage, &txq_struct);
+
+  uart__enable_queues(UART__0, txq_handle, rxq_handle);
 }
 
 static void entry_point__mount_sd_card(void) {

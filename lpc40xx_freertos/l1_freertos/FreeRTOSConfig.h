@@ -39,6 +39,7 @@
 #define configMAX_TASK_NAME_LEN                 (12)
 #define configIDLE_SHOULD_YIELD                 1
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
+#define configSUPPORT_STATIC_ALLOCATION         1
 
 /**
  * @{

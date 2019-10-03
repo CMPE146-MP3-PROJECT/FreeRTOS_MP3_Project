@@ -4,21 +4,22 @@
 #include "semphr.h"
 #include "task.h"
 
-static SemaphoreHandle_t spi2_mutex;
+static StaticSemaphore_t spi2_mutex_memory;
+static SemaphoreHandle_t spi2_mutex_handle;
 
 void spi2_mutex__acquire(void) {
-  if (!spi2_mutex) {
-    spi2_mutex = xSemaphoreCreateMutex();
+  if (!spi2_mutex_handle) {
+    spi2_mutex_handle = xSemaphoreCreateMutexStatic(&spi2_mutex_memory);
   }
 
   // Only acquire the mutex if the FreeRTOS is running
   if (taskSCHEDULER_RUNNING == xTaskGetSchedulerState()) {
-    xSemaphoreTake(spi2_mutex, portMAX_DELAY);
+    xSemaphoreTake(spi2_mutex_handle, portMAX_DELAY);
   }
 }
 
 void spi2_mutex__release(void) {
   if (taskSCHEDULER_RUNNING == xTaskGetSchedulerState()) {
-    xSemaphoreGive(spi2_mutex);
+    xSemaphoreGive(spi2_mutex_handle);
   }
 }
