@@ -19,7 +19,6 @@ int main(void) {
   led1 = board_io__get_led1();
   blink_on_startup(led1, 2);
 
-  puts("\n--------\nStartup");
   xTaskCreate(blink_task, "led0", (512U / sizeof(void *)), (void *)&led0, PRIORITY_LOW, NULL);
   xTaskCreate(blink_task, "led1", (512U / sizeof(void *)), (void *)&led1, PRIORITY_LOW, NULL);
 

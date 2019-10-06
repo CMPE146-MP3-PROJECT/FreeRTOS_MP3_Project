@@ -18,6 +18,10 @@ static const uint8_t lpc_peripheral_pconp_bit_map[] = {
     [LPC_PERIPHERAL__UART2] = 24,
     [LPC_PERIPHERAL__UART3] = 25,
 
+    [LPC_PERIPHERAL__I2C0] = 7,
+    [LPC_PERIPHERAL__I2C1] = 19,
+    [LPC_PERIPHERAL__I2C2] = 26,
+
     [LPC_PERIPHERAL__SSP0] = 21,
     [LPC_PERIPHERAL__SSP1] = 10,
     [LPC_PERIPHERAL__SSP2] = 20,

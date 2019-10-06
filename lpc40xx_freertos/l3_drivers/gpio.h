@@ -51,6 +51,9 @@ gpio_s gpio__construct_with_function(gpio__port_e port, uint8_t pin_number_0_to_
 /// Sets the function for a pin; @see gpio__function_e
 void gpio__set_function(gpio_s gpio, gpio__function_e function);
 
+/// Most of the pins are NOT open drain on power-up; this enables pin's open-collector mode
+void gpio__enable_open_drain(gpio_s gpio);
+
 /**
  * @{
  * @name Sets direction of the pin if used as an input/output pin

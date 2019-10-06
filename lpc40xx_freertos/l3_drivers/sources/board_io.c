@@ -48,6 +48,12 @@ void board_io__initialize(void) {
   board_io__sd_card_ds();
   gpio__construct_as_input(GPIO__PORT_1, 9); // SD card detect
 
+  // I2C pins; these require open-drain mode to be enabled
+  const gpio_s sda_2 = gpio__construct_with_function(GPIO__PORT_0, 10, GPIO__FUNCTION_2); // P0.10 - SDA
+  const gpio_s scl_2 = gpio__construct_with_function(GPIO__PORT_0, 11, GPIO__FUNCTION_2); // P0.11 - SCL
+  gpio__enable_open_drain(sda_2);
+  gpio__enable_open_drain(scl_2);
+
   // Output pins
   board_io__led3 = gpio__construct_as_output(GPIO__PORT_2, 3);
   board_io__led2 = gpio__construct_as_output(GPIO__PORT_1, 26);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "ff.h"
+#include "i2c.h"
 #include "ssp2.h"
 #include "uart.h"
 
@@ -12,6 +13,7 @@
 extern void main(void);
 static void entry_point__halt(void);
 static void entry_point__uart0_init(void);
+static void entry_point__i2c_init(void);
 static void entry_point__mount_sd_card(void);
 
 void entry_point(void) {
@@ -28,7 +30,15 @@ void entry_point(void) {
   /// UART initialization is required in order to use <stdio.h> puts, printf() etc; @see system_calls.c
   entry_point__uart0_init();
 
+  // UART is initialized, so we can now start using printf()
+  const char *line = "--------------------------------------------------------------------------------";
+  printf("\n%s\n%s(): Low level startup\n", line, __FUNCTION__);
+
+  entry_point__i2c_init();
+
+  printf("\n%s(): Entering main()\n%s\n", __FUNCTION__, line);
   main();
+
   entry_point__halt();
 }
 
@@ -66,6 +76,17 @@ static void entry_point__uart0_init(void) {
   QueueHandle_t txq_handle = xQueueCreateStatic(sizeof(txq_storage), sizeof(char), txq_storage, &txq_struct);
 
   uart__enable_queues(UART__0, txq_handle, rxq_handle);
+}
+
+static void entry_point__i2c_init(void) {
+  const uint32_t i2c_speed_hz = UINT32_C(400) * 1000;
+  i2c__initialize(I2C__2, i2c_speed_hz, clock__get_peripheral_clock_hz());
+
+  for (unsigned device = 2; device <= 254; device += 2) {
+    if (i2c__detect(I2C__2, device)) {
+      printf("I2C device detected at address: 0x%02X\n", device);
+    }
+  }
 }
 
 static void entry_point__mount_sd_card(void) {

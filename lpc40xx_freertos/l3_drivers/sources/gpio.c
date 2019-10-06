@@ -8,6 +8,18 @@ static LPC_GPIO_TypeDef *gpio__get_struct(gpio_s gpio) { return (LPC_GPIO_TypeDe
 
 static uint32_t gpio__get_pin_mask(gpio_s gpio) { return (UINT32_C(1) << gpio.pin_number); }
 
+static volatile uint32_t *gpio__get_iocon(gpio_s gpio) {
+  volatile uint32_t *IOCON_base = (volatile uint32_t *)LPC_IOCON;
+
+  // Each port is offset by thirty-two 32-bit registers
+  volatile uint32_t *port_offset = IOCON_base + (32 * gpio.port_number);
+
+  // Each pin configuration is a single 32-bit
+  volatile uint32_t *pin_iocon = (port_offset + gpio.pin_number);
+
+  return pin_iocon;
+}
+
 /*******************************************************************************
  *
  *                      P U B L I C    F U N C T I O N S
@@ -42,18 +54,17 @@ gpio_s gpio__construct_with_function(gpio__port_e port, uint8_t pin_number_0_to_
 }
 
 void gpio__set_function(gpio_s gpio, gpio__function_e function) {
-  volatile uint32_t *IOCON_base = (volatile uint32_t *)LPC_IOCON;
-
-  // Each port is offset by thirty-two 32-bit registers
-  volatile uint32_t *port_offset = IOCON_base + (32 * gpio.port_number);
-
-  // Each pin configuration is a single 32-bit
-  volatile uint32_t *pin_config = (port_offset + gpio.pin_number);
+  volatile uint32_t *pin_iocon = gpio__get_iocon(gpio);
 
   // Reference chapter 7: table 83
   const uint32_t config_mask = UINT32_C(7);
-  *pin_config &= ~(config_mask << 0);
-  *pin_config |= ((uint32_t)function & config_mask);
+  *pin_iocon &= ~(config_mask << 0);
+  *pin_iocon |= ((uint32_t)function & config_mask);
+}
+
+void gpio__enable_open_drain(gpio_s gpio) {
+  volatile uint32_t *pin_iocon = gpio__get_iocon(gpio);
+  *pin_iocon |= (UINT32_C(1) << 10);
 }
 
 void gpio__set_as_input(gpio_s gpio) { gpio__get_struct(gpio)->DIR &= ~gpio__get_pin_mask(gpio); }
