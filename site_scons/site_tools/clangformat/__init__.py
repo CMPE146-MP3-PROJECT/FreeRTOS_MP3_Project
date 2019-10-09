@@ -48,9 +48,8 @@ Helper functions
 
 
 def get_clang_format_binary_filenode():
-    clang_format_filename = "clang-format"
     if osops.is_windows():
-        ret = SELF_DIRNODE.File("win64/clang-format.exe")
+        ret = SELF_DIRNODE.File("win32/clang-format.exe")
     elif osops.is_macos():
         ret = SELF_DIRNODE.File("mac/clang-format")
     else:  # osops.is_linux()
@@ -67,10 +66,8 @@ def is_format_necessary(filenode):
         "--output-replacements-xml",
     ]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    while process.poll() is None:
-        pass
-    stdout, _ = process.communicate()
-    lines = str(stdout).split("\n")
+    stdout, stderr = process.communicate()
+    lines = stdout.decode().split("\n")
 
     # If number of "<replacement>" node in XML string is greater than 1, then clang format is required
     return sum("<replacement" in line for line in lines) > 1
