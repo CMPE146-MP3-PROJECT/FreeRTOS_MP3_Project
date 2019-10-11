@@ -35,7 +35,7 @@ void vApplicationIdleHook(void) {
   LPC_SC->PCON = 0; // Enter sleep mode
   __asm__("WFI");   // Wait for interrupt
 }
-#endif
+#endif // #if (0 != configUSE_IDLE_HOOK)
 
 #if (0 != configUSE_TICK_HOOK)
 /// Called upon each interrupt that invokes the FreeRTOS tick handler
@@ -60,4 +60,15 @@ void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackTyp
   *ppxIdleTaskStackBuffer = uxIdleTaskStack;        // stack memory for the idle task
   *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE; // stack memory size
 }
-#endif
+#endif // #if (0 != configSUPPORT_STATIC_ALLOCATION)
+
+#if (0 != configGENERATE_RUN_TIME_STATS)
+#include "sys_time.h"
+
+static uint64_t freertos_run_time_counter_offset;
+uint32_t freertos_hooks__get_run_time_counter_value(void) {
+  return (uint32_t)(sys_time__get_uptime_us() - freertos_run_time_counter_offset);
+}
+
+void freertos_hooks__reset_run_time_stats(void) { freertos_run_time_counter_offset = sys_time__get_uptime_us(); }
+#endif // #if (0 != configGENERATE_RUN_TIME_STATS)

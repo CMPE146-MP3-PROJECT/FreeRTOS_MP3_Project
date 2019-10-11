@@ -67,19 +67,6 @@ static void uart__wait_for_transmit_to_complete(lpc_uart *uart_regs) {
   }
 }
 
-// TODO: This should be moved out to another code module
-static TickType_t uart__ms_to_os_ticks(uint32_t timeout_ms) {
-  TickType_t ticks;
-
-  if (UINT32_MAX == timeout_ms) {
-    ticks = portMAX_DELAY;
-  } else {
-    ticks = timeout_ms / (1000 / configTICK_RATE_HZ);
-  }
-
-  return ticks;
-}
-
 static bool uart__load_pending_transmit_bytes(uart_s *uart_type) {
   const size_t hw_fifo_size = 16;
 
@@ -290,7 +277,7 @@ bool uart__get(uart_e uart, char *input_byte, uint32_t timeout_ms) {
    * without an RTOS which increases the driver complexity.
    */
   if (uart__is_receive_queue_enabled(uart) && rtos_is_running) {
-    status = xQueueReceive(uarts[uart].queue_receive, input_byte, uart__ms_to_os_ticks(timeout_ms));
+    status = xQueueReceive(uarts[uart].queue_receive, input_byte, RTOS_MS_TO_TICKS(timeout_ms));
   }
 
   return status;
@@ -302,7 +289,7 @@ bool uart__put(uart_e uart, char output_byte, uint32_t timeout_ms) {
 
   if (uart__is_transmit_queue_enabled(uart) && rtos_is_running) {
     // Deposit to the transmit queue for now
-    status = xQueueSend(uarts[uart].queue_transmit, &output_byte, uart__ms_to_os_ticks(timeout_ms));
+    status = xQueueSend(uarts[uart].queue_transmit, &output_byte, RTOS_MS_TO_TICKS(timeout_ms));
 
     /* 'Transmit Complete Interrupt' may have already fired when we get here, so if there is no further pending data
      * to be sent, it will not fire again to send any data. Hence, we check here in a critical section if transmit

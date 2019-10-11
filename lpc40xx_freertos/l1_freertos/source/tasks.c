@@ -5211,4 +5211,4 @@ when performing module tests). */
 
 #endif
 
-
+#include "freertos_tasks.mods"
