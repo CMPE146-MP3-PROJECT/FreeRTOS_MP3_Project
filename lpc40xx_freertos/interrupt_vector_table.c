@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "freertos_interrupt_handlers.h"
-#include "freertos_runtime_stats.h"
 #include "function_types.h"
 
 /**
@@ -23,23 +22,6 @@ extern void lpc_peripheral__interrupt_dispatcher(void);
 /** @} */
 
 static void halt(void);
-
-/**
- * By invoking the RTOS interrupt functions in this wrapper surrounded by run-time statistics hooks, we
- * can measure the time interrupts are using, while subtracting the runtime from the tasks simultaneously
- */
-static void invoke_function_in_wrapper(function__void_f function) {
-  vRunTimeStatIsrEntry();
-  function();
-  vRunTimeStatIsrExit();
-}
-
-/**
- * The *_wrapper() functions are meant to invoke FreeRTOS interrupts, but with run-time statistics hooks
- */
-static void vPortSVCHandler_wrapper(void) { invoke_function_in_wrapper(vPortSVCHandler); }
-static void xPortPendSVHandler_wrapper(void) { invoke_function_in_wrapper(xPortPendSVHandler); }
-static void xPortSysTickHandler_wrapper(void) { invoke_function_in_wrapper(xPortSysTickHandler); }
 
 __attribute__((section(".interrupt_vector_table"))) const function__void_f interrupt_vector_table[] = {
     /**
@@ -112,7 +94,19 @@ static void halt(void) {
   // This statement resolves compiler warning: variable define but not used
   (void)interrupt_vector_table;
 
-  fprintf(stderr, "CPU exception (interrupt) has occured and the program will now halt\n");
+  const unsigned isr_num = (*((uint8_t *)0xE000ED04));
+  fprintf(stderr, "Unexpected CPU exception ");
+  fprintf(stderr, "%u (interrupt) has occured and the program will now halt\n", isr_num);
+
+  if (isr_num < 16) {
+    static const char *table[] = {"estack",      "reset",    "NMI",      "hard fault", "memory fault", "bus fault",
+                                  "usage fault", "reserved", "reserved", "reserved",   "reserved",     "rtos",
+                                  "debug",       "reserved", "rtos",     "rtos"};
+    fprintf(stderr, "Exception appears to be '%s'\n", table[isr_num]);
+  } else {
+    fprintf(stderr, "Did you register the interrupt correctly using lpc_peripherals.h API?");
+  }
+
   while (true) {
     ;
   }

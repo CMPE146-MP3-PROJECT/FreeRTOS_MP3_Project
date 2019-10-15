@@ -129,6 +129,17 @@ void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral) {
   }
 }
 
+bool lpc_peripheral__is_powered_on(lpc_peripheral_e peripheral) {
+  bool powered_on = false;
+
+  if (peripheral < sizeof(lpc_peripheral_pconp_bit_map)) {
+    const uint32_t power_on_bit = (uint32_t)lpc_peripheral_pconp_bit_map[peripheral];
+    powered_on = 0 != (LPC_SC->PCONP & (UINT32_C(1) << power_on_bit));
+  }
+
+  return powered_on;
+}
+
 void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback) {
   lpc_peripheral__isr_registrations[peripheral] = isr_callback;
 

@@ -5,21 +5,17 @@
 
 #include "board_io.h"
 #include "common_macros.h"
-#include "delay.h"
 #include "gpio.h"
 #include "sj2_cli.h"
 
 static void blink_task(void *params);
 static void uart_task(void *params);
-static void blink_on_startup(gpio_s gpio, int count);
 
 static gpio_s led0, led1;
 
 int main(void) {
-  // Construct the LEDs and blink a startup sequence
   led0 = board_io__get_led0();
   led1 = board_io__get_led1();
-  blink_on_startup(led1, 2);
 
   xTaskCreate(blink_task, "led0", (512U / sizeof(void *)), (void *)&led0, PRIORITY_LOW, NULL);
   xTaskCreate(blink_task, "led1", (512U / sizeof(void *)), (void *)&led1, PRIORITY_LOW, NULL);
@@ -58,9 +54,12 @@ static void uart_task(void *params) {
     // This loop will repeat at precise task delay, even if the logic below takes variable amount of ticks
     vTaskDelayUntil(&previous_tick, 2000);
 
-    /* Calls to fprintf(stderr, ...) uses polled UART driver, so this entire output will be fully sent out
-     * before this function returns. See system_calls.c for actual implementation.
-     * This is useful to print information inside of interrupts as you cannot use printf() inside an ISR
+    /* Calls to fprintf(stderr, ...) uses polled UART driver, so this entire output will be fully
+     * sent out before this function returns. See system_calls.c for actual implementation.
+     *
+     * Use this style print for:
+     *  - Interrupts because you cannot use printf() inside an ISR
+     *  - During debugging in case system crashes before all output of printf() is sent
      */
     ticks = xTaskGetTickCount();
     fprintf(stderr, "This is a polled version of printf used for debugging ... finished in");
@@ -72,13 +71,5 @@ static void uart_task(void *params) {
     ticks = xTaskGetTickCount();
     printf("This is a more efficient printf ... finished in");
     printf(" %lu ticks\n\n", (xTaskGetTickCount() - ticks));
-  }
-}
-
-static void blink_on_startup(gpio_s gpio, int blinks) {
-  const int toggles = (2 * blinks);
-  for (int i = 0; i < toggles; i++) {
-    delay__ms(250);
-    gpio__toggle(gpio);
   }
 }

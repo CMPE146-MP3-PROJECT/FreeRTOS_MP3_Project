@@ -15,10 +15,6 @@ typedef LPC_UART_TypeDef lpc_uart;
  */
 typedef struct {
   lpc_uart *registers;
-  lpc_peripheral_e peripheral_id;
-  function__void_f isr_callback;
-  bool initialized;
-
   QueueHandle_t queue_transmit;
   QueueHandle_t queue_receive;
 } uart_s;
@@ -46,11 +42,15 @@ static void uart__isr_common(uart_s *uart_type); ///< Common function for all UA
  * but these extra registers are at the end of the memory map that matches with UART0
  */
 static uart_s uarts[] = {
-    {(lpc_uart *)LPC_UART0, LPC_PERIPHERAL__UART0, uart0_isr},
-    {(lpc_uart *)LPC_UART1, LPC_PERIPHERAL__UART1, uart1_isr},
-    {(lpc_uart *)LPC_UART2, LPC_PERIPHERAL__UART2, uart2_isr},
-    {(lpc_uart *)LPC_UART3, LPC_PERIPHERAL__UART3, uart3_isr},
+    {(lpc_uart *)LPC_UART0},
+    {(lpc_uart *)LPC_UART1},
+    {(lpc_uart *)LPC_UART2},
+    {(lpc_uart *)LPC_UART3},
 };
+
+static void (*const uart__isrs[])(void) = {uart0_isr, uart1_isr, uart2_isr, uart3_isr};
+static const lpc_peripheral_e uart_peripheral_ids[] = {LPC_PERIPHERAL__UART0, LPC_PERIPHERAL__UART1,
+                                                       LPC_PERIPHERAL__UART2, LPC_PERIPHERAL__UART3};
 
 /*******************************************************************************
  *
@@ -110,8 +110,9 @@ static bool uart__clear_receive_fifo(uart_s *uart_type) {
   return context_switch_required;
 }
 
-void uart__enable_receive_and_transmit_interrupts(uart_s *uart_type) {
-  lpc_peripheral__enable_interrupt(uart_type->peripheral_id, uart_type->isr_callback);
+static void uart__enable_receive_and_transmit_interrupts(uart_e uart) {
+  uart_s *uart_type = &uarts[uart];
+  lpc_peripheral__enable_interrupt(uart_peripheral_ids[uart], uart__isrs[uart]);
 
   const uint32_t enable_rx_tx_fifo = (1 << 0) | (1 << 6);
   const uint32_t reset_rx_tx_fifo = (1 << 1) | (1 << 2);
@@ -168,7 +169,7 @@ static void uart__isr_common(uart_s *uart_type) {
 
 void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
   if (!uart__is_initialized(uart)) {
-    lpc_peripheral__turn_on_power_to(uarts[uart].peripheral_id);
+    lpc_peripheral__turn_on_power_to(uart_peripheral_ids[uart]);
 
     const float roundup_offset = 0.5;
     const uint16_t divider = (uint16_t)((peripheral_clock / (16 * baud_rate)) + roundup_offset);
@@ -190,12 +191,12 @@ void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
     const uint32_t default_reset_fdr_value = (1 << 4);
     uart_regs->FDR = default_reset_fdr_value;
     uart_regs->LCR = eight_bit_datalen | stop_bits_is_2; // DLAB is reset back to zero also
-
-    uarts[uart].initialized = true;
   }
 }
 
-bool uart__is_initialized(uart_e uart) { return uarts[uart].initialized; }
+bool uart__is_initialized(uart_e uart) {
+  return lpc_peripheral__is_powered_on(uart_peripheral_ids[uart]) && (0 != uarts[uart].registers->LCR);
+}
 
 bool uart__is_transmit_queue_initialized(uart_e uart) { return uart__is_transmit_queue_enabled(uart); }
 
@@ -219,7 +220,7 @@ bool uart__enable_queues(uart_e uart, QueueHandle_t queue_receive, QueueHandle_t
     // Enable peripheral_id interrupt if all is well
     status = uart__is_receive_queue_enabled(uart) && uart__is_transmit_queue_enabled(uart);
     if (status) {
-      uart__enable_receive_and_transmit_interrupts(uart_type);
+      uart__enable_receive_and_transmit_interrupts(uart);
     }
   }
 
