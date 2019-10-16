@@ -658,6 +658,29 @@ sl_string_size_t sl_string__erase_special_chars(sl_string_t string) {
   return chars_removed;
 }
 
+bool sl_string__erase_int(sl_string_t string, int *erased_int) {
+  bool parsed = false;
+
+  const char *c = string;
+  while (('\0' != *c) && !isdigit(*c)) {
+    ++c; // Skip chars until a digit
+  }
+
+  if (('\0' != *c) && NULL != erased_int && isdigit(*c)) {
+    *erased_int = atoi(c);
+    parsed = true;
+  }
+
+  while (('\0' != *c) && isdigit(*c)) {
+    ++c; // Skip the digits we processed in atoi() above
+  }
+
+  // Erase the integer we processed above
+  sl_string__erase_first(string, (c - string));
+
+  return parsed;
+}
+
 bool sl_string__trim_end(sl_string_t string, const char *chars_to_trim) {
   bool result = false;
 

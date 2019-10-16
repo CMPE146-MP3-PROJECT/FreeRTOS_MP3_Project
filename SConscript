@@ -45,7 +45,7 @@ LINKER_FILES = [
 ]
 
 EXCLUDED_SRC_FILES = [
-    PROJECT_DIR.File("l2_standalone/string/test/test_sl_string.c"),
+    PROJECT_DIR.File("l2_utils/string/test/test_sl_string.c"),
     PROJECT_DIR.File("l4_io/cli/test/test_app_cli.c"),
 ]
 
