@@ -28,11 +28,13 @@ Normally, you will not modify anything at this folder.
 
 Do not modify anything at this is the folder; it is for FreeRTOS source code only.
 
-### `l2_standalone_utilities`
+### `l2_utils`
 
-Input sources here that can be compiled **without** any other dependency on a library other than standard C library.
+Typical sources here that can be compiled **without** any other dependency on a library other than standard C library.
 
-This folder contains stand-alone libraries, such as `buffer.h` that the drivers or above layers can utilize. The distinction of this folder is that you should not include libraries that need other libraries to build (other than standard C). For instance, `buffer.h` is great if it is standalone, but if `buffer.h` will use a driver, or another library such as `foo.h` then it is not a standalone library.
+This folder contains utility libraries, such as `buffer.h` that the drivers or above layers can utilize. Include code here that does not depend on a lot of other code modules. **Ensure that the code that goes here does not make function calls to higher layers**.
+
+Another common use case is for instance a driver utilizing a buffer from this folder, or an `l4_io` utilizing an `sl_string` from the code modules at this folder.
 
 ### `l3_drivers`
 

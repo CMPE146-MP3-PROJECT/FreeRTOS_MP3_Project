@@ -34,7 +34,11 @@
 #define configUSE_PREEMPTION                    1
 #define RTOS_MS_TO_TICKS(milliseconds)          ((configTICK_RATE_HZ * milliseconds) / 1000)
 
-#define configMINIMAL_STACK_SIZE                ((unsigned short) 400 / sizeof(void*))
+/**
+ * Size of stack does not need alignment on ARM Cortex
+ * This minimal stack is good enough for basic tasks; be careful not to use printf() with this minimal stack size
+ */
+#define configMINIMAL_STACK_SIZE                (400U / sizeof(void*))
 #define configCHECK_FOR_STACK_OVERFLOW          (2)
 
 #define configMAX_TASK_NAME_LEN                 (12)

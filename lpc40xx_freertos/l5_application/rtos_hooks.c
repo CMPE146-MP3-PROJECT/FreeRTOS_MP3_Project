@@ -48,7 +48,8 @@ void vApplicationTickHook(void) {
 // This is needed when we use '#ifdef configASSERT'
 void configASSERT_callback(unsigned line, const char *message) {
   uart_puts__polled(UART__0, "FreeRTOS ASSERT() occurred indicating an error condition that should NEVER happen");
-  uart_puts__polled(UART__0, "Did you call a blocking API or non FromISR() API inside an ISR?");
+  uart_puts__polled(UART__0, " - Did you call a blocking API or non FromISR() API inside an ISR?");
+  uart_puts__polled(UART__0, " - Did you forget to use fprintf(stderr) in an ISR?");
   uart_puts__polled(UART__0, "Here is the line of code that halted the CPU: ");
   halt(message);
 }

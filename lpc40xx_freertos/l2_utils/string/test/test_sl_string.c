@@ -983,6 +983,29 @@ void test_sl_string__erase_special_chars_no_special_chars(void) {
   TEST_ASSERT_EQUAL_STRING("Hello123World", str);
 }
 
+void test_erase_int(void) {
+  sl_string_t s = sl_string__initialize_from(string_memory, sizeof(string_memory) - string_memory_pad_size, "111 222ab333 ;a.444");
+  int result = -1;
+
+  TEST_ASSERT_TRUE(sl_string__erase_int(s, &result));
+  TEST_ASSERT_EQUAL_INT(111, result);
+
+  TEST_ASSERT_TRUE(sl_string__erase_int(s, &result));
+  TEST_ASSERT_EQUAL_INT(222, result);
+
+  TEST_ASSERT_TRUE(sl_string__erase_int(s, &result));
+  TEST_ASSERT_EQUAL_INT(333, result);
+
+  TEST_ASSERT_TRUE(sl_string__erase_int(s, &result));
+  TEST_ASSERT_EQUAL_INT(444, result);
+  printf("String is '%s'\n", s);
+
+  TEST_ASSERT_FALSE(sl_string__erase_int(s, &result));
+  TEST_ASSERT_EQUAL_INT(444, result);
+  TEST_ASSERT_FALSE(sl_string__erase_int(s, &result));
+  TEST_ASSERT_EQUAL_INT(444, result);
+}
+
 void test_sl_string__trim_end_successful(void) {
   sl_string__append(str, "./././123 ***");
 

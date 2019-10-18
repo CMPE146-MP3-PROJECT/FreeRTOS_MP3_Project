@@ -17,8 +17,8 @@ int main(void) {
   led0 = board_io__get_led0();
   led1 = board_io__get_led1();
 
-  xTaskCreate(blink_task, "led0", (512U / sizeof(void *)), (void *)&led0, PRIORITY_LOW, NULL);
-  xTaskCreate(blink_task, "led1", (512U / sizeof(void *)), (void *)&led1, PRIORITY_LOW, NULL);
+  xTaskCreate(blink_task, "led0", configMINIMAL_STACK_SIZE, (void *)&led0, PRIORITY_LOW, NULL);
+  xTaskCreate(blink_task, "led1", configMINIMAL_STACK_SIZE, (void *)&led1, PRIORITY_LOW, NULL);
 
   // It is advised to either run the uart_task, or the SJ2 command-line (CLI), but not both
   // Change '#if 0' to '#if 1' and vice versa to try it out
@@ -39,6 +39,7 @@ int main(void) {
 static void blink_task(void *params) {
   const gpio_s led = *((gpio_s *)params);
 
+  // Warning: This task starts with very minimal stack, so do not use printf() API here to avoid stack overflow
   while (true) {
     gpio__toggle(led);
     vTaskDelay(500);
@@ -48,7 +49,7 @@ static void blink_task(void *params) {
 // This sends periodic messages over printf() which uses system_calls.c to send them to UART0
 static void uart_task(void *params) {
   TickType_t previous_tick = 0;
-  long ticks = 0;
+  TickType_t ticks = 0;
 
   while (true) {
     // This loop will repeat at precise task delay, even if the logic below takes variable amount of ticks
@@ -62,7 +63,7 @@ static void uart_task(void *params) {
      *  - During debugging in case system crashes before all output of printf() is sent
      */
     ticks = xTaskGetTickCount();
-    fprintf(stderr, "This is a polled version of printf used for debugging ... finished in");
+    fprintf(stderr, "%u: This is a polled version of printf used for debugging ... finished in", (unsigned)ticks);
     fprintf(stderr, " %lu ticks\n", (xTaskGetTickCount() - ticks));
 
     /* This deposits data to an outgoing queue and doesn't block the CPU
