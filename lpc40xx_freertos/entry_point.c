@@ -12,7 +12,9 @@ static void entry_point__halt(void);
 static void entry_point__handle_crash_report(void);
 
 void entry_point(void) {
-  startup__initialize();
+  startup__initialize_ram();
+  startup__initialize_fpu();
+  startup__initialize_interrupts();
 
   clock__initialize_system_clock_96mhz();
   sys_time__init(clock__get_peripheral_clock_hz());
