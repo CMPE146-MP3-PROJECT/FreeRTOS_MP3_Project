@@ -11,6 +11,8 @@
 
 #include <string.h>
 
+#include "common_macros.h"
+
 #include "app_cli.h"
 
 /*******************************************************************************
@@ -24,7 +26,7 @@
  *                     P R I V A T E    F U N C T I O N S
  *
  ******************************************************************************/
-static const app_cli__command_s *app_cli__private_find_command(app_cli_s *cli, const sl_string_t input_string) {
+static const app_cli__command_s *app_cli__private_find_command(const app_cli_s *cli, const sl_string_t input_string) {
   app_cli__command_s *iterator = cli->commands_head_pointer;
   while (NULL != iterator) {
     if (sl_string__begins_with_whole_word(input_string, iterator->command_name, " ")) {
@@ -37,7 +39,8 @@ static const app_cli__command_s *app_cli__private_find_command(app_cli_s *cli, c
   return iterator;
 }
 
-static const app_cli__command_s *app_cli__private_find_short_command(app_cli_s *cli, const sl_string_t input_string) {
+static const app_cli__command_s *app_cli__private_find_short_command(const app_cli_s *cli,
+                                                                     const sl_string_t input_string) {
   app_cli__command_s *iterator = cli->commands_head_pointer;
 
   while (NULL != iterator) {
@@ -72,24 +75,57 @@ static void app_cli__private_handle_command(app_cli_s *cli, const app_cli__comma
   }
 }
 
-static void app_cli__private_print_help(const app_cli_s *cli, app_cli__argument_t cli_argument, sl_string_t output) {
-  (void)sl_string__printf(output, "\r\nList of commands: \r\n");
+static void app_cli__private_print_list_of_all_commands(const app_cli_s *cli, app_cli__argument_t cli_argument,
+                                                        sl_string_t output) {
+  (void)sl_string__printf(output, "\r\nList of commands (use help <name> to get full help if you see ...): \r\n");
   cli->output_function(cli_argument, output);
 
+  const size_t max_help_chars_to_print = 50;
   app_cli__command_s *iterator = cli->commands_head_pointer;
+
   while (NULL != iterator) {
-    if (cli->color_output) {
-      (void)sl_string__printf(output,
-                              "\x1B"
-                              "[34m%16s\x1B"
-                              "[0m: %s\r\n",
-                              iterator->command_name, iterator->help_message_for_command);
+    if (strlen(iterator->help_message_for_command) > max_help_chars_to_print) {
+      (void)sl_string__printf(output, "  %16s : %.50s ...", iterator->command_name, iterator->help_message_for_command);
     } else {
-      (void)sl_string__printf(output, "%16s: %s\r\n", iterator->command_name, iterator->help_message_for_command);
+      (void)sl_string__printf(output, "  %16s : %s", iterator->command_name, iterator->help_message_for_command);
     }
+
+    // If a command's help is multi-line, truncate it at that position and add "...." to indicate 'see more help'
+    const bool ends_with_carriage_return = sl_string__erase_at_substring(output, "\r");
+    const bool ends_with_newline = sl_string__erase_at_substring(output, "\n");
+    if (ends_with_carriage_return || ends_with_newline) {
+      (void)sl_string__append(output, "...");
+    }
+
+    (void)sl_string__append(output, "\r\n");
     cli->output_function(cli_argument, output);
 
     iterator = iterator->pointer_of_next_command;
+  }
+}
+
+static void app_cli__private_handle_help(const app_cli_s *cli, app_cli__argument_t cli_argument,
+                                         sl_string_t command_string) {
+  // 'help' without any command name means list all commands
+  if (sl_string__equals_to_ignore_case(command_string, "help")) {
+    app_cli__private_print_list_of_all_commands(cli, cli_argument, command_string);
+  }
+  // Print full help_message_for_command for a paticular command
+  else {
+    // Find the command
+    (void)sl_string__erase_first_word(command_string, ' ');
+    const app_cli__command_s *cli_command = app_cli__private_find_command(cli, command_string);
+    if (NULL == cli_command) {
+      cli_command = app_cli__private_find_short_command(cli, command_string);
+    }
+
+    if (NULL == cli_command) {
+      (void)sl_string__insert_at(command_string, 0, "ERROR: Could not find help for command: ");
+      cli->output_function(cli_argument, command_string);
+    } else {
+      cli->output_function(cli_argument, cli_command->help_message_for_command);
+    }
+    cli->output_function(cli_argument, "\r\n");
   }
 }
 
@@ -100,7 +136,7 @@ static void app_cli__private_handle_unmatched_command(const app_cli_s *cli, app_
   (void)sl_string__insert_at(output_string, 0, "Unable to match any registered CLI command for: ");
   cli->output_function(cli_argument, output_string);
 
-  app_cli__private_print_help(cli, cli_argument, output_string);
+  app_cli__private_print_list_of_all_commands(cli, cli_argument, output_string);
 }
 
 static void app_cli__private_process_input(app_cli_s *cli, app_cli__argument_t cli_argument, sl_string_t input_string) {
@@ -125,17 +161,13 @@ static void app_cli__private_process_input(app_cli_s *cli, app_cli__argument_t c
  ******************************************************************************/
 
 app_cli_s app_cli__initialize(size_t minimum_command_chars_to_match, app_cli__print_string_function output_function,
-                              bool color_output, const char *terminal_string) {
+                              const char *terminal_string) {
   static const size_t minimum_number_of_chars_to_match = 4;
-  const size_t max = minimum_number_of_chars_to_match > minimum_command_chars_to_match
-                         ? minimum_number_of_chars_to_match
-                         : minimum_command_chars_to_match;
 
   app_cli_s cli = {
       .commands_head_pointer = NULL,
-      .minimum_command_chars_to_match = max,
+      .minimum_command_chars_to_match = MAX_OF(minimum_number_of_chars_to_match, minimum_command_chars_to_match),
       .output_function = output_function,
-      .color_output = color_output,
       .terminal_string = terminal_string,
   };
 
@@ -151,10 +183,9 @@ void app_cli__add_command_handler(app_cli_s *cli, app_cli__command_s *app_cli_co
 
 void app_cli__process_input(app_cli_s *cli, app_cli__argument_t cli_argument, sl_string_t input_string) {
   (void)sl_string__trim_end(input_string, "\r\n");
-  (void)sl_string__trim_start(input_string, "\r\n");
 
-  if (sl_string__equals_to_ignore_case(input_string, "help")) {
-    app_cli__private_print_help(cli, cli_argument, input_string);
+  if (sl_string__begins_with_ignore_case(input_string, "help")) {
+    app_cli__private_handle_help(cli, cli_argument, input_string);
   } else {
     app_cli__private_process_input(cli, cli_argument, input_string);
   }

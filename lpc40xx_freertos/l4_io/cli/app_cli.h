@@ -31,16 +31,18 @@ static app_cli_status_e app_cli__hello_handler(app_cli__argument_t argument,
 }
 
 static void cli_example(void) {
-  const bool color_output = true;
-  const char *separator = "--------------------------------------------------------------------------------\r\n";
+  app_cli_s cli = app_cli__initialize(4, app_cli_output_function);
 
-  static app_cli_s sj2_cli_struct;
-  sj2_cli_struct = app_cli__initialize(4, sj2_cli__output_function, !color_output, separator);
-
-  // Need static struct that does not go out of scope
   static app_cli__command_s hello_command = {.command_name = "hello",
                                              .help_message_for_command = "responds back with 'hello world'",
                                              .app_cli_handler = app_cli__hello_handler};
+
+  app_cli__add_command_handler(&cli, &hello_command);
+
+  app_cli__process_input(&cli, NULL, "hello");
+
+  // Help command is built-in which will print the list of all commands
+  app_cli__process_input(&cli, NULL, "help");
 }
 
  @endcode
@@ -120,7 +122,6 @@ typedef struct {
   size_t minimum_command_chars_to_match;
 
   app_cli__print_string_function output_function; ///< This function is used to output CLI's response
-  bool color_output;
   const char *terminal_string;
 } app_cli_s;
 
@@ -142,15 +143,11 @@ typedef struct {
  * @param output_print_string
  * This function is used to output CLI data; it is also given to each CLI handler to output its data
  *
- * @param color_output
- * If true, then the commands will be printed in color
- * This is useful when CLI output is displayed on linux-like terminal
- *
  * @param terminal_string
  * Typyically this can be dashed line to separate CLI output, and it can also include ASCII terminal chars (ETX, EOT)
  */
 app_cli_s app_cli__initialize(size_t minimum_command_chars_to_match, app_cli__print_string_function output_function,
-                              bool color_output, const char *terminal_string);
+                              const char *terminal_string);
 
 /**
  * @param app_cli_command_static_memory A handler for the CLI; this memory should not go out of scope

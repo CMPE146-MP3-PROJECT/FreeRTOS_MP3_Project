@@ -15,7 +15,7 @@ app_cli_status_e cli__i2c(app_cli__argument_t argument, sl_string_t user_input_m
   const bool read = sl_string__begins_with_ignore_case(user_input_minus_command_name, "read");
   const bool write = sl_string__begins_with_ignore_case(user_input_minus_command_name, "write");
   sl_string__erase_first_word(user_input_minus_command_name, ' ');
-  const sl_string_t command_params = user_input_minus_command_name;
+  sl_string_t command_params = user_input_minus_command_name;
 
   // i2c read 0xDD 0xRR <n>
   if (read) {
@@ -42,7 +42,7 @@ static void cli__i2c_read(const sl_string_t command_params, app_cli__print_strin
 
   unsigned slave_address = 0, slave_register = 0, count = 1;
 
-  if (sl_string__scanf(command_params, "%x %x %x", &slave_address, &slave_register, &count) >= 2) {
+  if (sl_string__scanf(command_params, "%x %x %u", &slave_address, &slave_register, &count) >= 2) {
     if (i2c__read_slave_data(i2c_bus, slave_address, slave_register, &buffer[0], count)) {
       sl_string__printf(output, "I2C Read of Slave 0x%02X\n", slave_address);
       cli_output(unused_cli_argument, output);
@@ -87,7 +87,7 @@ static void cli__i2c_write(sl_string_t command_params, app_cli__print_string_fun
       cli_output(unused_cli_argument, output);
 
       for (size_t index = 0; index < count; index++) {
-        sl_string__printf(output, "  [%3d] = 0x%02X (%d)\n", index, buffer[index], buffer[index]);
+        sl_string__printf(output, "  [%3d] = 0x%02X (%d)\n", (slave_register + index), buffer[index], buffer[index]);
         cli_output(unused_cli_argument, output);
       }
     } else {

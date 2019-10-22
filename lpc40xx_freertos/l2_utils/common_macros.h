@@ -14,3 +14,6 @@
 #ifndef UNUSED
 #define UNUSED (void)
 #endif
+
+#define MAX_OF(a, b) (((a) > (b)) ? (a) : (b))
+#define MIN_OF(a, b) (((a) < (b)) ? (a) : (b))

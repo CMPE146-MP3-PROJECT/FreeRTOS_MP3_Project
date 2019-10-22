@@ -32,7 +32,7 @@
 #define configCPU_CLOCK_HZ                      (clock__get_core_clock_hz())
 #define configTICK_RATE_HZ                      ((TickType_t) 1000)
 #define configUSE_PREEMPTION                    1
-#define RTOS_MS_TO_TICKS(milliseconds)          ((configTICK_RATE_HZ * milliseconds) / 1000)
+#define RTOS_MS_TO_TICKS(milliseconds)          (milliseconds == UINT32_MAX) ? (portMAX_DELAY) : (((uint64_t)configTICK_RATE_HZ * milliseconds) / 1000)
 
 /**
  * Size of stack does not need alignment on ARM Cortex

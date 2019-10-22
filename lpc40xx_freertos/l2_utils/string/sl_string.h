@@ -195,8 +195,16 @@ bool sl_string__erase_first(sl_string_t string, sl_string_size_t n_chars);
 bool sl_string__erase_last(sl_string_t string, sl_string_size_t n_chars);
 bool sl_string__erase_at(sl_string_t string, sl_string_size_t index_position);
 bool sl_string__erase_after(sl_string_t string, sl_string_size_t erase_index_position, sl_string_size_t n_chars);
+bool sl_string__erase_at_substring(sl_string_t string, const char *erase_at_substring);
 bool sl_string__erase_first_word(sl_string_t string, char word_separater);
 sl_string_size_t sl_string__erase_special_chars(sl_string_t string);
+
+/**
+ * Erases or parses integer only from the string
+ * For example, if we have string = ";123 abc 456" then:
+ *  - First call to this function will set *erased_int to 123, and string will be " abc 1234"
+ *  - Second call to this function will set *erased_int to 456, and set the string to ""
+ */
 bool sl_string__erase_int(sl_string_t string, int *erased_int);
 
 bool sl_string__trim_end(sl_string_t string, const char *chars_to_trim);

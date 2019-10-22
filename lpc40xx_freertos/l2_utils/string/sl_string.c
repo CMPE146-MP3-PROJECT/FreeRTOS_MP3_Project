@@ -10,7 +10,6 @@
  */
 
 #include <ctype.h>
-#include <stdarg.h> //lint !e829 -  <stdarg> is required for our desired functionality
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +28,7 @@
  *                     P R I V A T E    F U N C T I O N S
  *
  ******************************************************************************/
+
 void sl_byte_convert__to_network_from_uint16(uint8_t bytes[2], uint16_t source_value) {
   bytes[0] = (uint8_t)(source_value >> 8);
   bytes[1] = (uint8_t)(source_value >> 0);
@@ -37,6 +37,8 @@ void sl_byte_convert__to_network_from_uint16(uint8_t bytes[2], uint16_t source_v
 uint16_t sl_byte_convert__from_network_to_uint16(const uint8_t bytes[2]) {
   return (((uint16_t)bytes[0] << 8) | (uint16_t)bytes[1]);
 }
+
+int sl_utils__pointer_distance(const void *pointer_to_last, const void *string) { return (pointer_to_last - string); }
 
 static sl_string_size_t sl_string__private_return_positive_or_zero(const int value) {
   return (value > 0) ? (sl_string_size_t)value : 0U;
@@ -48,7 +50,7 @@ static bool sl_string__private_ensure_enough_memory_for_insertion(const sl_strin
   const sl_string_size_t length_of_insertion_string = (sl_string_size_t)strlen(insertion_string);
   const sl_string_size_t memory_required = length_of_original_string + length_of_insertion_string;
 
-  return memory_required < sl_string__get_capacity(string);
+  return memory_required <= sl_string__get_capacity(string);
 }
 
 /**
@@ -62,21 +64,19 @@ static char *sl_string__private_strtok_r(sl_string_t string, const char *delimit
     string = *save_ptr;
   }
 
-  if (NULL != string) {
+  if (0U != sl_string__get_length(string)) {
+    string += strspn(string, delimiter_string);
+    *save_ptr = string;
+
     if (0U != sl_string__get_length(string)) {
-      string += strspn(string, delimiter_string);
-      *save_ptr = string;
+      end_of_token = string + strcspn(string, delimiter_string);
+      *save_ptr = end_of_token;
+      token = string;
 
-      if (0U != sl_string__get_length(string)) {
-        end_of_token = string + strcspn(string, delimiter_string);
-        *save_ptr = end_of_token;
+      if ('\0' != *end_of_token) {
+        *end_of_token = '\0';
+        *save_ptr = end_of_token + 1;
         token = string;
-
-        if ('\0' != *end_of_token) {
-          *end_of_token = '\0';
-          *save_ptr = end_of_token + 1;
-          token = string;
-        }
       }
     }
   }
@@ -131,10 +131,14 @@ sl_string_size_t sl_string__get_capacity_including_null_char(const sl_string_t s
   return sl_string__get_capacity(string) + 1U;
 }
 
-sl_string_size_t sl_string__get_length(const sl_string_t string) { return (sl_string_size_t)strlen(string); }
+sl_string_size_t sl_string__get_length(const sl_string_t string) {
+  return (NULL == string) ? 0U : (sl_string_size_t)strlen(string);
+}
 
 bool sl_string__is_full(const sl_string_t string) {
-  return sl_string__get_length(string) == sl_string__get_capacity(string);
+  const sl_string_size_t length = sl_string__get_length(string);
+  const sl_string_size_t capacity = sl_string__get_capacity(string);
+  return (length >= capacity);
 }
 
 const char *sl_string__c_str(const sl_string_t string) { return string; }
@@ -304,10 +308,13 @@ bool sl_string__append(sl_string_t string, const char *append) {
   bool result = false;
 
   if (NULL != append) {
-    if (sl_string__private_ensure_enough_memory_for_insertion(string, append)) {
-      sl_string_size_t current_length = sl_string__get_length(string);
-      sl_string_size_t remaining_length = sl_string__get_capacity(string) - current_length;
-      strncat(string, append, remaining_length);
+    const sl_string_size_t length_of_original_string = sl_string__get_length(string);
+    const sl_string_size_t length_of_insertion_string = (sl_string_size_t)strlen(append);
+    const sl_string_size_t total_length = length_of_original_string + length_of_insertion_string;
+
+    if (total_length <= sl_string__get_capacity(string)) {
+      const sl_string_size_t length_to_copy_including_null = (1U + length_of_insertion_string);
+      memcpy((string + length_of_original_string), append, length_to_copy_including_null);
       result = true;
     }
   }
@@ -353,7 +360,7 @@ int sl_string__last_index_of(const sl_string_t string, const char *index_of) {
     }
   }
 
-  return ((NULL != pointer_to_last) ? (int)(pointer_to_last - string) : sl_string_error);
+  return ((NULL != pointer_to_last) ? (int)sl_utils__pointer_distance(pointer_to_last, string) : sl_string_error);
 }
 
 int sl_string__last_index_of_ignore_case(const sl_string_t string, const char *index_of_case_ignored) {
@@ -370,7 +377,7 @@ int sl_string__last_index_of_ignore_case(const sl_string_t string, const char *i
       size_t num_of_chars_to_move_substring_start_location = 1;
 
       if (0 == strncasecmp(pointer_to_first_char_in_substring, index_of_case_ignored, length_of_string_to_find)) {
-        index_of_string = (int)(pointer_to_first_char_in_substring - string);
+        index_of_string = (int)sl_utils__pointer_distance(pointer_to_first_char_in_substring, string);
         num_of_chars_to_move_substring_start_location = length_of_string_to_find;
       }
 
@@ -396,7 +403,7 @@ int sl_string__first_index_of(const sl_string_t string, const char *index_of) {
     pointer_to_first = strstr(string, index_of);
   }
 
-  return ((NULL != pointer_to_first) ? (int)(pointer_to_first - string) : sl_string_error);
+  return ((NULL != pointer_to_first) ? (int)sl_utils__pointer_distance(pointer_to_first, string) : sl_string_error);
 }
 
 int sl_string__first_index_of_ignore_case(const sl_string_t string, const char *index_of_case_ignored) {
@@ -414,7 +421,7 @@ int sl_string__first_index_of_ignore_case(const sl_string_t string, const char *
 
       if (0 ==
           strncasecmp(pointer_to_first_char_in_substring, index_of_case_ignored, length_of_index_of_case_ignored)) {
-        index_of_string = (int)(pointer_to_first_char_in_substring - string);
+        index_of_string = (int)sl_utils__pointer_distance(pointer_to_first_char_in_substring, string);
         break;
       }
 
@@ -576,8 +583,8 @@ bool sl_string__ends_with_newline(const sl_string_t string) {
   bool status = false;
   const sl_string_size_t length = sl_string__get_length(string);
 
-  if (length > 0) {
-    const sl_string_size_t last_index = length - 1;
+  if (length > 0U) {
+    const sl_string_size_t last_index = length - 1U;
     const char last_char = string[last_index];
     status = ('\r' == last_char) || ('\n' == last_char);
   }
@@ -629,13 +636,25 @@ bool sl_string__erase_after(sl_string_t string, sl_string_size_t erase_index_pos
   return result;
 }
 
+bool sl_string__erase_at_substring(sl_string_t string, const char *erase_at_substring) {
+  const char *found = strstr(string, erase_at_substring);
+  const bool found_something_to_erase = (NULL != found);
+
+  if (found_something_to_erase) {
+    const sl_string_size_t position = (sl_string_size_t)sl_utils__pointer_distance(found, string);
+    string[position] = '\0';
+  }
+
+  return found_something_to_erase;
+}
+
 bool sl_string__erase_first_word(sl_string_t string, char word_separater) {
   bool result = false;
   const char *word_ptr = strchr(string, (int)word_separater);
 
   if (NULL != word_ptr) {
-    int n_chars = (int)(word_ptr - string) + 1;
-    result = sl_string__erase_first(string, (uint16_t)n_chars); // Plus 1 to also erase the word_seperator
+    const sl_string_size_t n_chars = (sl_string_size_t)sl_utils__pointer_distance(word_ptr, string) + 1U;
+    result = sl_string__erase_first(string, n_chars); // Plus 1 to also erase the word_seperator
   }
 
   return result;
@@ -662,21 +681,22 @@ bool sl_string__erase_int(sl_string_t string, int *erased_int) {
   bool parsed = false;
 
   const char *c = string;
-  while (('\0' != *c) && !isdigit(*c)) {
+  while (('\0' != *c) && (0U == isdigit((int)*c))) {
     ++c; // Skip chars until a digit
   }
 
-  if (('\0' != *c) && NULL != erased_int && isdigit(*c)) {
+  if (('\0' != *c) && (NULL != erased_int) && (0U != isdigit((int)*c))) {
     *erased_int = atoi(c);
     parsed = true;
   }
 
-  while (('\0' != *c) && isdigit(*c)) {
+  while (('\0' != *c) && (0U != isdigit((int)*c))) {
     ++c; // Skip the digits we processed in atoi() above
   }
 
   // Erase the integer we processed above
-  sl_string__erase_first(string, (c - string));
+  const sl_string_size_t chars_to_erase = (sl_string_size_t)sl_utils__pointer_distance(c, string);
+  (void)sl_string__erase_first(string, chars_to_erase);
 
   return parsed;
 }
@@ -745,12 +765,8 @@ bool sl_string__replace_first(sl_string_t string, const char *replace, const cha
     result = true;
 
     if (sl_string_error != start_of_replace_index) {
-      result =
-          sl_string__erase_after(string, (sl_string_size_t)start_of_replace_index, (sl_string_size_t)strlen(replace));
-
-      if (result) {
-        result = sl_string__insert_at(string, (uint16_t)start_of_replace_index, replace_with);
-      }
+      (void)sl_string__erase_after(string, (sl_string_size_t)start_of_replace_index, (sl_string_size_t)strlen(replace));
+      result = sl_string__insert_at(string, (uint16_t)start_of_replace_index, replace_with);
     }
   }
 
@@ -765,12 +781,8 @@ bool sl_string__replace_last(sl_string_t string, const char *replace, const char
     result = true;
 
     if (sl_string_error != start_of_replace_index) {
-      result =
-          sl_string__erase_after(string, (sl_string_size_t)start_of_replace_index, (sl_string_size_t)strlen(replace));
-
-      if (result) {
-        result = sl_string__insert_at(string, (sl_string_size_t)start_of_replace_index, replace_with);
-      }
+      (void)sl_string__erase_after(string, (sl_string_size_t)start_of_replace_index, (sl_string_size_t)strlen(replace));
+      result = sl_string__insert_at(string, (sl_string_size_t)start_of_replace_index, replace_with);
     }
   }
 
