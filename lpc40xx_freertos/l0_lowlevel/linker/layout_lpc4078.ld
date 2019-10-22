@@ -111,6 +111,7 @@ SECTIONS
     .data : ALIGN(4)
     {
        FILL(0xff)
+       *(vtable)
        *(.data*)
        . = ALIGN(4) ;
        PROVIDE(_data_end = .);
