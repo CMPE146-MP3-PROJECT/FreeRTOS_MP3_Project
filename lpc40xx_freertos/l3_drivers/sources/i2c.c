@@ -138,8 +138,10 @@ void i2c__initialize(i2c_e i2c_number, uint32_t desired_i2c_bus_speed_in_hz, uin
   const uint32_t ideal_speed_hz = UINT32_C(100) * 1000;
   const uint32_t freq_hz = (desired_i2c_bus_speed_in_hz > max_speed_hz) ? ideal_speed_hz : desired_i2c_bus_speed_in_hz;
   const uint32_t half_clock_divider = (peripheral_clock_hz / freq_hz) / 2;
-  lpc_i2c->SCLH = (half_clock_divider * percent_high) / 100;
-  lpc_i2c->SCLL = (half_clock_divider * percent_low) / 100;
+
+  // Each clock phase contributes to 50%
+  lpc_i2c->SCLH = ((half_clock_divider * percent_high) / 100) / 2;
+  lpc_i2c->SCLL = ((half_clock_divider * percent_low) / 100) / 2;
 
   // Set I2C slave address to zeroes and enable I2C
   lpc_i2c->ADR0 = lpc_i2c->ADR1 = lpc_i2c->ADR2 = lpc_i2c->ADR3 = 0;
@@ -221,6 +223,7 @@ static bool i2c__transfer_unprotected(i2c_s *i2c, uint8_t slave_address, uint8_t
 
   // Wait for transfer to finish; the signal will be sent by the ISR once the transaction finishes
   if (rtos_is_running) {
+    // If the RTOS is running, we can block (sleep) on this signal
     if (xSemaphoreTake(i2c->transfer_complete_signal, timeout_ms)) {
       status = (0 == i2c->error_code);
     }
