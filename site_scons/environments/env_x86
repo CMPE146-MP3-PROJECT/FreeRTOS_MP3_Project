@@ -1,0 +1,34 @@
+import os
+import sys
+
+import osops
+
+env_x86 = Environment(
+    ENV=os.environ,
+    tools=["mingw"],
+    CC="gcc",
+    CFLAGS=[
+        "-std=c99",
+        "-g",
+        "-O0",
+    ],
+    ASFLAGS=[],
+    LINKFLAGS=[],
+    CPPPATH=[],
+    CPPDEFINES=[],
+    LIBS=[],
+    LIBPATH=[],
+)
+
+if osops.is_windows():
+    osops.prepend_env_var(env_x86, Dir("#/compiler/windows/mingw/bin"))
+elif osops.is_linux():
+    pass
+elif osops.is_macos():
+    pass
+else:
+    print("[{}] is an unsupported OS!".format(sys.platform))
+    sys.exit(-1)
+
+Export("env_x86")
+Return("env_x86")

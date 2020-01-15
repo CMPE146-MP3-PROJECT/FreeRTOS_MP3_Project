@@ -20,6 +20,7 @@ def scan_tree(
     source_patterns=DEFAULT_SOURCE_PATTERNS,
     include_patterns=DEFAULT_INCLUDE_PATTERNS,
     assembly_patterns=DEFAULT_ASSEMBLY_PATTERNS,
+    subsidiary_scons_filename="subsidiary-scons",
     recursive=True):
     """
     Recursively search/glob source files, include files, etc.
@@ -27,6 +28,7 @@ def scan_tree(
     :param source_patterns: A list of source file name patterns to search (list of str)
     :param include_patterns: A list of include file name patterns to search (list of str)
     :param assembly_patterns: A list of assembly file name patterns to search (list of str)
+    :param subsidiary_scons_filename: Subsidiary SCons file name (str)
     :param recursive: Flag to determine if file/directory search operation should be recursive (bool)
     :return: A sources object (Sources)
 
@@ -38,8 +40,8 @@ def scan_tree(
     dirnode = Dir(dirnode)
     sources = Sources()
     for dirpath, dirnames, filenames in os.walk(os.path.relpath(dirnode.abspath)):
-        if "SConscript" in filenames:
-            subsidary_sources = SConscript(Dir(dirpath).File("SConscript"))
+        if subsidiary_scons_filename in filenames:
+            subsidary_sources = SConscript(Dir(dirpath).File(subsidiary_scons_filename))
             if isinstance(subsidary_sources, Sources):
                 sources += subsidary_sources
                 dirnames[:] = []  # End recursion for this directory tree

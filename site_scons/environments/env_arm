@@ -1,0 +1,111 @@
+import os
+import sys
+
+import osops
+
+CORE = "cortex-m4"
+OPTIMIZATION_LEVEL = "s"
+
+
+"""
+Define build environment
+
+References:
+- https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html
+"""
+env_arm = Environment(
+    ENV=os.environ,
+    tools=["mingw"],
+    CC="arm-none-eabi-gcc",
+    OBJCOPY="arm-none-eabi-objcopy",
+    OBJDUMP="arm-none-eabi-objdump",
+    SIZE="arm-none-eabi-size",
+    CFLAGS=[
+        "-std=c99",
+        "-fmessage-length=0",
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    ASFLAGS=[],
+    LINKFLAGS=[
+        "-nostartfiles",
+        "-specs=nano.specs",
+        "-u", "_printf_float",
+        "-u", "_scanf_float",
+        "-specs=nosys.specs",
+        "-Wl,--gc-sections",
+    ],
+    CPPPATH=[],
+    CPPDEFINES=[],
+    LIBS=[
+        "m",
+    ]
+)
+
+""" Define additional flags """
+COMMON_FLAGS = [
+    "-O{}".format(OPTIMIZATION_LEVEL),
+    "-mcpu={}".format(CORE),
+    "-mthumb",
+    "-mfloat-abi=hard",
+    "-mfpu=auto",
+    "-Wall",
+    "-g",
+    "-pipe",
+]
+env_arm["CFLAGS"].extend(COMMON_FLAGS)
+env_arm["LINKFLAGS"].extend(COMMON_FLAGS)
+
+
+"""
+Define builders
+
+References:
+- https://sourceware.org/binutils/docs/binutils/objcopy.html
+- https://sourceware.org/binutils/docs/binutils/objdump.html
+- https://sourceware.org/binutils/docs/binutils/size.html
+"""
+def objcopy_generator(source, target, env, for_signature):
+    """
+    :raise: KeyError if target format is not supported.
+    """
+    file_basename, file_ext = os.path.splitext(target[0].name)
+    file_ext = file_ext.lstrip(".")  # Strip leading '.' if any (i.e. ".hex" -> "hex")
+    ext_fmt_map = {
+        "bin": "binary",
+        "hex": "ihex",
+    }
+    return "$OBJCOPY -O {} $SOURCE $TARGET".format(ext_fmt_map[file_ext])
+
+
+def toolchain_description_generator(source, target, env, for_signature):
+    if osops.is_windows():
+        print("-- Using ARM compiler on WINDOWS")
+    elif osops.is_linux():
+        print("-- Using ARM compiler on LINUX")
+    elif osops.is_macos():
+        print("-- Using ARM compiler on MAC")
+    else:
+        pass
+
+    return target
+
+
+env_arm["BUILDERS"]["Objcopy"] = Builder(generator=objcopy_generator)
+env_arm["BUILDERS"]["Objdump"] = Builder(action="$OBJDUMP --source --all-headers --demangle --line-numbers --wide $SOURCE > $TARGET")
+env_arm["BUILDERS"]["Size"] = Builder(action="$SIZE --format=berkeley $SOURCE")
+
+env_arm["BUILDERS"]["PrintToolchainDescription"] = Builder(generator=toolchain_description_generator)
+
+if osops.is_windows():
+    osops.prepend_env_var(env_arm, Dir("#/compiler/windows/gcc-arm-none-eabi-8-2019-q3-update/bin"))
+elif osops.is_linux():
+    osops.prepend_env_var(env_arm, Dir("#/compiler/linux/gcc-arm-none-eabi-8-2019-q3-update/bin"))
+elif osops.is_macos():
+    osops.prepend_env_var(env_arm, Dir("#/compiler/mac/gcc-arm-none-eabi-8-2019-q3-update/bin"))
+else:
+    print("[{}] is an unsupported OS!".format(sys.platform))
+    sys.exit(-1)
+
+Export("env_arm")
+Return("env_arm")

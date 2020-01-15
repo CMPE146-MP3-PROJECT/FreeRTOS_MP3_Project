@@ -16,10 +16,23 @@ SCons is a lightweight build system implemented in Python. Its minimalistic para
 pip install scons
 ```
 
-## Usage
+## Usage 1
 
 ```bash
 scons
+```
+
+## Usage 2
+
+```bash
+scons --project=<project name>
+```
+
+### Example Usage 2
+
+```bash
+scons --project=lpc40xx_freertos
+scons --project=x86_sandbox
 ```
 
 ## Documentation
@@ -27,14 +40,14 @@ scons
 This repository's SCons infrastructure consists of multiple files:
 
 - SConstruct - SCons entry point.
-- SConscript - Supplementary files that extend the build system.
-- env_arm - Definition of ARM construction environment and supplementary builders.
 - site_scons - A directory which contains supplementary artifacts (i.e. modules, SCons construction environments, tools/builders, etc.).
 - site_tools/site_init.py - First file to be executed on SCons entry.
 - site_scons/cli.py - Custom command line arguments.
 - site_scons/fsops.py - Custom supplementary functions for file system operations.
 - site_scons/osops.py - Custom supplementary functions for OS operations.
 - site_scons/site_tools - A directory which contains custom tools for construction environments.
+- site_scons/environments/env_arm - Definition of ARM construction environment and supplementary builders.
+- site_scons/environments/env_x86 - Definition of Intel x86 construction environment and supplementary builders.
 
 SCons works by performing the following high-level steps:
 

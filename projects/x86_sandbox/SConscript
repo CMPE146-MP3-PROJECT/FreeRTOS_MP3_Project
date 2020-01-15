@@ -1,0 +1,71 @@
+import sys
+
+import env
+import fsops
+from sources import Sources
+
+"""
+CLI
+"""
+verbose = GetOption("verbose")
+no_format = GetOption("no_format")
+
+
+"""
+Imports
+"""
+Import("project_dirnode")
+
+
+"""
+Define file nodes and directory nodes
+"""
+PROJECT_DIR = project_dirnode
+
+""" Build artifact nodes """
+VARIANT_DIR = Dir("#/_build_{}".format(PROJECT_DIR.name))
+OBJ_DIR = VARIANT_DIR.Dir("obj")
+
+""" Source and include nodes """
+INCLUDE_DIRS = []
+
+
+"""
+Import build environment
+"""
+env_x86 = env.register_environment("env_x86")
+
+""" Add/modify additional parameters """
+env_x86 = env_x86.Clone(
+    tools=["clangformat"]
+)
+
+env_x86.VariantDir(variant_dir=VARIANT_DIR, src_dir=Dir("."), duplicate=0)
+
+
+"""
+Search and group files to build
+"""
+all_sources = fsops.scan_tree(Dir("."))
+env_x86["CPPPATH"].extend(INCLUDE_DIRS)
+env_x86["CPPPATH"].extend(all_sources.include_dirnodes)
+
+
+"""
+Perform builds
+"""
+
+""" Compile all sources -> objects """
+obj_filenodes = []
+for filenode in all_sources.source_filenodes + all_sources.assembly_filenodes:
+    dest_filepath = fsops.ch_target_filenode(filenode, OBJ_DIR, "o")
+    new_obj_filenodes = env_x86.Object(target=dest_filepath, source=filenode)
+    obj_filenodes.extend(new_obj_filenodes)
+
+
+exe_filenodes = env_x86.Program(target=VARIANT_DIR.File(PROJECT_DIR.name), source=obj_filenodes)
+
+# If "--no-format" provided as command line argument, then do not run Clang Format builders
+if not no_format:
+    for filenode in all_sources.source_filenodes:
+        env_x86.ClangFormat(filenode=filenode, verbose=verbose)
