@@ -98,11 +98,11 @@ env_arm["BUILDERS"]["Size"] = Builder(action="$SIZE --format=berkeley $SOURCE")
 env_arm["BUILDERS"]["PrintToolchainDescription"] = Builder(generator=toolchain_description_generator)
 
 if osops.is_windows():
-    osops.prepend_env_var(env_arm, Dir("#/compiler/windows/gcc-arm-none-eabi-8-2019-q3-update/bin"))
+    osops.prepend_env_var(env_arm, Dir("#/toolchains/windows/gcc-arm-none-eabi-8-2019-q3-update/bin"))
 elif osops.is_linux():
-    osops.prepend_env_var(env_arm, Dir("#/compiler/linux/gcc-arm-none-eabi-8-2019-q3-update/bin"))
+    osops.prepend_env_var(env_arm, Dir("#/toolchains/linux/gcc-arm-none-eabi-8-2019-q3-update/bin"))
 elif osops.is_macos():
-    osops.prepend_env_var(env_arm, Dir("#/compiler/mac/gcc-arm-none-eabi-8-2019-q3-update/bin"))
+    osops.prepend_env_var(env_arm, Dir("#/toolchains/mac/gcc-arm-none-eabi-8-2019-q3-update/bin"))
 else:
     print("[{}] is an unsupported OS!".format(sys.platform))
     sys.exit(-1)

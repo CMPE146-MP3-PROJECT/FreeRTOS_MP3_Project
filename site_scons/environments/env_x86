@@ -21,7 +21,8 @@ env_x86 = Environment(
 )
 
 if osops.is_windows():
-    osops.prepend_env_var(env_x86, Dir("#/compiler/windows/mingw/bin"))
+    osops.prepend_env_var(env_x86, Dir("#/toolchains/windows/mingw/bin"))
+    osops.prepend_env_var(env_x86, Dir("#/toolchains/windows/ruby26/bin"))
 elif osops.is_linux():
     pass
 elif osops.is_macos():
