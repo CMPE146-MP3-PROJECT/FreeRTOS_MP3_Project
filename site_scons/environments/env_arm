@@ -6,6 +6,7 @@ import osops
 CORE = "cortex-m4"
 OPTIMIZATION_LEVEL = "s"
 
+verbose = GetOption("verbose")
 
 """
 Define build environment
@@ -15,7 +16,10 @@ References:
 """
 env_arm = Environment(
     ENV=os.environ,
-    tools=["mingw"],
+    tools=[
+        "mingw",
+        "clangformat",
+    ],
     CC="arm-none-eabi-gcc",
     OBJCOPY="arm-none-eabi-objcopy",
     OBJDUMP="arm-none-eabi-objdump",
@@ -106,6 +110,10 @@ elif osops.is_macos():
 else:
     print("[{}] is an unsupported OS!".format(sys.platform))
     sys.exit(-1)
+
+if not verbose:
+    env_arm["CCCOMSTR"] = "Compiling $SOURCE"
+    env_arm["LINKCOMSTR"] = "Linking $TARGET"
 
 Export("env_arm")
 Return("env_arm")

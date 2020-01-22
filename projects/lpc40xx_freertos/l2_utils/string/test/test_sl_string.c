@@ -14,14 +14,9 @@
 
 #include "unity.h"
 
-#include "sl_utils.h"
-
-#include "sl_byte_conversions.h"
-
 // Module includes
-#include "sl_string.h"
+#include "sl_string.c"
 
-#include "sl_unit_test_facilitator.h"
 
 /******************************************************************************
  *
@@ -29,7 +24,7 @@
  *
  *****************************************************************************/
 const size_t sl_header_length = sizeof(sl_string_size_t);
-static const char *test_very_long_string =
+const char *test_very_long_string =
     "test test test test test test test test test test test test test test test test test test test test test";
 
 /*******************************************************************************
@@ -49,9 +44,9 @@ static const char *test_very_long_string =
  *        P R I V A T E    F U N C T I O N    D E C L A R A T I O N S
  *
  *****************************************************************************/
-static char string_memory[110];
-static sl_string_t str;
-static const size_t string_memory_pad_size = 10;
+char string_memory[110];
+sl_string_t str;
+const size_t string_memory_pad_size = 10;
 /******************************************************************************
  *
  *             P R I V A T E    D A T A    D E F I N I T I O N S
@@ -320,13 +315,13 @@ void test_sl_string__printf_successful(void) {
 }
 
 void test_sl_string__printf_with_string_size_zero(void) {
-  static sl_string_t m_str = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
+  sl_string_t m_str = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
   const int printed_count = sl_string__printf(m_str, "%s", "");
   TEST_ASSERT_EQUAL_INT(0, printed_count);
 }
 
 void test_sl_string__printf_append_with_string_size_zero(void) {
-  static sl_string_t m_str = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
+  sl_string_t m_str = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
   const int printed_count = sl_string__printf_append(m_str, "%s", "");
   TEST_ASSERT_EQUAL_INT(0, printed_count);
 }
@@ -336,7 +331,7 @@ void test_sl_string__printf_filename_format(void) {
   const sl_string_t directory_name = "logs";
   const sl_string_t preceding_name = "debuglog";
   const sl_string_t tagname = "predump";
-  static sl_string_t file_name = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
+  sl_string_t file_name = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
   const int printed_count = sl_string__printf(file_name, "%s/%s__%s.in_use", directory_name, preceding_name, tagname);
   TEST_ASSERT_EQUAL_INT(strlen(file_name), printed_count);
   TEST_ASSERT_EQUAL_STRING(expected_filename, file_name);
@@ -344,7 +339,7 @@ void test_sl_string__printf_filename_format(void) {
 
 void test_sl_string__scanf_with_arg_size_zero(void) {
   char *hello_str = "";
-  static sl_string_t m_str = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
+  sl_string_t m_str = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
   int parsed_count = sl_string__scanf(m_str, "%s", hello_str);
   TEST_ASSERT_EQUAL_INT(0, parsed_count);
 }
@@ -1139,7 +1134,7 @@ void test_sl_string__replace_all_double_slash_with_slash(void) {
   const sl_string_t directory_name = "sibros/can_module/logs/";
   const sl_string_t preceding_name = "debuglog";
   const sl_string_t tagname = "predump";
-  static sl_string_t file_name = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
+  sl_string_t file_name = sl_string__initialize(string_memory, sizeof(string_memory) - string_memory_pad_size);
   const int printed_count = sl_string__printf(file_name, "%s/%s__%s.in_use", directory_name, preceding_name, tagname);
   TEST_ASSERT_EQUAL_INT(strlen(file_name), printed_count);
   // replace double slash with slash from middle of the string

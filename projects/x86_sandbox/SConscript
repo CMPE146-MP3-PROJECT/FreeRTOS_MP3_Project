@@ -9,6 +9,7 @@ CLI
 """
 verbose = GetOption("verbose")
 no_format = GetOption("no_format")
+unit_test = GetOption("unit_test")
 
 
 """
@@ -25,6 +26,7 @@ PROJECT_DIR = project_dirnode
 """ Build artifact nodes """
 VARIANT_DIR = Dir("#/_build_{}".format(PROJECT_DIR.name))
 OBJ_DIR = VARIANT_DIR.Dir("obj")
+UNIT_TEST_BUILD_DIR = VARIANT_DIR.Dir("test")
 
 """ Source and include nodes """
 INCLUDE_DIRS = []
@@ -62,10 +64,11 @@ for filenode in all_sources.source_filenodes + all_sources.assembly_filenodes:
     new_obj_filenodes = env_x86.Object(target=dest_filepath, source=filenode)
     obj_filenodes.extend(new_obj_filenodes)
 
+exe_filenodes = env_x86.Program(target=VARIANT_DIR.File("{}.exe".format(PROJECT_DIR.name)), source=obj_filenodes)
 
-exe_filenodes = env_x86.Program(target=VARIANT_DIR.File(PROJECT_DIR.name), source=obj_filenodes)
-
-# If "--no-format" provided as command line argument, then do not run Clang Format builders
 if not no_format:
     for filenode in all_sources.source_filenodes:
         env_x86.ClangFormat(filenode=filenode, verbose=verbose)
+
+if unit_test:
+    env_x86.Test(source=PROJECT_DIR, target=UNIT_TEST_BUILD_DIR, sources=all_sources, verbose=verbose)

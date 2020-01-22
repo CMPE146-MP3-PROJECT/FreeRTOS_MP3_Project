@@ -3,14 +3,17 @@ import sys
 
 import osops
 
+verbose = GetOption("verbose")
+
 env_x86 = Environment(
     ENV=os.environ,
-    tools=["mingw"],
+    tools=[
+        "mingw",
+        "unittest",
+    ],
     CC="gcc",
     CFLAGS=[
         "-std=c99",
-        "-g",
-        "-O0",
     ],
     ASFLAGS=[],
     LINKFLAGS=[],
@@ -26,10 +29,14 @@ if osops.is_windows():
 elif osops.is_linux():
     pass
 elif osops.is_macos():
-    pass
+    env_x86["CC"] = "clang"
 else:
     print("[{}] is an unsupported OS!".format(sys.platform))
     sys.exit(-1)
+
+if not verbose:
+    env_x86['CCCOMSTR'] = "Compiling $SOURCE"
+    env_x86['LINKCOMSTR'] = "Linking $TARGET"
 
 Export("env_x86")
 Return("env_x86")

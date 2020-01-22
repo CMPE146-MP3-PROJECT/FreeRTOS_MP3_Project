@@ -13,6 +13,7 @@ from sources import Sources
 DEFAULT_SOURCE_PATTERNS = ["*.c", "*.cpp"]
 DEFAULT_INCLUDE_PATTERNS = ["*.h", "*.hpp"]
 DEFAULT_ASSEMBLY_PATTERNS = ["*.s", "*.S"]
+DEFAULT_IGNORE_DIRNAMES = ["test"]
 
 
 def scan_tree(
@@ -21,6 +22,7 @@ def scan_tree(
     include_patterns=DEFAULT_INCLUDE_PATTERNS,
     assembly_patterns=DEFAULT_ASSEMBLY_PATTERNS,
     subsidiary_scons_filename="subsidiary-scons",
+    ignore_dirnames=DEFAULT_IGNORE_DIRNAMES,
     recursive=True):
     """
     Recursively search/glob source files, include files, etc.
@@ -29,6 +31,7 @@ def scan_tree(
     :param include_patterns: A list of include file name patterns to search (list of str)
     :param assembly_patterns: A list of assembly file name patterns to search (list of str)
     :param subsidiary_scons_filename: Subsidiary SCons file name (str)
+    :param ignore_dirnames: List of directory names to ignore (list of str)
     :param recursive: Flag to determine if file/directory search operation should be recursive (bool)
     :return: A sources object (Sources)
 
@@ -38,8 +41,13 @@ def scan_tree(
         sources.include_dirnodes  # A list of all include directory nodes
     """
     dirnode = Dir(dirnode)
+    ignore_dirnames = ignore_dirnames if ignore_dirnames is not None else []
     sources = Sources()
+
     for dirpath, dirnames, filenames in os.walk(os.path.relpath(dirnode.abspath)):
+        if os.path.basename(dirpath) in ignore_dirnames:
+            continue
+
         if subsidiary_scons_filename in filenames:
             subsidary_sources = SConscript(Dir(dirpath).File(subsidiary_scons_filename))
             if isinstance(subsidary_sources, Sources):
@@ -138,6 +146,20 @@ def prefix_filenode_name(filenode, prefix):
     """
     filenode = File(filenode)
     new_filename = "{}{}".format(prefix, filenode.name)
+    new_filenode = File(os.path.join(os.path.dirname(filenode.abspath), new_filename))
+    return new_filenode
+
+
+def suffix_filenode_name(filenode, suffix):
+    """
+    Add a suffix to a file node's name
+    :param filenode: A file node (File)
+    :param suffix: Suffix to add (str)
+    :return: A file node with a modified file name (File)
+    """
+    filenode = File(filenode)
+    basename, ext = os.path.splitext(filenode.name)
+    new_filename = "{}{}{}".format(basename, suffix, ext)
     new_filenode = File(os.path.join(os.path.dirname(filenode.abspath), new_filename))
     return new_filenode
 

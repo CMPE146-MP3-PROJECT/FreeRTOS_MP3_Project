@@ -9,6 +9,7 @@ CLI
 """
 verbose = GetOption("verbose")
 no_format = GetOption("no_format")
+unit_test = GetOption("unit_test")
 
 
 """
@@ -28,6 +29,7 @@ VARIANT_DIR = REPO_ROOT_DIR.Dir("_build_{}".format(PROJECT_DIR.name))
 OBJ_DIR = VARIANT_DIR.Dir("obj")
 MAP_FILE = VARIANT_DIR.File("{}.map".format(PROJECT_DIR.name))
 SIZE_FILE = VARIANT_DIR.File("{}.size".format(PROJECT_DIR.name))
+UNIT_TEST_BUILD_DIR = VARIANT_DIR.Dir("test")
 
 """ Source and include nodes """
 INCLUDE_DIRS = []
@@ -44,10 +46,7 @@ LINKER_FILES = [
     PROJECT_DIR.File("l0_lowlevel/linker/layout_lpc4078.ld"),
 ]
 
-EXCLUDED_SRC_FILES = [
-    PROJECT_DIR.File("l2_utils/string/test/test_sl_string.c"),
-    PROJECT_DIR.File("l4_io/cli/test/test_app_cli.c"),
-]
+EXCLUDED_SRC_FILES = []
 
 
 """
@@ -56,11 +55,6 @@ Import build environment
 env_arm = env.register_environment("env_arm")
 
 env_arm.PrintToolchainDescription()
-
-""" Add/modify additional parameters """
-env_arm = env_arm.Clone(
-    tools=["clangformat"]
-)
 
 env_arm.VariantDir(variant_dir=VARIANT_DIR, src_dir=Dir("."), duplicate=0)
 
@@ -134,7 +128,16 @@ format_filenodes = fsops.filter_files(
     exclude_dirnodes=FORMAT_EXCLUDED_DIRS,
 )
 
-# If "--no-format" provided as command line argument, then do not run Clang Format builders
 if not no_format:
     for filenode in format_filenodes:
         env_arm.ClangFormat(filenode=filenode, verbose=verbose)
+
+
+"""
+Unit test
+"""
+if unit_test:
+    env_x86 = env.register_environment("env_x86")
+    env_x86.Append(CPPPATH=env_arm["CPPPATH"])
+    unit_test_results = env_x86.Test(source=PROJECT_DIR, target=UNIT_TEST_BUILD_DIR, sources=all_sources, verbose=verbose)
+    Requires(obj_filenodes, unit_test_results)
