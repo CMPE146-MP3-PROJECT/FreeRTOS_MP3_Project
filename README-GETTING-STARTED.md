@@ -1,6 +1,5 @@
 # SJ2-C Getting Started
 
-
 ## Setup and Install
 
 Setup and install should be super simple unless you have Windows, which is not suited for ideal software development, but you can still use it. These steps should still get you setup regardless of your OS.
@@ -15,44 +14,91 @@ Setup and install should be super simple unless you have Windows, which is not s
 
 That is it, you should now be ready to build software for your board.
 
+----
 
 ## Compile & Flash
 
 1. Use any IDE and open up the `lpc40xx_freertos` folder
+    * We recommend `Visual Studio Code`
     * You can work on your code in an IDE and use command line to compile
 2. Build the project:
     * **From the root directory** of this `sjtwo-c` folder, type: `scons`
-    * Once you get used to it, also try `scons -j4` to use more threads to build.
-    * You can type `scons --clean` to clean the project
 3. Invoke the python script to flash your new program
     * From the root of `sjtwo-c` folder, type: `python nxp-programmer/flash.py` and it might just work :)
     * The `flash.py` defaults to `lpc40xx_freertos.bin` file and auto detects your SJ2 serial port
-    * See [nxp-programmer README](nxp-programmer/README.md) and more examples in the following `Examples` section
+    * See [nxp-programmer README](nxp-programmer/README.md) and more examples in the following *Examples* section
 4. After flashing your new program, use your favorite serial terminal to watch the output from your board.
 
-### How `flash.py` works
+### SCons 
+
+Full documentation of the `SCons` command [is listed at this README](README-SCons.md). This should be read so you fully understand how to build various different projects and run the unit-tests.
+
+### Typical Workflow
+
+This describes typical commands you will use to compile and flash the project:
+
+```bash
+# 1. Edit your code and save it in Visual Studio Code
+
+# 2. This will run unit tests and compile the lpc40xx_freertos project
+scons --unit-test
+
+# 3. Finally, flash the project
+python nxp-programmer/flash.py
+```
+
+### More advanced stuff
+```bash
+# Optionally, you can clean and compile the LPC project
+scons -c
+scons --unit-test
+
+# You can compile the LPC project without running unit-tests
+# Warning: If unit-tests fail, you will waste a lot of time debugging it on the controller, so do not skip them
+scons
+
+# Compile with multiple threads (use as many threads as your machine has, since I have 12, I will use -j12)
+scons -j12
+```
+
+----
+
+## How `flash.py` works
 
 This script takes a COM port and your firmware file to program, however:
 *  COM port can be automatically detected if `--port` argument is not provided
 *  Firmware file is defaulted to `_build_lpc40xx_freertos/lpc40xx_freertos.bin` if `--input` argument is not provided
 
 Example:
+```bash
+python nxp-programmer/flash.py --port <Device Port> --input <.bin file path>`
+# <Device Port>    is your serial port
+# <.bin file path> is the path to your firmware you want to load to the board
 
-* `python nxp-programmer/flash.py --port <Device Port> --input <.bin file path>`
-    * The `<Device Port>` is your serial port, and `<.bin file path>` is the path to your firmware you want to load to the board
-* The script can auto-detect your `--port`, so you should be able to flash using:
-    * `python nxp-programmer/flash.py --input _build_lpc40xx_freertos/lpc40xx_freertos.bin`
+# The script can auto-detects your `--port`, so you should be able to flash using:
+python nxp-programmer/flash.py --input _build_lpc40xx_freertos/lpc40xx_freertos.bin`
+```
 
 ### More `flash.py` Examples
 
 Providing an explicit `--port` may be faster to program, but initially you would need to know what `--port` your SJ board is at. Try using `python nxp-programmer/flash.py` which will use the default binary file, and automatically find the port for you, otherwise follow the examples below:
 
-* Example on Windows:
-    * `python nxp-programmer/flash.py --port COM6 --input _build_lpc40xx_freertos/lpc40xx_freertos.bin`
-* Example on Linux:
-    * `python nxp-programmer/flash.py --port /dev/ttyUSB --input _build_lpc40xx_freertos/lpc40xx_freertos.bin`
-* Example on Mac:
-    * `python nxp-programmer/flash.py --port /dev/tty.SLAB_USBtoUART --input _build_lpc40xx_freertos/lpc40xx_freertos.bin`
+```bash
+# All these examples will default to use "_build_lpc40xx_freertos/lpc40xx_freertos.bin"
+
+# Example on Windows:
+python nxp-programmer/flash.py --port COM6
+
+# Example on Linux:
+python nxp-programmer/flash.py --port /dev/ttyUSB
+
+# Example on Mac:
+python nxp-programmer/flash.py --port /dev/tty.SLAB_USBtoUART
+
+# ##################################
+# Fully explicit command on windows:
+python nxp-programmer/flash.py --port COM6 --input _build_lpc40xx_freertos/lpc40xx_freertos.bin
+```
 
 ### Advanced Tips
 
