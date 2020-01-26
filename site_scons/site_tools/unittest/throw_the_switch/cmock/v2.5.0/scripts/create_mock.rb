@@ -1,8 +1,7 @@
-require "#{ENV['CMOCK_DIR']}/lib/cmock"
-
 raise "Header file to mock must be specified!" unless ARGV.length >= 1
+raise "Output directory must be specified!" unless ARGV.length >= 2
 
-mock_out = ENV.fetch('MOCK_OUT', './build/test/mocks')
-mock_prefix = ENV.fetch('MOCK_PREFIX', 'mock_')
-cmock = CMock.new({:plugins => [:ignore, :return_thru_ptr], :mock_prefix => mock_prefix, :mock_path => mock_out})
+here = File.dirname __FILE__
+require_relative  "#{here}/../lib/cmock"
+cmock = CMock.new({:plugins => [:ignore, :return_thru_ptr], :mock_prefix => "Mock", :mock_path => ARGV[1]})
 cmock.setup_mocks(ARGV[0])

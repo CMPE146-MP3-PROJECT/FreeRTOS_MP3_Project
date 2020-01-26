@@ -71,4 +71,5 @@ if not no_format:
         env_x86.ClangFormat(filenode=filenode, verbose=verbose)
 
 if unit_test:
-    env_x86.Test(source=PROJECT_DIR, target=UNIT_TEST_BUILD_DIR, sources=all_sources, verbose=verbose)
+    unit_test_results = env_x86.Test(source=PROJECT_DIR, target=UNIT_TEST_BUILD_DIR, sources=all_sources, verbose=verbose)
+    Requires(obj_filenodes, unit_test_results)
