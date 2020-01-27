@@ -84,11 +84,11 @@ def objcopy_generator(source, target, env, for_signature):
 
 def toolchain_description_generator(source, target, env, for_signature):
     if osops.is_windows():
-        print("-- Using ARM compiler on WINDOWS")
+        print("--- Using ARM compiler on WINDOWS ---")
     elif osops.is_linux():
-        print("-- Using ARM compiler on LINUX")
+        print("--- Using ARM compiler on LINUX ---")
     elif osops.is_macos():
-        print("-- Using ARM compiler on MAC")
+        print("--- Using ARM compiler on MAC ---")
     else:
         pass
 

@@ -17,7 +17,7 @@ def main():
     project_dirnode = Dir("#/projects").Dir(project_dirname)
 
     if not os.path.isdir(project_dirnode.abspath):
-        print("Unable to find project [{}]".format(project_dirpath))
+        print("Unable to find project [{}]".format(project_dirnode.name))
         sys.exit(-1)
 
     if not has_subsidary_scons(project_dirnode):

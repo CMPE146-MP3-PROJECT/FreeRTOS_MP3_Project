@@ -38,6 +38,9 @@ IGNORE_HEADER_FILENAME = [
     "unity.h"
 ]
 
+""" Unit test runner variables """
+UNIT_TEST_RUNNER_PY = SELF_DIR.File("unit_test_runner.py")
+
 """ Common variables """
 OBJ_DIRNAME = "obj"
 EXE_DIRNAME = "exe"
@@ -99,12 +102,11 @@ def unittest_method(env, source, target, sources=None, verbose=False):
         obj_filenodes += env_ut.Object(target=fsops.ch_target_filenode(filenode_ut, output_dirnode.Dir(OBJ_DIRNAME), "o"), source=filenode_ut)
 
         exe_filenodes = env_ut.Program(target=fsops.ch_target_filenode(filenode_ut, output_dirnode, "exe"), source=obj_filenodes)
-        result = env_ut.Command(target=None, source=exe_filenodes, action=exe_filenodes[0].abspath)
         all_exe_filenodes += exe_filenodes
-        results += result
-        Depends(result, exe_filenodes)
 
-    return results
+    result = execute_unit_tests(env_ut, all_exe_filenodes)
+
+    return result
 
 
 """
@@ -127,7 +129,6 @@ def get_unittest_env(source_env):
             "-O0",
         ],
     )
-
     return env_ut
 
 def get_unittest_coverage_env(source_env):
@@ -209,3 +210,17 @@ def generate_mocks(env, header_filenodes, target_dirnode, dependent_source=None)
         mock_header_filenodes.append(mock_header_filenode)
         mock_source_filenodes.append(mock_source_filenode)
     return mock_header_filenodes, mock_source_filenodes
+
+
+def execute_unit_tests(env, exe_filenodes):
+    # Example:
+    # python <UNIT_TEST_RUNNER_PY> -i <exe> -i <exe> -i <exe>
+    command = [
+        "python",
+        UNIT_TEST_RUNNER_PY.abspath,
+    ]
+    command.extend(map(lambda filenode: "-i {}".format(filenode.abspath), exe_filenodes))
+
+    result = env.Command(target=None, source=exe_filenodes, action=" ".join(command))
+
+    return result
