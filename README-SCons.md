@@ -34,17 +34,28 @@ scons --project=lpc40xx_freertos
 scons --project=x86_sandbox
 ```
 
-### Build and run unit-tests
+### Build and run unit tests
+
+Unit tests are ran by default before compilation of the project.
 
 ```bash
-# By default, this will run unit-tests within lpc40xx_freertos
-scons --unit-test
+# By default, this will run unit tests and build the `lpc40xx_freertos` project
+scons
 
 # Or you can be more explicit
-scons --project=lpc40xx_freertos --unit-test
+scons --project=lpc40xx_freertos
 
-# Run tests witin the `x86_sandbox`:
-scons --project=x86_sandbox --unit-test
+# Run unit tests and build the `x86_sandbox` project
+scons --project=x86_sandbox
+```
+
+To disable unit tests, add the option `--no-unit-test`
+
+```bash
+scons --no-unit-test
+
+# OR
+scons --project=x86_sandbox --no-unit-test
 ```
 
 ----
@@ -53,20 +64,20 @@ scons --project=x86_sandbox --unit-test
 
 This repository's SCons infrastructure consists of multiple files:
 
-- `SConstruct` - SCons entry point.
-- `site_scons` - A directory which contains supplementary artifacts (i.e. modules, SCons construction environments, tools/builders, etc.).
-- `site_scons/site_init.py` - First file to be executed on SCons entry.
-- `site_scons/cli.py` - Custom command line arguments.
-- `site_scons/fsops.py` - Custom supplementary functions for file system operations.
-- `site_scons/osops.py` - Custom supplementary functions for OS operations.
-- `site_scons/site_tools` - A directory which contains custom tools for construction environments.
-- `site_scons/environments/env_arm` - Definition of ARM construction environment and supplementary builders.
-- `site_scons/environments/env_x86` - Definition of Intel x86 construction environment and supplementary builders.
+- `SConstruct` - SCons entry point
+- `site_scons` - A directory which contains supplementary artifacts (i.e. modules, SCons construction environments, tools/builders, etc.)
+- `site_scons/site_init.py` - First file to be executed on SCons entry
+- `site_scons/cli.py` - Custom command line arguments
+- `site_scons/fsops.py` - Custom supplementary functions for file system operations
+- `site_scons/osops.py` - Custom supplementary functions for OS operations
+- `site_scons/site_tools` - A directory which contains custom tools for construction environments
+- `site_scons/environments/env_arm` - Definition of ARM construction environment and supplementary builders
+- `site_scons/environments/env_x86` - Definition of Intel x86 construction environment and supplementary builders
 
 SCons works by performing the following high-level steps:
 
-1. Execute scripts and assemble dependency trees.
-2. Detect changes in file content then determine which build steps need to be executed.
-3. Finally, execute all required build steps.
+1. Execute scripts and assemble dependency trees
+2. Detect changes in file content then determine which build steps need to be executed
+3. Finally, execute all required build steps
 
 ---

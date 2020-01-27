@@ -9,7 +9,7 @@ CLI
 """
 verbose = GetOption("verbose")
 no_format = GetOption("no_format")
-unit_test = GetOption("unit_test")
+no_unit_test = GetOption("no_unit_test")
 
 
 """
@@ -136,7 +136,7 @@ if not no_format:
 """
 Unit test
 """
-if unit_test:
+if not no_unit_test:
     env_x86 = env.register_environment("env_x86")
     env_x86.Append(CPPPATH=env_arm["CPPPATH"])
     unit_test_results = env_x86.Test(source=PROJECT_DIR, target=UNIT_TEST_BUILD_DIR, sources=all_sources, verbose=verbose)

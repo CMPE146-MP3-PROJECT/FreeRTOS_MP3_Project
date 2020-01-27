@@ -9,7 +9,7 @@ CLI
 """
 verbose = GetOption("verbose")
 no_format = GetOption("no_format")
-unit_test = GetOption("unit_test")
+no_unit_test = GetOption("no_unit_test")
 
 
 """
@@ -70,6 +70,6 @@ if not no_format:
     for filenode in all_sources.source_filenodes:
         env_x86.ClangFormat(filenode=filenode, verbose=verbose)
 
-if unit_test:
+if not no_unit_test:
     unit_test_results = env_x86.Test(source=PROJECT_DIR, target=UNIT_TEST_BUILD_DIR, sources=all_sources, verbose=verbose)
     Requires(obj_filenodes, unit_test_results)

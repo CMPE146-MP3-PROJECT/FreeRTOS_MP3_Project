@@ -40,8 +40,8 @@ This describes typical commands you will use to compile and flash the project:
 ```bash
 # 1. Edit your code and save it in Visual Studio Code
 
-# 2. This will run unit tests and compile the lpc40xx_freertos project
-scons --unit-test
+# 2. This will run unit tests and compile the `lpc40xx_freertos` project
+scons
 
 # 3. Finally, flash the project
 python nxp-programmer/flash.py
@@ -50,12 +50,13 @@ python nxp-programmer/flash.py
 ### More advanced stuff
 ```bash
 # Optionally, you can clean and compile the LPC project
-scons -c
-scons --unit-test
 
-# You can compile the LPC project without running unit-tests
+# To clean compiled artifacts for the default project `lpc40xx_freertos`
+scons -c
+
+# You can compile the `lpc40xx_freertos` project without running unit-tests
 # Warning: If unit-tests fail, you will waste a lot of time debugging it on the controller, so do not skip them
-scons
+scons --no-unit-test
 
 # Compile with multiple threads (use as many threads as your machine has, since I have 12, I will use -j12)
 scons -j12
