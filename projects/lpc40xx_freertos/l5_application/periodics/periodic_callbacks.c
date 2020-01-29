@@ -1,6 +1,7 @@
 #include "periodic_callbacks.h"
 
 #include "board_io.h"
+#include "gpio.h"
 
 /******************************************************************************
  * Your board will reset if the periodic function does not return within its deadline

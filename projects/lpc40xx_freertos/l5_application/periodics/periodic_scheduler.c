@@ -14,7 +14,7 @@ typedef struct {
   /// Incremented until task_delay_in_ticks and then task_finished_flag is checked for deadline
   TickType_t ticks_elapsed;
   /// After the callback() is invoked, this flag is set which is later checked by periodic_scheduler__task_monitor()
-  bool task_finished_flag;
+  volatile bool task_finished_flag;
 } periodic_scheduler_s;
 
 /// Instances of the 4 periodic tasks and their callback function pointer
@@ -58,7 +58,7 @@ static void periodic_scheduler__check_flag(periodic_scheduler_s *periodic_task) 
 }
 static void periodic_scheduler__task_monitor(void *param) {
   // We let all the other tasks run first, and then check their flags
-  while (1) {
+  while (true) {
     vTaskDelay(1);
     periodic_scheduler__check_flag(&periodic_scheduler__1000Hz);
     periodic_scheduler__check_flag(&periodic_scheduler__100Hz);

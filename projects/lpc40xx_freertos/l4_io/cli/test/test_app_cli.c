@@ -65,7 +65,8 @@
 //   sl_string__append(cli_output_string, string);
 // }
 
-// static app_cli_status_e app_cli__hello_handler(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
+// static app_cli_status_e app_cli__hello_handler(app_cli__argument_t argument, sl_string_t
+// user_input_minus_command_name,
 //                                                app_cli__print_string_function output_print_string) {
 //   sl_string_t output_string = user_input_minus_command_name; // re-use the string
 
@@ -76,7 +77,8 @@
 //   return APP_CLI_STATUS__SUCCESS;
 // }
 
-// static app_cli_status_e app_cli__fail_handler(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
+// static app_cli_status_e app_cli__fail_handler(app_cli__argument_t argument, sl_string_t
+// user_input_minus_command_name,
 //                                               app_cli__print_string_function output_print_string) {
 //   UNUSED(argument);
 //   UNUSED(user_input_minus_command_name);
@@ -85,7 +87,8 @@
 //   return APP_CLI_STATUS__HANDLER_FAILURE;
 // }
 
-// static app_cli_status_e app_cli__sibros_handler(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
+// static app_cli_status_e app_cli__sibros_handler(app_cli__argument_t argument, sl_string_t
+// user_input_minus_command_name,
 //                                                 app_cli__print_string_function output_print_string) {
 //   UNUSED(argument);
 //   sl_string__insert_at(user_input_minus_command_name, 0, "string argument was: ");
@@ -168,11 +171,13 @@
 // }
 
 // void test_unmatched_command(void) {
-//   static const char *expected_unmatched_command_output = "Unable to match any registered CLI command for: unmatched\r\n"
+//   static const char *expected_unmatched_command_output = "Unable to match any registered CLI command for:
+//   unmatched\r\n"
 //                                                          "List of commands: \r\n"
 //                                                          "          sibros: outputs command string arguments\r\n"
 //                                                          "            fail: always returns failure\r\n"
-//                                                          "           hello: responds back with 'hello world'\r\n\x03";
+//                                                          "           hello: responds back with 'hello
+//                                                          world'\r\n\x03";
 
 //   app_cli__process_input(&cli, no_arg, input_string("unmatched"));
 //   TEST_ASSERT_EQUAL_STRING(expected_unmatched_command_output, cli_output_string);
@@ -244,11 +249,13 @@
 // }
 
 // void test_sibros_short_command_with_higher_number_of_chars(void) {
-//   static const char *expected_unmatched_command_output = "Unable to match any registered CLI command for: sibro 123\r\n"
+//   static const char *expected_unmatched_command_output = "Unable to match any registered CLI command for: sibro
+//   123\r\n"
 //                                                          "List of commands: \r\n"
 //                                                          "          sibros: outputs command string arguments\r\n"
 //                                                          "            fail: always returns failure\r\n"
-//                                                          "           hello: responds back with 'hello world'\r\n\x03";
+//                                                          "           hello: responds back with 'hello
+//                                                          world'\r\n\x03";
 
 //   cli.minimum_command_chars_to_match = 6;
 

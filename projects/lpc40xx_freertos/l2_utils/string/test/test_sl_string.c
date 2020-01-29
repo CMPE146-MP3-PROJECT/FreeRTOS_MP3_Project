@@ -17,7 +17,6 @@
 // Module includes
 #include "sl_string.c"
 
-
 /******************************************************************************
  *
  *                               D E F I N E S
@@ -1143,14 +1142,14 @@ void test_sl_string__replace_all_double_slash_with_slash(void) {
 
   sl_string_t string_with_slash = "/sibros/can_module/logs/debuglog__predump.in_use";
   // adding slash in the beginning of string_with_slash
-  sl_string__printf(file_name, "/%s", string_with_slash);  // re-use file_name
+  sl_string__printf(file_name, "/%s", string_with_slash); // re-use file_name
   // replace double slash with slash from beginning of the string
   TEST_ASSERT_EQUAL_INT(1, sl_string__replace_all(file_name, "//", "/"));
   TEST_ASSERT_EQUAL_STRING(string_with_slash, file_name);
 
   string_with_slash = "/sibros/can_module/logs/";
   // adding slash at the end of string_with_slash
-  sl_string__printf(file_name, "%s/", string_with_slash);  // re-use file_name
+  sl_string__printf(file_name, "%s/", string_with_slash); // re-use file_name
   // replace double slash with slash from end of the string
   TEST_ASSERT_EQUAL_INT(1, sl_string__replace_all(file_name, "//", "/"));
   TEST_ASSERT_EQUAL_STRING(string_with_slash, file_name);

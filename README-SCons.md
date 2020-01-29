@@ -2,7 +2,7 @@
 
 SCons is a lightweight build system implemented in Python. **It is not a compiler**, but in layman terms, it is a tool that uses the compiler to generate a compiled executable. Its minimalistic paradigm and full support of native Python enables fast prototyping of both simple and complex projects that may depend on factors ranging from cross-compiler support to supplementary software tools.
 
-## Prerequisite
+## Prerequisites
 
 - [Python](https://www.python.org/) 3.x.x (Python 2.x is now obsolete)
 - [SCons](https://pypi.org/project/scons/)
@@ -15,7 +15,7 @@ Please reference this [README](README-GETTING-STARTED.md) that talks about Pytho
 
 ### Build default project
 
-This will, by default, build the `lpc40xx_freertos` project:
+By default, the `scons` command will build the `lpc40xx_freertos` project:
 ```bash
 cd sjtwo-c
 
@@ -55,7 +55,7 @@ To disable unit tests, add the option `--no-unit-test`
 scons --no-unit-test
 
 # OR
-scons --project=x86_sandbox --no-unit-test
+scons --no-unit-test --project=x86_sandbox
 ```
 
 ----

@@ -14,6 +14,14 @@ Setup and install should be super simple unless you have Windows, which is not s
 
 That is it, you should now be ready to build software for your board.
 
+### Additional dependencies for Mac and Linux
+
+In order to run the unit-tests, `Ruby` and a `GCC compiler` is required for Mac and Linux. This is because the unit-tests compile an executable you run on your host machine, and it is not compiled for running on the embedded ARM target.
+
+* For *Windows*, we have checked in Ruby and MinGW (Minimal GCC for Windows) already
+* In *Linux*, the GCC (development tools) should already be installed as part of default installation of Ubuntu
+* For *Mac*, you may have to install GCC equivalent which should be as easy as typing `xcode-select --install`
+
 ----
 
 ## Compile & Flash
@@ -55,10 +63,12 @@ python nxp-programmer/flash.py
 scons -c
 
 # You can compile the `lpc40xx_freertos` project without running unit-tests
-# Warning: If unit-tests fail, you will waste a lot of time debugging it on the controller, so do not skip them
+# Warning: If unit-tests fail, you will waste a lot of time debugging it on 
+# the controller, so do not skip them
 scons --no-unit-test
 
-# Compile with multiple threads (use as many threads as your machine has, since I have 12, I will use -j12)
+# Compile with multiple threads (use as many threads as your machine has
+# Since I have 12, I will use -j12
 scons -j12
 ```
 

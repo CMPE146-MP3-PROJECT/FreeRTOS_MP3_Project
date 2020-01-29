@@ -63,11 +63,13 @@ def exists():
 Environment functions
 """
 
-def unittest_method(env, source, target, sources=None, verbose=False):
+def unittest_method(env, source, target, sources=None, prepend_include_dirnodes=None, verbose=False):
     all_exe_filenodes = []
-    results = []
     dependent_srcpath_objpath_map = {}
     env_ut = get_unittest_env(env)
+
+    prepend_include_dirnodes = [prepend_include_dirnodes] if (prepend_include_dirnodes is not None) else []
+    env_ut.Prepend(CPPPATH=prepend_include_dirnodes)
 
     unittest_obj_filenodes = []
     for source_filenode in SOURCE_FILES:
@@ -85,15 +87,21 @@ def unittest_method(env, source, target, sources=None, verbose=False):
         obj_filenodes = []
 
         if sources is not None:
-            dependent_source_filenodes, mock_header_filenodes = find_dependencies_from_sources(filenode_ut, sources, verbose)
+            header_filenodes_override = []
+            if prepend_include_dirnodes is not None:
+                for dirnode in prepend_include_dirnodes:
+                    header_filenodes_override.extend(Glob(os.path.join(dirnode.abspath, "*.h*")))
+
+            dependent_source_filenodes, mock_header_filenodes = find_dependencies_from_sources(filenode_ut, sources, header_filenodes_override, verbose)
             for filenode in dependent_source_filenodes:
                 if filenode not in dependent_srcpath_objpath_map:
-                    obj_filenodes = env_ut.Object(target=fsops.ch_target_filenode(filenode, target.Dir(OBJ_DIRNAME), "o"), source=filenode)
-                    dependent_srcpath_objpath_map[filenode] = obj_filenodes[0]
+                    objs = env_ut.Object(target=fsops.ch_target_filenode(filenode, target.Dir(OBJ_DIRNAME), "o"), source=filenode)
+                    dependent_srcpath_objpath_map[filenode] = objs[0]
+                    obj_filenodes += objs
                 else:
                     obj_filenodes.append(dependent_srcpath_objpath_map[filenode])
 
-            _, mock_source_filenodes = generate_mocks(env_ut, mock_header_filenodes, mock_output_dirnode, dependent_source=filenode_ut)
+            _, mock_source_filenodes = generate_mocks(env_ut, mock_header_filenodes, mock_output_dirnode)
             for mock_source_filenode in mock_source_filenodes:
                 obj_filenodes += env_ut.Object(target=fsops.ch_target_filenode(mock_source_filenode, output_dirnode.Dir(OBJ_DIRNAME), "o"), source=mock_source_filenode)
 
@@ -155,7 +163,7 @@ def generate_test_main(env, filenode, target_dirnode):
     return env.Command(action="ruby {} $SOURCE $TARGET".format(GENERATE_TEST_RUNNER_RB.abspath), source=filenode, target=output_filenode)[0]
 
 
-def find_dependencies_from_sources(filenode, sources, verbose=False):
+def find_dependencies_from_sources(filenode, sources, header_filenodes_override=None, verbose=False):
     include_parser = IncludeParser(filenode.abspath)
     dependent_source_filenodes = []
     missing_dependency_filenames = []
@@ -178,9 +186,12 @@ def find_dependencies_from_sources(filenode, sources, verbose=False):
                 missing_dependency_filenames.append(filename)
         else:
             mock_header_filename = filename.lstrip(MOCK_HEADER_PREFIX)
-            for header_filenode in sources.include_filenodes:
+            if header_filenodes_override is None:
+                header_filenodes_override = []
+            for header_filenode in header_filenodes_override + sources.include_filenodes:
                 if mock_header_filename == header_filenode.name:
                     mock_header_filenodes.append(header_filenode)
+                    break
             else:
                 missing_mock_header_filenames.append(mock_header_filename)
 
@@ -195,7 +206,7 @@ def find_dependencies_from_sources(filenode, sources, verbose=False):
     return dependent_source_filenodes, mock_header_filenodes
 
 
-def generate_mocks(env, header_filenodes, target_dirnode, dependent_source=None):
+def generate_mocks(env, header_filenodes, target_dirnode):
     mock_header_filenodes = []
     mock_source_filenodes = []
     for header_filenode in header_filenodes:
@@ -205,8 +216,6 @@ def generate_mocks(env, header_filenodes, target_dirnode, dependent_source=None)
         mock_source_filenode = target_dirnode.File("{}{}{}".format(MOCK_HEADER_PREFIX, basename, ext.replace("h", "c")))
         Depends(mock_header_filenode, results)
         Depends(mock_source_filenode, results)
-        if dependent_source is not None:
-            Depends(dependent_source, results)
         mock_header_filenodes.append(mock_header_filenode)
         mock_source_filenodes.append(mock_source_filenode)
     return mock_header_filenodes, mock_source_filenodes
