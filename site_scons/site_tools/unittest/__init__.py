@@ -210,12 +210,10 @@ def generate_mocks(env, header_filenodes, target_dirnode):
     mock_header_filenodes = []
     mock_source_filenodes = []
     for header_filenode in header_filenodes:
-        results = env.Command(action="ruby {} $SOURCE {}".format(MOCK_GENERATOR_RB.abspath, target_dirnode.abspath), source=header_filenode, target=None)
         basename, ext = os.path.splitext(header_filenode.name)
         mock_header_filenode = target_dirnode.File("{}{}".format(MOCK_HEADER_PREFIX, header_filenode.name))
         mock_source_filenode = target_dirnode.File("{}{}{}".format(MOCK_HEADER_PREFIX, basename, ext.replace("h", "c")))
-        Depends(mock_header_filenode, results)
-        Depends(mock_source_filenode, results)
+        results = env.Command(action="ruby {} $SOURCE {}".format(MOCK_GENERATOR_RB.abspath, target_dirnode.abspath), source=header_filenode, target=[mock_header_filenode, mock_source_filenode])
         mock_header_filenodes.append(mock_header_filenode)
         mock_source_filenodes.append(mock_source_filenode)
     return mock_header_filenodes, mock_source_filenodes
