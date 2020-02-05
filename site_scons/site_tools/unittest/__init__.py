@@ -16,15 +16,18 @@ from sources import Sources
 SELF_DIR = Dir(os.path.dirname(__file__))
 UNITY_DIR = SELF_DIR.Dir("throw_the_switch/unity/v2.5.0")
 CMOCK_DIR = SELF_DIR.Dir("throw_the_switch/cmock/v2.5.0")
+CEXCEPTION_DIR = SELF_DIR.Dir("throw_the_switch/cexception/v1.3.1")
 
 SOURCE_FILES = [
     UNITY_DIR.File("src/unity.c"),
     CMOCK_DIR.File("src/cmock.c"),
+    CEXCEPTION_DIR.File("lib/cexception.c")
 ]
 
 INCLUDE_DIRS = [
     UNITY_DIR.Dir("src"),
     CMOCK_DIR.Dir("src"),
+    CEXCEPTION_DIR.Dir("lib"),
 ]
 
 """ Unity variables """
