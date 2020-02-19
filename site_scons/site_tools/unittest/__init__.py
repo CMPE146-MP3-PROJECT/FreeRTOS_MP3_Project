@@ -187,8 +187,8 @@ def find_dependencies_from_sources(filenode, sources, header_filenodes_override=
                     break
             else:
                 missing_dependency_filenames.append(filename)
-        else:
-            mock_header_filename = filename.lstrip(MOCK_HEADER_PREFIX)
+        else:  # filename.startswith(MOCK_HEADER_PREFIX)
+            mock_header_filename = filename.replace(MOCK_HEADER_PREFIX, "", 1)
             if header_filenodes_override is None:
                 header_filenodes_override = []
             for header_filenode in header_filenodes_override + sources.include_filenodes:
