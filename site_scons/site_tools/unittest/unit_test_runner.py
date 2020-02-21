@@ -20,22 +20,32 @@ def get_args():
         action="append",
         default=None,
     )
-
+    arg_parser.add_argument(
+        "--summary-only",
+        action="store_true",
+    )
     return arg_parser.parse_args()
 
 
 def main():
     args = get_args()
     exe_filepaths = args.input if (args.input is not None) else []
+    summary_only = args.summary_only
 
     unit_test_summary = UnitTestSummary()
 
     for exe_filepath in exe_filepaths:
         filename = os.path.basename(exe_filepath)
         basename, _ = os.path.splitext(filename)
-        print_execution_header(exe_filepath)
-        error = subprocess.call(exe_filepath)
-        print_execution_footer(exe_filepath, error)
+
+        process = subprocess.Popen(exe_filepath, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        error = process.returncode
+        if error or not summary_only:
+            print_execution_header(exe_filepath)
+            print(stdout.decode("ascii"))
+            print_execution_footer(exe_filepath, error)
+
         unit_test_summary.add_result(basename, not error)
 
     if len(unit_test_summary) > 0:

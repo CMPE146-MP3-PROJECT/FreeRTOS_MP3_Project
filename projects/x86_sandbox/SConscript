@@ -10,6 +10,7 @@ CLI
 verbose = GetOption("verbose")
 no_format = GetOption("no_format")
 no_unit_test = GetOption("no_unit_test")
+test_output = GetOption("test_output")
 
 
 """
@@ -84,5 +85,6 @@ if not no_unit_test:
         sources=all_sources,
         prepend_include_dirnodes=MOCK_DIR,
         verbose=verbose,
+        summary_only=not test_output,
     )
     Requires(obj_filenodes, unit_test_results)
