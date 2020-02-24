@@ -29,7 +29,7 @@ void pwm1__init_single_edge(uint32_t frequency_in_hertz) {
   LPC_PWM1->PCR |= (pwm_channel_output_enable_mask << 9); ///< Enable the PWM (bits 9-14)
 }
 
-void pwm1__set_duty_cycle(pwm1_channel_e pwm1_channel, double duty_cycle_in_percent) {
+void pwm1__set_duty_cycle(pwm1_channel_e pwm1_channel, float duty_cycle_in_percent) {
   const uint32_t mr0_reg_val = LPC_PWM1->MR0;
   const uint32_t match_reg_value = (mr0_reg_val * duty_cycle_in_percent) / 100;
 

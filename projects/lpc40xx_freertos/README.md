@@ -1,3 +1,29 @@
+## General Information
+
+### Floating point
+
+`float` is an IEEE single precision 32-bit floating point number. The Cortex-M4 has hardware support for this data type, and math operations involving this data type will be very fast.
+
+Example of `float f = random() * 1.1;`
+```c
+    16ac:	ed9f 7a30 	vldr	s14, [pc, #192]	;
+    16b0:	eddd 7a03 	vldr	s15, [sp, #12]
+    16b4:	482f      	ldr	r0, [pc, #188]	;
+    16b6:	ee67 7a87 	vmul.f32	s15, s15, s14
+```
+
+`double` is a 64-bit float, and there is no hardware support for this. This means that math operations performed using this data type will be VERY slow.
+
+Same example with double that uses software routine `__aeabi_dmul()` to multiply:
+```
+    16ce:	e9dd 0104 	ldrd	r0, r1, [sp, #16]
+    16d2:	a321      	add	r3, pc, #132	;
+    16d4:	e9d3 2300 	ldrd	r2, r3, [r3]
+    16d8:	f002 ff60 	bl	459c <__aeabi_dmul>
+    16dc:	e9cd 0104 	strd	r0, r1, [sp, #16]
+```
+
+----
 
 ## Folder Structure
 

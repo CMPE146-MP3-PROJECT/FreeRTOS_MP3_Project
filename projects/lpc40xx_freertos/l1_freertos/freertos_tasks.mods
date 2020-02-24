@@ -10,15 +10,15 @@
 BaseType_t uxTaskGetCpuUsage(TaskHandle_t xTask) {
   tskTCB *pxTCB = prvGetTCBFromHandle(xTask);
   uint64_t taskRunTime = pxTCB->ulRunTimeCounter;
-  uint32_t ulTotalRunTime;
+  uint32_t ulTotalCpuRunTime;
 
   #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
-    portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
+    portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalCpuRunTime );
   #else
-    ulTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
+    ulTotalCpuRunTime = portGET_RUN_TIME_COUNTER_VALUE();
   #endif
 
-  return (taskRunTime * 100) / ulTotalRunTime;
+  return (taskRunTime * 100) / ulTotalCpuRunTime;
 }
 
 static void prvResetRunTimeStatsInList(List_t *pxList) {

@@ -9,7 +9,8 @@ static void cli__task_list_print(sl_string_t user_input_minus_command_name, app_
 
 app_cli_status_e cli__crash_me(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
                                app_cli__print_string_function cli_output) {
-  *((uint32_t *)NULL) = 0xDEADBEEF;
+  uint32_t *bad_pointer = (uint32_t *)0x00000001;
+  *bad_pointer = 0xDEADBEEF;
   return APP_CLI_STATUS__SUCCESS;
 }
 
