@@ -6,6 +6,7 @@ import osops
 CORE = "cortex-m4"
 OPTIMIZATION_LEVEL = "s"
 
+no_float_format = GetOption("no_float_format")
 verbose = GetOption("verbose")
 
 """
@@ -34,8 +35,6 @@ env_arm = Environment(
     LINKFLAGS=[
         "-nostartfiles",
         "-specs=nano.specs",
-        "-u", "_printf_float",
-        "-u", "_scanf_float",
         "-specs=nosys.specs",
         "-Wl,--gc-sections",
     ],
@@ -72,6 +71,14 @@ COMMON_FLAGS = [
     "-g",
     "-pipe",
 ]
+
+""" Define conditional flags """
+if not no_float_format:
+    env_arm["LINKFLAGS"].extend([
+        "-u", "_printf_float",
+        "-u", "_scanf_float",
+    ])
+
 env_arm["CFLAGS"].extend(COMMON_FLAGS)
 env_arm["LINKFLAGS"].extend(COMMON_FLAGS)
 
