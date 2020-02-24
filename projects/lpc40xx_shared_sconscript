@@ -11,6 +11,7 @@ verbose = GetOption("verbose")
 no_format = GetOption("no_format")
 no_unit_test = GetOption("no_unit_test")
 test_output = GetOption("test_output")
+timeout = GetOption("timeout")
 
 
 """
@@ -151,7 +152,8 @@ if not no_unit_test:
         target=UNIT_TEST_BUILD_DIR,
         sources=all_sources,
         prepend_include_dirnodes=MOCK_DIR,
-        verbose=verbose,
         summary_only=not test_output,
+        timeout=timeout,
+        verbose=verbose,
     )
     Requires(obj_filenodes, unit_test_results)

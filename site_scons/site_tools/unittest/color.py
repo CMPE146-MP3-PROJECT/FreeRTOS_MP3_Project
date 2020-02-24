@@ -25,4 +25,7 @@ class ColorString(object):
 
     def __getattr__(self, name):
         if name in self.COLORS:
-            return "{}{}{}".format(self.COLORS[name], self._string, self.COLORS["neutral"])
+            ret =  "{}{}{}".format(self.COLORS[name], self._string, self.COLORS["neutral"])
+        else:
+            raise AttributeError(name)
+        return ret

@@ -66,7 +66,7 @@ def exists():
 Environment functions
 """
 
-def unittest_method(env, source, target, sources=None, prepend_include_dirnodes=None, summary_only=False, verbose=False):
+def unittest_method(env, source, target, sources=None, prepend_include_dirnodes=None, summary_only=False, timeout=None, verbose=False):
     if verbose:
         summary_only = False
 
@@ -118,7 +118,7 @@ def unittest_method(env, source, target, sources=None, prepend_include_dirnodes=
         exe_filenodes = env_ut.Program(target=fsops.ch_target_filenode(filenode_ut, output_dirnode, "exe"), source=obj_filenodes)
         all_exe_filenodes += exe_filenodes
 
-    result = execute_unit_tests(env_ut, all_exe_filenodes, summary_only=summary_only)
+    result = execute_unit_tests(env_ut, all_exe_filenodes, summary_only=summary_only, timeout=timeout)
 
     return result
 
@@ -225,7 +225,7 @@ def generate_mocks(env, header_filenodes, target_dirnode):
     return mock_header_filenodes, mock_source_filenodes
 
 
-def execute_unit_tests(env, exe_filenodes, summary_only=False):
+def execute_unit_tests(env, exe_filenodes, summary_only=False, timeout=None):
     # Example:
     # python <UNIT_TEST_RUNNER_PY> -i <exe> -i <exe> -i <exe>
     command = [
@@ -234,6 +234,9 @@ def execute_unit_tests(env, exe_filenodes, summary_only=False):
     ]
     if summary_only:
         command.append("--summary-only")
+    if timeout is not None:
+        command.append("--timeout={}".format(str(timeout)))
+
     command.extend(map(lambda filenode: "-i {}".format(filenode.abspath), exe_filenodes))
 
     result = env.Command(target=None, source=exe_filenodes, action=" ".join(command))
