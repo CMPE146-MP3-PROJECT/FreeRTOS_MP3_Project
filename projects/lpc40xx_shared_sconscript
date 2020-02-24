@@ -8,7 +8,7 @@ from sources import Sources
 CLI
 """
 verbose = GetOption("verbose")
-no_format = GetOption("no_format")
+no_clang_format = GetOption("no_clang_format")
 no_unit_test = GetOption("no_unit_test")
 test_output = GetOption("test_output")
 timeout = GetOption("timeout")
@@ -136,7 +136,7 @@ format_filenodes = fsops.filter_files(
     exclude_dirnodes=FORMAT_EXCLUDED_DIRS,
 )
 
-if not no_format:
+if not no_clang_format:
     for filenode in format_filenodes:
         env_arm.ClangFormat(filenode=filenode, verbose=verbose)
 

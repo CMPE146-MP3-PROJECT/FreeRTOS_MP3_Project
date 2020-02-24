@@ -8,7 +8,7 @@ from sources import Sources
 CLI
 """
 verbose = GetOption("verbose")
-no_format = GetOption("no_format")
+no_clang_format = GetOption("no_clang_format")
 no_unit_test = GetOption("no_unit_test")
 test_output = GetOption("test_output")
 timeout = GetOption("timeout")
@@ -73,7 +73,7 @@ for filenode in all_sources.source_filenodes + all_sources.assembly_filenodes:
 
 exe_filenodes = env_x86.Program(target=VARIANT_DIR.File("{}.exe".format(PROJECT_DIR.name)), source=obj_filenodes)
 
-if not no_format:
+if not no_clang_format:
     format_sources = fsops.scan_tree(project_dirnode, ignore_dirnames=None)
 
     for filenode in format_sources.source_filenodes + format_sources.include_filenodes:
