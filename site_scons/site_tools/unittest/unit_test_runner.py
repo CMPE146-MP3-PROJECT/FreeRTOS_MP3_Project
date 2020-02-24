@@ -4,12 +4,38 @@ import os
 import signal
 import subprocess
 import sys
+from threading import Thread
+import time
 
 from color import ColorString
 from unit_test_summary import UnitTestSummary
 from windows import NtStatusException
 
 Signal = namedtuple("Signal", ["name", "code"])
+
+
+class ProcessWatchdog(Thread):
+    def __init__(self, process, timeout, **kwargs):
+        super(ProcessWatchdog, self).__init__(**kwargs)
+        self.setDaemon = True
+        self._process = process
+        self._timeout = timeout
+        self._timeout_expired = False
+        self.start()
+
+    def run(self):
+        start_time = time.time()
+        while time.time() - start_time < self._timeout:
+            if self._process.poll() is not None:
+                break
+            time.sleep(0.001)
+        else:
+            self._process.kill()
+            self._timeout_expired = True
+
+    @property
+    def timeout_expired(self):
+        return self._timeout_expired
 
 
 def get_args():
@@ -43,17 +69,9 @@ def main():
     for exe_filepath in exe_filepaths:
         filename = os.path.basename(exe_filepath)
         basename, _ = os.path.splitext(filename)
-        stdout = ""
-        stderr = ""
-        timeout_expired = None
 
-        process = subprocess.Popen(exe_filepath, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        try:
-            stdout, stderr = process.communicate(timeout=timeout)
-            error = process.returncode
-        except subprocess.TimeoutExpired:
-            process.kill()
-            error = 1
+        stdout, stderr, error, timeout_expired = execute_process_with_timeout(exe_filepath, timeout=timeout)
+        if timeout_expired:
             timeout_expired = timeout
 
         if error or timeout_expired or not summary_only:
@@ -70,6 +88,35 @@ def main():
         print("No unit-tests defined.")
 
     return unit_test_summary.has_failure
+
+
+def execute_process_with_timeout(command, timeout):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE)
+    stdout = ""
+    stderr = ""
+    error = 1
+    timeout_expired = False
+
+    if hasattr(subprocess, "TimeoutExpired"):
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+            error = process.returncode
+        except subprocess.TimeoutExpired:
+            process.kill()
+            error = 1
+            timeout_expired = True
+    else:
+        process_watchdog = ProcessWatchdog(process=process, timeout=timeout)
+        stdout, stderr = process.communicate()
+        error = process.returncode
+        process_watchdog.join(1)
+        if process_watchdog.timeout_expired:
+            stdout = ""
+            stderr = ""
+            error = 1
+            timeout_expired = True
+
+    return stdout, stderr, error, timeout_expired
 
 
 def print_execution_header(exe_filepath):
