@@ -25,6 +25,9 @@ static const uint8_t lpc_peripheral_pconp_bit_map[] = {
     [LPC_PERIPHERAL__I2C1] = 19,
     [LPC_PERIPHERAL__I2C2] = 26,
 
+    [LPC_PERIPHERAL__CAN0] = 13,
+    [LPC_PERIPHERAL__CAN1] = 14,
+
     [LPC_PERIPHERAL__SSP0] = 21,
     [LPC_PERIPHERAL__SSP1] = 10,
     [LPC_PERIPHERAL__SSP2] = 20,
@@ -141,6 +144,10 @@ bool lpc_peripheral__is_powered_on(lpc_peripheral_e peripheral) {
 }
 
 void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback) {
+  // Sorry: Nasty hack because CAN1 shares interrupt with CAN0
+  if (LPC_PERIPHERAL__CAN1 == peripheral) {
+    peripheral = LPC_PERIPHERAL__CAN0;
+  }
   lpc_peripheral__isr_registrations[peripheral] = isr_callback;
 
   /**

@@ -34,6 +34,14 @@ typedef enum {
   LPC_PERIPHERAL__I2C1 = 11,
   LPC_PERIPHERAL__I2C2 = 12,
 
+  /**
+   * CAN0 and CAN1 do not have consistency like the other peripherals
+   * CAN0 and CAN1 share the same interrupt, but have separate power controls
+   * We arbritarily make up CAN1 as +64 offset but handle it at lpc_peripherals.c
+   */
+  LPC_PERIPHERAL__CAN0 = 25,
+  LPC_PERIPHERAL__CAN1 = 25 + 64,
+
   LPC_PERIPHERAL__PWM1 = 9,
   LPC_PERIPHERAL__ADC = 22,
   LPC_PERIPHERAL__GPIO = (54 - 16),
