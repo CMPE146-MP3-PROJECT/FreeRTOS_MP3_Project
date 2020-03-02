@@ -67,6 +67,14 @@ void gpio__enable_open_drain(gpio_s gpio) {
   *pin_iocon |= (UINT32_C(1) << 10);
 }
 
+void gpio__enable_pull_down_resistors(gpio_s gpio) {
+  volatile uint32_t *pin_iocon = gpio__get_iocon(gpio);
+
+  const uint32_t mode_mask = UINT32_C(3);
+  *pin_iocon &= ~(mode_mask << 3);
+  *pin_iocon |= (UINT32_C(1) << 3);
+}
+
 void gpio__set_as_input(gpio_s gpio) { gpio__get_struct(gpio)->DIR &= ~gpio__get_pin_mask(gpio); }
 
 void gpio__set_as_output(gpio_s gpio) { gpio__get_struct(gpio)->DIR |= gpio__get_pin_mask(gpio); }

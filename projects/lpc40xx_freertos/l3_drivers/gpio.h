@@ -54,6 +54,9 @@ void gpio__set_function(gpio_s gpio, gpio__function_e function);
 /// Most of the pins are NOT open drain on power-up; this enables pin's open-collector mode
 void gpio__enable_open_drain(gpio_s gpio);
 
+/// Sets the function mode of a pin to enable pull down resistors
+void gpio__enable_pull_down_resistors(gpio_s gpio);
+
 /**
  * @{
  * @name Sets direction of the pin if used as an input/output pin
