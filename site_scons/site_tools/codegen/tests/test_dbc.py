@@ -26,7 +26,6 @@ def print_messages_and_signals_objects(dbc):
 
 def print_messages_and_signals_simplified(dbc):
     for message_obj in dbc.messages:
-
         for signal_obj in message_obj.signals:
             print("{}.{} - Receivers {}".format(
                     message_obj.name, signal_obj.name, signal_obj.receivers

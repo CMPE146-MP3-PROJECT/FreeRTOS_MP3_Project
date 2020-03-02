@@ -68,7 +68,7 @@ void board_io__initialize(void) {
   board_io__sw0 = gpio__construct_as_input(GPIO__PORT_0, 29);
 
   // SW2 and SW3 require internal pull down resistors
-  // otherwise undefined behavior will result from 
+  // otherwise undefined behavior will result from
   // floating pins on open switch
   gpio__enable_pull_down_resistors(board_io__sw3);
   gpio__enable_pull_down_resistors(board_io__sw2);

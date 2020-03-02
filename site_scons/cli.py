@@ -6,6 +6,7 @@ from SCons.Script import *
 
 
 def cli_init():
+    AddOption("--dbc-node-name", default=None)
     AddOption("--no-clang-format", action="store_true", default=False)
     AddOption("--no-float-format", action="store_true", default=False)
     AddOption("--no-unit-test", action="store_true", default=False)

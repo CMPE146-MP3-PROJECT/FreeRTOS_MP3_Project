@@ -10,5 +10,5 @@ int main(void) {
     delay__ms(500);
   }
 
-  return 1;  // main() shall never return
+  return 1; // main() shall never return
 }
