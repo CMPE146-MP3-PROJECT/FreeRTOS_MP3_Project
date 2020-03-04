@@ -327,6 +327,19 @@ bool sl_string__append_char(sl_string_t string, char append) {
   return sl_string__append(string, string_to_append);
 }
 
+size_t sl_string__copy_to(const sl_string_t string, char *copy_to, size_t copy_to_max_size) {
+  const size_t len = sl_string__get_length(string);
+  const size_t bytes_to_copy_excluding_null = (copy_to_max_size > 0) ? (copy_to_max_size - 1) : 0;
+  const size_t bytes_to_copy = (len < bytes_to_copy_excluding_null) ? len : bytes_to_copy_excluding_null;
+
+  if (NULL != copy_to) {
+    memcpy(copy_to, string, bytes_to_copy);
+    copy_to[bytes_to_copy] = '\0';
+  }
+
+  return bytes_to_copy;
+}
+
 bool sl_string__equals_to(const sl_string_t string, const char *compare_with) {
   bool equal = false;
 

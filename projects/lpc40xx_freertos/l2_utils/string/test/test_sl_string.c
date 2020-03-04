@@ -182,6 +182,36 @@ void test_append_char(void) {
   TEST_ASSERT_EQUAL_STRING(s, "abc");
   TEST_ASSERT_EQUAL(3, sl_string__get_length(s));
 }
+
+void test_sl_string__copy_to(void) {
+  char copy_buffer[8];
+
+  TEST_ASSERT_EQUAL(0, sl_string__copy_to(str, copy_buffer, 0));
+
+  sl_string__set(str, "hello");
+  TEST_ASSERT_EQUAL(0, sl_string__copy_to(str, copy_buffer, 0));
+
+  TEST_ASSERT_EQUAL(0, sl_string__copy_to(str, copy_buffer, 1));
+  TEST_ASSERT_EQUAL_STRING("", copy_buffer);
+
+  TEST_ASSERT_EQUAL(1, sl_string__copy_to(str, copy_buffer, 2));
+  TEST_ASSERT_EQUAL_STRING("h", copy_buffer);
+
+  TEST_ASSERT_EQUAL(4, sl_string__copy_to(str, copy_buffer, 5));
+  TEST_ASSERT_EQUAL_STRING("hell", copy_buffer);
+
+  TEST_ASSERT_EQUAL(5, sl_string__copy_to(str, copy_buffer, 6));
+  TEST_ASSERT_EQUAL_STRING("hello", copy_buffer);
+
+  TEST_ASSERT_EQUAL(5, sl_string__copy_to(str, copy_buffer, 7));
+  TEST_ASSERT_EQUAL_STRING("hello", copy_buffer);
+
+  TEST_ASSERT_EQUAL(0, sl_string__copy_to(str, NULL, 0));
+  TEST_ASSERT_EQUAL(0, sl_string__copy_to(str, NULL, 1));
+  TEST_ASSERT_EQUAL(1, sl_string__copy_to(str, NULL, 2));
+  TEST_ASSERT_EQUAL(5, sl_string__copy_to(str, NULL, 7));
+}
+
 void test_sl_string__to_int_successful(void) {
   sl_string__printf(str, "%s", "123");
 

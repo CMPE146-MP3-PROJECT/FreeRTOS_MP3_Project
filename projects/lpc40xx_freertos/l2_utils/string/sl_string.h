@@ -161,6 +161,13 @@ bool sl_string__insert_at(sl_string_t string, sl_string_size_t index_position, c
 bool sl_string__append(sl_string_t string, const char *append);
 bool sl_string__append_char(sl_string_t string, char append);
 
+/**
+ * Copy the string to the user provided pointer with max size of 'copy_to_max_size' including NULL
+ * @returns the number of bytes copied not including null terminator
+ * @returns If the 'copy_to' is a NULL pointer, then this returns the number of bytes that would have been copied
+ */
+size_t sl_string__copy_to(const sl_string_t string, char *copy_to, size_t copy_to_max_size);
+
 bool sl_string__equals_to(const sl_string_t string, const char *compare_with);
 bool sl_string__equals_to_ignore_case(const sl_string_t string, const char *compare_with_case_ignored);
 
