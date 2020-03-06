@@ -61,6 +61,14 @@ class CodeWriter(object):
             "#define MAX_OF(x,y) ((x) > (y) ? (x) : (y))\n"
             "#endif\n"
             "\n"
+            "/**\n"
+            " * Extern dependency to use dbc_encode_and_send_*() API\n"
+            " * This is designed such that the generated code does not depend on your CAN driver\n"
+            " * @param argument_from_dbc_encode_and_send is a pass through argument from dbc_encode_and_send_*()\n"
+            " * @returns the value returned from is returned from dbc_encode_and_send_*()\n"
+            " */\n"
+            "extern bool dbc_send_can_message(void * argument_from_dbc_encode_and_send, uint32_t message_id, const uint8_t bytes[8], uint8_t dlc);\n"
+            "\n"
         ).format(dbc_filename))
 
     def _write_footer(self):
@@ -206,8 +214,11 @@ class CodeWriter(object):
             code += "  (void)raw;\n"
         else:
             for signal in message.signals:
-                code += self._get_decode_signal_code(signal)
-                code += '\n'
+                if 'little' not in signal.byte_order:
+                    code += '#error "Ooops, I do not know how to work with Big Endian signals"\n'
+                else:
+                    code += self._get_decode_signal_code(signal)
+                    code += '\n'
 
         # Remove excessive newlines from the end
         return code.rstrip()
@@ -289,6 +300,16 @@ class CodeWriter(object):
                 "}}\n"
             ).format(message.name, message.senders[0], message.frame_id, message.length, encode_code))
 
+            self._stream.write((
+                "\n"
+                "/// @see dbc_encode_{0}(); this is its variant to encode and call dbc_send_can_message() to send the message\n"
+                "static inline bool dbc_encode_and_send_{0}(void *argument_for_dbc_send_can_message, const dbc_{0}_s *message) {{\n"
+                "  uint8_t bytes[8];\n"
+                "  const dbc_message_header_t header = dbc_encode_{0}(bytes, message);\n"
+                "  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);\n"
+                "}}\n"
+            ).format(message.name))
+
     def _get_encode_signals_code(self, message):
         code = "  uint64_t raw = 0;\n"\
                "  memset(bytes, 0, 8);\n"\
@@ -299,8 +320,11 @@ class CodeWriter(object):
             code += "  (void)raw;\n\n"
         else:
             for signal in message.signals:
-                code += self._get_encode_signal_code(signal, "raw")
-                code += '\n'
+                if 'little' not in signal.byte_order:
+                    code += '#error "Ooops, I do not know how to work with Big Endian signals"\n'
+                else:
+                    code += self._get_encode_signal_code(signal, "raw")
+                    code += '\n'
 
         # Remove excessive newlines from the end
         return code.rstrip()

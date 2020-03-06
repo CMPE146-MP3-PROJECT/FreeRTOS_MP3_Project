@@ -14,6 +14,14 @@
 #define MAX_OF(x,y) ((x) > (y) ? (x) : (y))
 #endif
 
+/**
+ * Extern dependency to use dbc_encode_and_send_*() API
+ * This is designed such that the generated code does not depend on your CAN driver
+ * @param argument_from_dbc_encode_and_send is a pass through argument from dbc_encode_and_send_*()
+ * @returns the value returned from is returned from dbc_encode_and_send_*()
+ */
+extern bool dbc_send_can_message(void * argument_from_dbc_encode_and_send, uint32_t message_id, const uint8_t bytes[8], uint8_t dlc);
+
 /// Missing in Action (MIA) structure
 typedef struct {
   uint32_t mia_counter; ///< Counter used to track MIA
@@ -211,6 +219,13 @@ static inline dbc_message_header_t dbc_encode_DBC_TEST1(uint8_t bytes[8], const 
   return dbc_header_DBC_TEST1;
 }
 
+/// @see dbc_encode_DBC_TEST1(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_DBC_TEST1(void *argument_for_dbc_send_can_message, const dbc_DBC_TEST1_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_DBC_TEST1(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
+}
+
 /**
  * DBC_TEST2:
  *   Sent by 'IO' with message ID 501 composed of 8 bytes
@@ -245,6 +260,13 @@ static inline dbc_message_header_t dbc_encode_DBC_TEST2(uint8_t bytes[8], const 
   return dbc_header_DBC_TEST2;
 }
 
+/// @see dbc_encode_DBC_TEST2(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_DBC_TEST2(void *argument_for_dbc_send_can_message, const dbc_DBC_TEST2_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_DBC_TEST2(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
+}
+
 /**
  * DBC_TEST3:
  *   Sent by 'IO' with message ID 502 composed of 8 bytes
@@ -264,6 +286,13 @@ static inline dbc_message_header_t dbc_encode_DBC_TEST3(uint8_t bytes[8], const 
   return dbc_header_DBC_TEST3;
 }
 
+/// @see dbc_encode_DBC_TEST3(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_DBC_TEST3(void *argument_for_dbc_send_can_message, const dbc_DBC_TEST3_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_DBC_TEST3(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
+}
+
 /**
  * DRIVER_HEARTBEAT:
  *   Sent by 'DRIVER' with message ID 100 composed of 1 bytes
@@ -277,6 +306,13 @@ static inline dbc_message_header_t dbc_encode_DRIVER_HEARTBEAT(uint8_t bytes[8],
   bytes[0] |= (((uint8_t)(raw >>  0) & 0xff)     ); // 8 bits at B0
 
   return dbc_header_DRIVER_HEARTBEAT;
+}
+
+/// @see dbc_encode_DRIVER_HEARTBEAT(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_DRIVER_HEARTBEAT(void *argument_for_dbc_send_can_message, const dbc_DRIVER_HEARTBEAT_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_DRIVER_HEARTBEAT(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
 }
 
 /**
@@ -296,6 +332,13 @@ static inline dbc_message_header_t dbc_encode_MOTOR_CMD(uint8_t bytes[8], const 
   bytes[0] |= (((uint8_t)(raw >>  0) & 0x0f) << 4); // 4 bits at B4
 
   return dbc_header_MOTOR_CMD;
+}
+
+/// @see dbc_encode_MOTOR_CMD(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_MOTOR_CMD(void *argument_for_dbc_send_can_message, const dbc_MOTOR_CMD_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_MOTOR_CMD(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
 }
 
 /**
@@ -318,6 +361,13 @@ static inline dbc_message_header_t dbc_encode_MOTOR_STATUS(uint8_t bytes[8], con
   return dbc_header_MOTOR_STATUS;
 }
 
+/// @see dbc_encode_MOTOR_STATUS(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_MOTOR_STATUS(void *argument_for_dbc_send_can_message, const dbc_MOTOR_STATUS_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_MOTOR_STATUS(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
+}
+
 /**
  * SENSOR_SONARS:
  *   Sent by 'SENSOR' with message ID 200 composed of 8 bytes
@@ -330,6 +380,13 @@ static inline dbc_message_header_t dbc_encode_SENSOR_SONARS(uint8_t bytes[8], co
   (void)raw;
 
   return dbc_header_SENSOR_SONARS;
+}
+
+/// @see dbc_encode_SENSOR_SONARS(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_SENSOR_SONARS(void *argument_for_dbc_send_can_message, const dbc_SENSOR_SONARS_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_SENSOR_SONARS(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
 }
 
 /**
@@ -358,6 +415,13 @@ static inline dbc_message_header_t dbc_encode_DBC_TEST4(uint8_t bytes[8], const 
   bytes[7] |= (((uint8_t)(raw >>  8) & 0xff)     ); // 8 bits at B56
 
   return dbc_header_DBC_TEST4;
+}
+
+/// @see dbc_encode_DBC_TEST4(); this is its variant to encode and call dbc_send_can_message() to send the message
+static inline bool dbc_encode_and_send_DBC_TEST4(void *argument_for_dbc_send_can_message, const dbc_DBC_TEST4_s *message) {
+  uint8_t bytes[8];
+  const dbc_message_header_t header = dbc_encode_DBC_TEST4(bytes, message);
+  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);
 }
 
 /**

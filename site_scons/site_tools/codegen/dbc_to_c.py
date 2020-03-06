@@ -48,14 +48,14 @@ def main():
         else:
             output_filepath = output
 
-    code_writer = CodeWriter(dbc_filepath, dbc_node_name)
-
-    print("Generating code [{}] -> [{}] using node [{}]".format(
+        print("Generating code [{}] -> [{}] using node [{}]".format(
             os.path.basename(dbc_filepath),
             os.path.basename(output_filepath),
             dbc_node_name,
+            )
         )
-    )
+
+    code_writer = CodeWriter(dbc_filepath, dbc_node_name)
 
     if not print_only:
         if not os.path.isdir(os.path.dirname(output_filepath)):
