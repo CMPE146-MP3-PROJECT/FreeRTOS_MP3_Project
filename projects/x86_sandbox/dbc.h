@@ -188,8 +188,8 @@ extern const dbc_DBC_TEST4_s            dbc_mia_replacement_DBC_TEST4;
 
 
 /**
- * DBC_TEST1:
- *   Sent by 'IO' with message ID 500 composed of 8 bytes
+ * Encode to transmit DBC_TEST1:
+ *   Transmitter: 'IO' with message ID 500 composed of 8 bytes
  */
 static inline dbc_message_header_t dbc_encode_DBC_TEST1(uint8_t bytes[8], const dbc_DBC_TEST1_s *message) {
   uint64_t raw = 0;
@@ -227,8 +227,8 @@ static inline bool dbc_encode_and_send_DBC_TEST1(void *argument_for_dbc_send_can
 }
 
 /**
- * DBC_TEST2:
- *   Sent by 'IO' with message ID 501 composed of 8 bytes
+ * Encode to transmit DBC_TEST2:
+ *   Transmitter: 'IO' with message ID 501 composed of 8 bytes
  */
 static inline dbc_message_header_t dbc_encode_DBC_TEST2(uint8_t bytes[8], const dbc_DBC_TEST2_s *message) {
   uint64_t raw = 0;
@@ -268,8 +268,8 @@ static inline bool dbc_encode_and_send_DBC_TEST2(void *argument_for_dbc_send_can
 }
 
 /**
- * DBC_TEST3:
- *   Sent by 'IO' with message ID 502 composed of 8 bytes
+ * Encode to transmit DBC_TEST3:
+ *   Transmitter: 'IO' with message ID 502 composed of 8 bytes
  */
 static inline dbc_message_header_t dbc_encode_DBC_TEST3(uint8_t bytes[8], const dbc_DBC_TEST3_s *message) {
   uint64_t raw = 0;
@@ -294,8 +294,8 @@ static inline bool dbc_encode_and_send_DBC_TEST3(void *argument_for_dbc_send_can
 }
 
 /**
- * DRIVER_HEARTBEAT:
- *   Sent by 'DRIVER' with message ID 100 composed of 1 bytes
+ * Encode to transmit DRIVER_HEARTBEAT:
+ *   Transmitter: 'DRIVER' with message ID 100 composed of 1 bytes
  */
 static inline dbc_message_header_t dbc_encode_DRIVER_HEARTBEAT(uint8_t bytes[8], const dbc_DRIVER_HEARTBEAT_s *message) {
   uint64_t raw = 0;
@@ -316,8 +316,8 @@ static inline bool dbc_encode_and_send_DRIVER_HEARTBEAT(void *argument_for_dbc_s
 }
 
 /**
- * MOTOR_CMD:
- *   Sent by 'DRIVER' with message ID 101 composed of 1 bytes
+ * Encode to transmit MOTOR_CMD:
+ *   Transmitter: 'DRIVER' with message ID 101 composed of 1 bytes
  */
 static inline dbc_message_header_t dbc_encode_MOTOR_CMD(uint8_t bytes[8], const dbc_MOTOR_CMD_s *message) {
   uint64_t raw = 0;
@@ -342,8 +342,8 @@ static inline bool dbc_encode_and_send_MOTOR_CMD(void *argument_for_dbc_send_can
 }
 
 /**
- * MOTOR_STATUS:
- *   Sent by 'MOTOR' with message ID 400 composed of 3 bytes
+ * Encode to transmit MOTOR_STATUS:
+ *   Transmitter: 'MOTOR' with message ID 400 composed of 3 bytes
  */
 static inline dbc_message_header_t dbc_encode_MOTOR_STATUS(uint8_t bytes[8], const dbc_MOTOR_STATUS_s *message) {
   uint64_t raw = 0;
@@ -369,8 +369,8 @@ static inline bool dbc_encode_and_send_MOTOR_STATUS(void *argument_for_dbc_send_
 }
 
 /**
- * SENSOR_SONARS:
- *   Sent by 'SENSOR' with message ID 200 composed of 8 bytes
+ * Encode to transmit SENSOR_SONARS:
+ *   Transmitter: 'SENSOR' with message ID 200 composed of 8 bytes
  */
 static inline dbc_message_header_t dbc_encode_SENSOR_SONARS(uint8_t bytes[8], const dbc_SENSOR_SONARS_s *message) {
   uint64_t raw = 0;
@@ -390,8 +390,8 @@ static inline bool dbc_encode_and_send_SENSOR_SONARS(void *argument_for_dbc_send
 }
 
 /**
- * DBC_TEST4:
- *   Sent by 'IO' with message ID 503 composed of 8 bytes
+ * Encode to transmit DBC_TEST4:
+ *   Transmitter: 'IO' with message ID 503 composed of 8 bytes
  */
 static inline dbc_message_header_t dbc_encode_DBC_TEST4(uint8_t bytes[8], const dbc_DBC_TEST4_s *message) {
   uint64_t raw = 0;
@@ -425,7 +425,8 @@ static inline bool dbc_encode_and_send_DBC_TEST4(void *argument_for_dbc_send_can
 }
 
 /**
- * DBC_TEST1: Sent by IO
+ * Decode received message DBC_TEST1: Sent by IO
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_DBC_TEST1(dbc_DBC_TEST1_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;
@@ -442,7 +443,7 @@ static inline bool dbc_decode_DBC_TEST1(dbc_DBC_TEST1_s *message, const dbc_mess
   message->DBC_TEST1_unsigned_minmax = ((raw));
 
   raw  = ((uint64_t)((bytes[4]))); // 8 bits from B32
-  message->DBC_TEST1_enum = ((raw));
+  message->DBC_TEST1_enum = (DBC_TEST1_enum_e)((raw));
 
   raw  = ((uint64_t)((bytes[5]))); // 8 bits from B40
   message->DBC_TEST1_float = ((raw * 0.5f));
@@ -456,7 +457,8 @@ static inline bool dbc_decode_DBC_TEST1(dbc_DBC_TEST1_s *message, const dbc_mess
 }
 
 /**
- * DBC_TEST2: Sent by IO
+ * Decode received message DBC_TEST2: Sent by IO
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_DBC_TEST2(dbc_DBC_TEST2_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;
@@ -498,7 +500,8 @@ static inline bool dbc_decode_DBC_TEST2(dbc_DBC_TEST2_s *message, const dbc_mess
 }
 
 /**
- * DBC_TEST3: Sent by IO
+ * Decode received message DBC_TEST3: Sent by IO
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_DBC_TEST3(dbc_DBC_TEST3_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;
@@ -527,7 +530,8 @@ static inline bool dbc_decode_DBC_TEST3(dbc_DBC_TEST3_s *message, const dbc_mess
 }
 
 /**
- * DRIVER_HEARTBEAT: Sent by DRIVER
+ * Decode received message DRIVER_HEARTBEAT: Sent by DRIVER
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_DRIVER_HEARTBEAT(dbc_DRIVER_HEARTBEAT_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;
@@ -538,14 +542,15 @@ static inline bool dbc_decode_DRIVER_HEARTBEAT(dbc_DRIVER_HEARTBEAT_s *message, 
 
   uint64_t raw = 0;
   raw  = ((uint64_t)((bytes[0]))); // 8 bits from B0
-  message->DRIVER_HEARTBEAT_cmd = ((raw));
+  message->DRIVER_HEARTBEAT_cmd = (DRIVER_HEARTBEAT_cmd_e)((raw));
 
   message->mia_info.mia_counter = 0;
   return success;
 }
 
 /**
- * MOTOR_CMD: Sent by DRIVER
+ * Decode received message MOTOR_CMD: Sent by DRIVER
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_MOTOR_CMD(dbc_MOTOR_CMD_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;
@@ -566,7 +571,8 @@ static inline bool dbc_decode_MOTOR_CMD(dbc_MOTOR_CMD_s *message, const dbc_mess
 }
 
 /**
- * MOTOR_STATUS: Sent by MOTOR
+ * Decode received message MOTOR_STATUS: Sent by MOTOR
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_MOTOR_STATUS(dbc_MOTOR_STATUS_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;
@@ -588,7 +594,8 @@ static inline bool dbc_decode_MOTOR_STATUS(dbc_MOTOR_STATUS_s *message, const db
 }
 
 /**
- * SENSOR_SONARS: Sent by SENSOR
+ * Decode received message SENSOR_SONARS: Sent by SENSOR
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_SENSOR_SONARS(dbc_SENSOR_SONARS_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;
@@ -606,7 +613,8 @@ static inline bool dbc_decode_SENSOR_SONARS(dbc_SENSOR_SONARS_s *message, const 
 }
 
 /**
- * DBC_TEST4: Sent by IO
+ * Decode received message DBC_TEST4: Sent by IO
+ *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success
  */
 static inline bool dbc_decode_DBC_TEST4(dbc_DBC_TEST4_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {
   const bool success = true;

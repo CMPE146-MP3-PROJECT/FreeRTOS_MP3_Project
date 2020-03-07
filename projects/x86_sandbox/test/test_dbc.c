@@ -41,7 +41,7 @@ void test_encode_decode__dbc_DBC_TEST1_s() {
 
   // Validate decoded signals
   TEST_ASSERT_TRUE(dbc_decode_DBC_TEST1(&decoded, header, bytes));
-  TEST_ASSERT_EQUAL(DBC_TEST1_enum_val_one, msg.DBC_TEST1_enum);
+  TEST_ASSERT_EQUAL(DBC_TEST1_enum_val_one, decoded.DBC_TEST1_enum);
   TEST_ASSERT_EQUAL(1.234, decoded.DBC_TEST1_float);
   TEST_ASSERT_EQUAL(2.345, decoded.DBC_TEST1_float_signed);
   TEST_ASSERT_EQUAL(255, decoded.DBC_TEST1_unsigned1);

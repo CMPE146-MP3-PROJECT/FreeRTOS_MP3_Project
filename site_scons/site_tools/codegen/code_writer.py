@@ -171,38 +171,28 @@ class CodeWriter(object):
 
     def _decode_methods(self):
         for message in self._dbc.messages:
-            if not self._message_is_relevant(message):
-                self._stream.write((
-                    "\n"
-                    "/**\n"
-                    " * {0}:\n"
-                    " *   Sent by '{1}' with message ID {2} composed of {3} bytes\n"
-                    " *   **Since you are not the transmitter, this function is not generated for you**\n"
-                    " */\n"
-                    "// static inline dbc_message_header_t dbc_encode_{0}(uint8_t bytes[8], const dbc_{0}_s *message);\n"
-                ).format(message.name, message.senders[0], message.frame_id, message.length))
-            else:
-                validation_check = (
-                    "\n"
-                    "  if ((header.message_id != dbc_header_{0}.message_id) || (header.message_dlc != dbc_header_{1}.message_dlc)) {{\n"
-                    "    return !success;\n"
-                    "  }}\n"
-                ).format(message.name, message.name)
+            validation_check = (
+                "\n"
+                "  if ((header.message_id != dbc_header_{0}.message_id) || (header.message_dlc != dbc_header_{1}.message_dlc)) {{\n"
+                "    return !success;\n"
+                "  }}\n"
+            ).format(message.name, message.name)
 
-                self._stream.write((
-                    "\n"
-                    "/**\n"
-                    " * {0}: Sent by {1}\n"
-                    " */\n"
-                    "static inline bool dbc_decode_{0}(dbc_{0}_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {{\n"
-                    "  const bool success = true;\n"
-                    "{2}\n"
-                    "{3}\n"
-                    "\n"
-                    "  message->mia_info.mia_counter = 0;\n"
-                    "  return success;\n"
-                    "}}\n"
-                ).format(message.name, message.senders[0], validation_check, self._get_decode_signals_code(message)))
+            self._stream.write((
+                "\n"
+                "/**\n"
+                " * Decode received message {0}: Sent by {1}\n"
+                " *   Provided a dbc_message_header_t, this will attempt to decode the received message and return true upon success\n"
+                " */\n"
+                "static inline bool dbc_decode_{0}(dbc_{0}_s *message, const dbc_message_header_t header, const uint8_t bytes[8]) {{\n"
+                "  const bool success = true;\n"
+                "{2}\n"
+                "{3}\n"
+                "\n"
+                "  message->mia_info.mia_counter = 0;\n"
+                "  return success;\n"
+                "}}\n"
+            ).format(message.name, message.senders[0], validation_check, self._get_decode_signals_code(message)))
 
         self._stream.write("\n")
 
@@ -252,9 +242,13 @@ class CodeWriter(object):
             remaining -= bits_in_this_byte
             bit_count += bits_in_this_byte
 
+        enum_cast = "";
+        if self._is_signal_an_enum(signal):
+            enum_cast = '({0})'.format(self._get_signal_type(signal))
+
         # If the signal is not defined as a signed, then we will use this code
-        unsigned_code = "message->{0} = (({1} * {2}f) + ({3}));\n".format(signal.name, raw_sig_name, signal.scale,
-                                                                         signal.offset)
+        unsigned_code = "message->{0} = {1}(({2} * {3}f) + ({4}));\n".format(signal.name, enum_cast, raw_sig_name,
+                                                                             signal.scale, signal.offset)
 
         if signal.is_signed:
             mask = "(1 << {0})".format((signal.length - 1))
@@ -285,30 +279,40 @@ class CodeWriter(object):
 
     def _encode_methods(self):
         for message in self._dbc.messages:
-            encode_code = self._get_encode_signals_code(message)
+            if not self._message_is_relevant(message):
+                self._stream.write(("\n"
+                                       "/**\n"
+                                       " * {0}:\n"
+                                       " *   Transmitter: '{1}' with message ID {2} composed of {3} bytes\n"
+                                       " *   **Since you ({4}) are not the transmitter, this function is not generated for you**\n"
+                                       " */\n"
+                                       "// static inline dbc_message_header_t dbc_encode_{0}(uint8_t bytes[8], const dbc_{0}_s *message);\n"
+                                   ).format(message.name, message.senders[0], message.frame_id, message.length, self._dbc_node_name.upper()))
+            else:
+                encode_code = self._get_encode_signals_code(message)
 
-            self._stream.write((
-                "\n"
-                "/**\n"
-                " * {0}:\n"
-                " *   Sent by '{1}' with message ID {2} composed of {3} bytes\n"
-                " */\n"
-                "static inline dbc_message_header_t dbc_encode_{0}(uint8_t bytes[8], const dbc_{0}_s *message) {{\n"
-                "{4}\n"
-                "\n"
-                "  return dbc_header_{0};\n"
-                "}}\n"
-            ).format(message.name, message.senders[0], message.frame_id, message.length, encode_code))
+                self._stream.write((
+                    "\n"
+                    "/**\n"
+                    " * Encode to transmit {0}:\n"
+                    " *   Transmitter: '{1}' with message ID {2} composed of {3} bytes\n"
+                    " */\n"
+                    "static inline dbc_message_header_t dbc_encode_{0}(uint8_t bytes[8], const dbc_{0}_s *message) {{\n"
+                    "{4}\n"
+                    "\n"
+                    "  return dbc_header_{0};\n"
+                    "}}\n"
+                ).format(message.name, message.senders[0], message.frame_id, message.length, encode_code))
 
-            self._stream.write((
-                "\n"
-                "/// @see dbc_encode_{0}(); this is its variant to encode and call dbc_send_can_message() to send the message\n"
-                "static inline bool dbc_encode_and_send_{0}(void *argument_for_dbc_send_can_message, const dbc_{0}_s *message) {{\n"
-                "  uint8_t bytes[8];\n"
-                "  const dbc_message_header_t header = dbc_encode_{0}(bytes, message);\n"
-                "  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);\n"
-                "}}\n"
-            ).format(message.name))
+                self._stream.write((
+                    "\n"
+                    "/// @see dbc_encode_{0}(); this is its variant to encode and call dbc_send_can_message() to send the message\n"
+                    "static inline bool dbc_encode_and_send_{0}(void *argument_for_dbc_send_can_message, const dbc_{0}_s *message) {{\n"
+                    "  uint8_t bytes[8];\n"
+                    "  const dbc_message_header_t header = dbc_encode_{0}(bytes, message);\n"
+                    "  return dbc_send_can_message(argument_for_dbc_send_can_message, header.message_id, bytes, header.message_dlc);\n"
+                    "}}\n"
+                ).format(message.name))
 
     def _get_encode_signals_code(self, message):
         code = "  uint64_t raw = 0;\n"\
@@ -489,7 +493,7 @@ class CodeWriter(object):
     def _get_signal_type(self, signal):
         signal_type = "float";
 
-        if signal.choices is not None:
+        if self._is_signal_an_enum(signal):
             signal_type = signal.name + ENUM_SUFFIX
         elif (signal.scale * 1.0).is_integer():
             max_value = (2 ** signal.length) * signal.scale
@@ -509,6 +513,9 @@ class CodeWriter(object):
             signal_type = "float"
 
         return signal_type
+
+    def _is_signal_an_enum(self, signal):
+        return signal.choices is not None
 
     def _message_is_relevant(self, message):
         return (message.senders[0].upper() == self._dbc_node_name.upper()) or (GENERATE_ALL_NODE_NAME == self._dbc_node_name.upper())
