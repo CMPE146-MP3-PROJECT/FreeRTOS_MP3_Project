@@ -5,7 +5,7 @@
 
 // Data for x-axis, y-axis, and z-axis
 typedef struct {
-  uint16_t x, y, z;
+  int16_t x, y, z;
 } acceleration__axis_data_s;
 
 /// Enables acceleration sensor data update and returns true if we successfully detected the sensor

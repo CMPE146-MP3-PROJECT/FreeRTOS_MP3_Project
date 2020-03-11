@@ -10,7 +10,7 @@
 #include "uart.h"
 
 static void peripherals_init__startup_sequence(void);
-static void peripherals_init__mount_sd_card(void);
+static const char *peripherals_init__mount_sd_card(void);
 static void peripherals_init__uart0_init(void);
 static void peripherals_init__i2c_init(void);
 
@@ -18,16 +18,16 @@ void peripherals_init(void) {
   board_io__initialize();
   peripherals_init__startup_sequence();
 
-  const uint32_t spi_sd_max_speed_khz = 24 * 1000;
-  ssp2__initialize(spi_sd_max_speed_khz);
-  peripherals_init__mount_sd_card();
-
   // UART initialization is required in order to use <stdio.h> puts, printf() etc; @see system_calls.c
   peripherals_init__uart0_init();
 
+  const uint32_t spi_sd_max_speed_khz = 24 * 1000;
+  ssp2__initialize(spi_sd_max_speed_khz);
+  const char *mount_info = peripherals_init__mount_sd_card();
+
   // UART is initialized, so we can now start using printf()
   const char *line = "--------------------------------------------------------------------------------";
-  printf("\n%s\n%s(): Low level startup\n", line, __FUNCTION__);
+  printf("\n%s\n%s(): Low level startup\n%s\n", line, __FUNCTION__, mount_info);
 
   peripherals_init__i2c_init();
 }
@@ -40,14 +40,21 @@ static void peripherals_init__startup_sequence(void) {
   }
 }
 
-static void peripherals_init__mount_sd_card(void) {
+static const char *peripherals_init__mount_sd_card(void) {
   // This FATFS object should never go out of scope
   static FATFS sd_card_drive;
+  const char *mount_info = "";
 
-  const BYTE option_mount_later = 0; // Actually mounts later when the first file is accessed
+  const BYTE option_mount_now = 1;
   const TCHAR *default_drive = (const TCHAR *)"";
 
-  f_mount(&sd_card_drive, default_drive, option_mount_later);
+  if (FR_OK == f_mount(&sd_card_drive, default_drive, option_mount_now)) {
+    mount_info = ("SD card mounted successfully\n");
+  } else {
+    mount_info = ("WARNING: SD card could not be mounted\n");
+  }
+
+  return mount_info;
 }
 
 static void peripherals_init__uart0_init(void) {

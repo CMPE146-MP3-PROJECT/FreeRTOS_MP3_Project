@@ -6,6 +6,9 @@
 
 #include "ff.h"
 
+#include "FreeRTOS.h"
+#include "semphr.h"
+
 #if FF_USE_LFN == 3	/* Dynamic memory allocation */
 
 /*------------------------------------------------------------------------*/
@@ -69,6 +72,7 @@ int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object
 
 	/* FreeRTOS */
 	*sobj = xSemaphoreCreateMutex();
+	vTraceSetMutexName(*sobj, "fatfs");
 	return (int)(*sobj != NULL);
 
 	/* CMSIS-RTOS */

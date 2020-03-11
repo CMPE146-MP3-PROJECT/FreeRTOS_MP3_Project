@@ -56,4 +56,5 @@ typedef enum {
 void lpc_peripheral__turn_on_power_to(lpc_peripheral_e peripheral);
 bool lpc_peripheral__is_powered_on(lpc_peripheral_e peripheral);
 
-void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback);
+void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback,
+                                      const char *name_for_rtos_trace);

@@ -36,9 +36,9 @@ acceleration__axis_data_s acceleration__get_data(void) {
   axis_data.z = ((uint16_t)axis_raw_data[4] << 8) | axis_raw_data[5];
 
   // Data is at upper 12-bits, so shift the result down by 4
-  axis_data.x >>= 4;
-  axis_data.y >>= 4;
-  axis_data.z >>= 4;
+  axis_data.x /= 16;
+  axis_data.y /= 16;
+  axis_data.z /= 16;
 
   return axis_data;
 }

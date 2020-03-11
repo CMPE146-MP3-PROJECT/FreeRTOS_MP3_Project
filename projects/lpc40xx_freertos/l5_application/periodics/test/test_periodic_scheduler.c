@@ -36,9 +36,9 @@ void test_periodic_scheduler__initialize(void) {
   xTaskCreate_ExpectAndReturn(periodic_scheduler__1000Hz_task, "1000Hz", stack_size, NULL, PRIORITY_PERIODIC_1000HZ,
                               NULL, 0);
 
-  xTaskCreate_ExpectAndReturn(periodic_scheduler__task_monitor, "xHz", stack_size, NULL, PRIORITY_PERIODIC_MONITOR,
+  xTaskCreate_ExpectAndReturn(periodic_scheduler__task_monitor, "Hz_wdt", stack_size, NULL, PRIORITY_PERIODIC_MONITOR,
                               NULL, 0);
 
   periodic_callbacks__initialize_Expect();
-  periodic_scheduler__initialize(stack_size);
+  periodic_scheduler__initialize(stack_size, true);
 }

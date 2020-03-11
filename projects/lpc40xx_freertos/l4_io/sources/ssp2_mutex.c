@@ -10,6 +10,7 @@ static SemaphoreHandle_t spi2_mutex_handle;
 void spi2_mutex__acquire(void) {
   if (!spi2_mutex_handle) {
     spi2_mutex_handle = xSemaphoreCreateMutexStatic(&spi2_mutex_memory);
+    vTraceSetMutexName(spi2_mutex_handle, "spi2_mutex");
   }
 
   // Only acquire the mutex if the FreeRTOS is running

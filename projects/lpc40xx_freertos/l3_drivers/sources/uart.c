@@ -15,6 +15,7 @@ typedef LPC_UART_TypeDef lpc_uart;
  */
 typedef struct {
   lpc_uart *registers;
+  const char *rtos_isr_trace_name;
   QueueHandle_t queue_transmit;
   QueueHandle_t queue_receive;
 } uart_s;
@@ -42,10 +43,10 @@ static void uart__isr_common(uart_s *uart_type); ///< Common function for all UA
  * but these extra registers are at the end of the memory map that matches with UART0
  */
 static uart_s uarts[] = {
-    {(lpc_uart *)LPC_UART0},
-    {(lpc_uart *)LPC_UART1},
-    {(lpc_uart *)LPC_UART2},
-    {(lpc_uart *)LPC_UART3},
+    {(lpc_uart *)LPC_UART0, "Uart0"},
+    {(lpc_uart *)LPC_UART1, "Uart1"},
+    {(lpc_uart *)LPC_UART2, "Uart2"},
+    {(lpc_uart *)LPC_UART3, "Uart3"},
 };
 
 static void (*const uart__isrs[])(void) = {uart0_isr, uart1_isr, uart2_isr, uart3_isr};
@@ -112,7 +113,7 @@ static bool uart__clear_receive_fifo(uart_s *uart_type) {
 
 static void uart__enable_receive_and_transmit_interrupts(uart_e uart) {
   uart_s *uart_type = &uarts[uart];
-  lpc_peripheral__enable_interrupt(uart_peripheral_ids[uart], uart__isrs[uart]);
+  lpc_peripheral__enable_interrupt(uart_peripheral_ids[uart], uart__isrs[uart], uart_type->rtos_isr_trace_name);
 
   const uint32_t enable_rx_tx_fifo = (1 << 0) | (1 << 6);
   const uint32_t reset_rx_tx_fifo = (1 << 1) | (1 << 2);
@@ -207,12 +208,16 @@ bool uart__enable_queues(uart_e uart, QueueHandle_t queue_receive, QueueHandle_t
     // Ensure that the queues are not already enabled
     if (!uart__is_receive_queue_enabled(uart) && NULL != queue_receive) {
       uart_type->queue_receive = queue_receive;
-      // vTraceSetQueueName(queue_receive, "U RXQ"); // TODO: should be unique
+      const char name[] = {'U', '0' + (char)uart, 'R', 'X', 'Q', '\0'};
+      vTraceSetQueueName(queue_receive, name);
+      (void)name; // avoid warning if trace is disabled
     }
 
     if (!uart__is_transmit_queue_enabled(uart) && NULL != queue_transmit) {
       uart_type->queue_transmit = queue_transmit;
-      // vTraceSetQueueName(queue_transmit, "U TXQ"); // TODO: should be unique
+      const char name[] = {'U', '0' + (char)uart, 'T', 'X', 'Q', '\0'};
+      vTraceSetQueueName(queue_transmit, name);
+      (void)name; // avoid warning if trace is disabled
     }
 
     // Enable peripheral_id interrupt if all is well

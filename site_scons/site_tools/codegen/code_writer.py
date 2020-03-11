@@ -108,7 +108,7 @@ class CodeWriter(object):
         self._stream.write("// These are copied during dbc_service_mia_*() when message MIA timeout occurs\n")
         self._stream.write(line)
         for message in self._dbc.messages:
-            suggested_mia_time = "" if message.cycle_time is 0 else (" // Suggested MIA threshold: (3*{0})".format(message.cycle_time))
+            suggested_mia_time = "" if message.cycle_time == 0 else (" // Suggested MIA threshold: (3*{0})".format(message.cycle_time))
             self._stream.write(("extern const dbc_{0}_s ".format(message.name)).ljust(40))
             self._stream.write("dbc_mia_replacement_{0};{1}\n".format(message.name, suggested_mia_time))
 
@@ -156,7 +156,7 @@ class CodeWriter(object):
             # MIA only makes sense for messages we receive, and not the messages we send
             mia = "  dbc_mia_info_t mia_info;\n"
             comment = "" if message.comment is None else ("\n *   - "+message.comment)
-            cycle_time = "" if message.cycle_time is 0 else ("\n *   - Expected every {0} ms".format(message.cycle_time))
+            cycle_time = "" if message.cycle_time == 0 else ("\n *   - Expected every {0} ms".format(message.cycle_time))
 
             self._stream.write((
                 "\n"

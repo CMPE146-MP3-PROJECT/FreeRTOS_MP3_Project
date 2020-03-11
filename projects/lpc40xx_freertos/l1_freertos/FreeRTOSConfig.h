@@ -101,11 +101,11 @@
 #define INCLUDE_eTaskGetState                   1
 
 // Enable CPU utilization API
-#define configUSE_TRACE_FACILITY                1
+#define configUSE_TRACE_FACILITY                0
 #define configGENERATE_RUN_TIME_STATS           1
 
 // If RTOS trace facility is enabled, then provide the high resolution timer API
-#if (0 != configUSE_TRACE_FACILITY)
+#if (0 != configGENERATE_RUN_TIME_STATS)
   extern uint32_t freertos_hooks__get_run_time_counter_value(void);
   extern void freertos_hooks__reset_run_time_stats(void);
 
@@ -144,3 +144,6 @@ do {                                              \
 #if (0 == configMAX_SYSCALL_INTERRUPT_PRIORITY)
   #error "configMAX_SYSCALL_INTERRUPT_PRIORITY must not be 0"
 #endif
+
+// This should be included regardless of '#if (0 != configUSE_TRACE_FACILITY)'
+#include "trcRecorder.h"

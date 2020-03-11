@@ -28,6 +28,7 @@
  */
 typedef struct {
   LPC_I2C_TypeDef *const registers; ///< LPC memory mapped registers for the I2C bus
+  const char *rtos_isr_trace_name;
 
   // Transfer complete signal informs us when I2C state machine driven by ISR has finished
   SemaphoreHandle_t transfer_complete_signal;
@@ -47,9 +48,9 @@ typedef struct {
 
 /// Instances of structs for each I2C peripheral
 static i2c_s i2c_structs[] = {
-    {LPC_I2C0},
-    {LPC_I2C1},
-    {LPC_I2C2},
+    {LPC_I2C0, "i2c0"},
+    {LPC_I2C1, "i2c1"},
+    {LPC_I2C2, "i2c2"},
 };
 
 static bool i2c__transfer(i2c_s *i2c, uint8_t slave_address, uint8_t starting_slave_memory_address,
@@ -115,6 +116,7 @@ void i2c__initialize(i2c_e i2c_number, uint32_t desired_i2c_bus_speed_in_hz, uin
   // allocation because we do not want to statically define memory for all I2C buses
   i2c->transfer_complete_signal = xSemaphoreCreateBinary();
   i2c->mutex = xSemaphoreCreateMutex();
+  vTraceSetMutexName(i2c->mutex, "i2c_mutex");
 
   // Optional: Provide names of the FreeRTOS objects for the Trace Facility
   // vTraceSetMutexName(mI2CMutex, "I2C Mutex");
@@ -148,7 +150,7 @@ void i2c__initialize(i2c_e i2c_number, uint32_t desired_i2c_bus_speed_in_hz, uin
 
   // Enable I2C and the interrupt for it
   lpc_i2c->CONSET = 0x40;
-  lpc_peripheral__enable_interrupt(peripheral_id, isrs[i2c_number]);
+  lpc_peripheral__enable_interrupt(peripheral_id, isrs[i2c_number], i2c_structs[i2c_number].rtos_isr_trace_name);
 }
 
 bool i2c__detect(i2c_e i2c_number, uint8_t slave_address) {

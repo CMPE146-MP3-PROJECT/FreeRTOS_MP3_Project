@@ -101,6 +101,10 @@ static function__void_f lpc_peripheral__isr_registrations[32 + 9] = {
     lpc_peripheral__halt_handler, // 56 EEPROM
 };
 
+#if (0 != configUSE_TRACE_FACILITY)
+static traceHandle lpc_peripheral__trace_handles[32 + 9];
+#endif
+
 /**
  * This function is intentionally not declared at the header file
  * This is registered by the startup code and registered as the interrupt callback for each peripheral
@@ -115,7 +119,14 @@ void lpc_peripheral__interrupt_dispatcher(void) {
 
   /* Lookup the function pointer we want to call and make the call */
   function__void_f isr_to_service = lpc_peripheral__isr_registrations[isr_num];
+
+#if (0 != configUSE_TRACE_FACILITY)
+  vTraceStoreISRBegin(lpc_peripheral__trace_handles[isr_num]);
   isr_to_service();
+  vTraceStoreISREnd(0);
+#else
+  isr_to_service();
+#endif
 
   // http://www.keil.com/support/docs/3928.htm
   static volatile int memory_write_to_avoid_spurious_interrupt;
@@ -143,12 +154,17 @@ bool lpc_peripheral__is_powered_on(lpc_peripheral_e peripheral) {
   return powered_on;
 }
 
-void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback) {
+void lpc_peripheral__enable_interrupt(lpc_peripheral_e peripheral, function__void_f isr_callback,
+                                      const char *name_for_rtos_trace) {
   // Sorry: Nasty hack because CAN1 shares interrupt with CAN0
   if (LPC_PERIPHERAL__CAN1 == peripheral) {
     peripheral = LPC_PERIPHERAL__CAN0;
   }
   lpc_peripheral__isr_registrations[peripheral] = isr_callback;
+
+#if (0 != configUSE_TRACE_FACILITY)
+  lpc_peripheral__trace_handles[peripheral] = xTraceSetISRProperties(name_for_rtos_trace, 0);
+#endif
 
   /**
    * @note:

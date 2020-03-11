@@ -265,13 +265,13 @@ bool can__init(can__num_e can, uint32_t baudrate_kbps, uint16_t rxq_size, uint16
    */
   if (can1 == can) {
     lpc_peripheral__turn_on_power_to(LPC_PERIPHERAL__CAN0);
-    lpc_peripheral__enable_interrupt(LPC_PERIPHERAL__CAN0, can__isr);
+    lpc_peripheral__enable_interrupt(LPC_PERIPHERAL__CAN0, can__isr, "CAN0");
 
     gpio__set_function((gpio_s){.port_number = GPIO__PORT_0, .pin_number = 0}, GPIO__FUNCTION_1);
     gpio__set_function((gpio_s){.port_number = GPIO__PORT_0, .pin_number = 1}, GPIO__FUNCTION_1);
   } else if (can2 == can) {
     lpc_peripheral__turn_on_power_to(LPC_PERIPHERAL__CAN1);
-    lpc_peripheral__enable_interrupt(LPC_PERIPHERAL__CAN1, can__isr);
+    lpc_peripheral__enable_interrupt(LPC_PERIPHERAL__CAN1, can__isr, "CAN1");
 
     gpio__set_function((gpio_s){.port_number = GPIO__PORT_2, .pin_number = 7}, GPIO__FUNCTION_1);
     gpio__set_function((gpio_s){.port_number = GPIO__PORT_2, .pin_number = 8}, GPIO__FUNCTION_1);

@@ -6,13 +6,14 @@
 typedef struct {
   LPC_TIM_TypeDef *registers;
   lpc_peripheral_e peripheral_id;
+  const char *rtos_isr_trace_name;
 } hw_timer_s;
 
 static const hw_timer_s hw_timers[] = {
-    {LPC_TIM0, LPC_PERIPHERAL__TIMER0},
-    {LPC_TIM1, LPC_PERIPHERAL__TIMER1},
-    {LPC_TIM2, LPC_PERIPHERAL__TIMER2},
-    {LPC_TIM3, LPC_PERIPHERAL__TIMER3},
+    {LPC_TIM0, LPC_PERIPHERAL__TIMER0, "HW_T0"},
+    {LPC_TIM1, LPC_PERIPHERAL__TIMER1, "HW_T1"},
+    {LPC_TIM2, LPC_PERIPHERAL__TIMER2, "HW_T2"},
+    {LPC_TIM3, LPC_PERIPHERAL__TIMER3, "HW_T3"},
 };
 
 void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, function__void_f isr_callback) {
@@ -32,7 +33,7 @@ void hw_timer__enable(lpc_timer_e timer, const uint32_t prescalar_divider, funct
   /* Interrupt can be enabled because we can assume the timer is not setup
    * for interrupt yet through hw_timer__enable_match_isr()
    */
-  lpc_peripheral__enable_interrupt(hw_timers[timer].peripheral_id, isr_callback);
+  lpc_peripheral__enable_interrupt(hw_timers[timer].peripheral_id, isr_callback, hw_timers[timer].rtos_isr_trace_name);
 
   hw_timers[timer].registers->PR = prescalar_divider;
   hw_timers[timer].registers->TCR = 1; // Enable
