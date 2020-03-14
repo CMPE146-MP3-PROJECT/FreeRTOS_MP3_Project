@@ -6,15 +6,15 @@
 /**
  * Board information:
  *
- * P2.3  - LED3
- * P1.26 - LED2
- * P1.24 - LED1
- * P1.18 - LED0
+ * P2.3  - LED0
+ * P1.26 - LED1
+ * P1.24 - LED2
+ * P1.18 - LED3
  *
- * P1.19 - SW3
- * P1.15 - SW2
- * P0.30 - SW1
- * P0.29 - SW0
+ * P1.19 - SW0
+ * P1.15 - SW1
+ * P0.30 - SW2
+ * P0.29 - SW3
  *
  * P1.8 - SD CS
  * P1.9 - SD card detect
@@ -56,22 +56,22 @@ void board_io__initialize(void) {
   gpio__enable_open_drain(scl_2);
 
   // Output pins
-  board_io__led3 = gpio__construct_as_output(GPIO__PORT_2, 3);
-  board_io__led2 = gpio__construct_as_output(GPIO__PORT_1, 26);
-  board_io__led1 = gpio__construct_as_output(GPIO__PORT_1, 24);
-  board_io__led0 = gpio__construct_as_output(GPIO__PORT_1, 18);
+  board_io__led0 = gpio__construct_as_output(GPIO__PORT_2, 3);
+  board_io__led1 = gpio__construct_as_output(GPIO__PORT_1, 26);
+  board_io__led2 = gpio__construct_as_output(GPIO__PORT_1, 24);
+  board_io__led3 = gpio__construct_as_output(GPIO__PORT_1, 18);
 
   // Input pins
-  board_io__sw3 = gpio__construct_as_input(GPIO__PORT_1, 19);
-  board_io__sw2 = gpio__construct_as_input(GPIO__PORT_1, 15);
-  board_io__sw1 = gpio__construct_as_input(GPIO__PORT_0, 30);
-  board_io__sw0 = gpio__construct_as_input(GPIO__PORT_0, 29);
+  board_io__sw0 = gpio__construct_as_input(GPIO__PORT_1, 19);
+  board_io__sw1 = gpio__construct_as_input(GPIO__PORT_1, 15);
+  board_io__sw2 = gpio__construct_as_input(GPIO__PORT_0, 30);
+  board_io__sw3 = gpio__construct_as_input(GPIO__PORT_0, 29);
 
-  // SW2 and SW3 require internal pull down resistors
+  // SW0 and SW1 require internal pull down resistors
   // otherwise undefined behavior will result from
   // floating pins on open switch
-  gpio__enable_pull_down_resistors(board_io__sw3);
-  gpio__enable_pull_down_resistors(board_io__sw2);
+  gpio__enable_pull_down_resistors(board_io__sw0);
+  gpio__enable_pull_down_resistors(board_io__sw1);
 }
 
 // Note: Not using gpio.h API here to optimize the speed of SSP CS selection
