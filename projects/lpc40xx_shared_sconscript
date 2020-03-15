@@ -34,7 +34,7 @@ SIZE_FILE = VARIANT_DIR.File("{}.size".format(PROJECT_DIR.name))
 UNIT_TEST_BUILD_DIR = VARIANT_DIR.Dir("test")
 AUTO_GENERATED_CODE_DIR = VARIANT_DIR.Dir("auto_generated")
 MOCK_DIR = project_dirnode.Dir("unittest_header_overrides")
-DBC_DIRS = PROJECT_DIR
+DBC_DIRS = Dir("#/dbc")
 
 """ Source and include nodes """
 INCLUDE_DIRS = []

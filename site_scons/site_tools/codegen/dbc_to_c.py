@@ -2,7 +2,8 @@ from argparse import ArgumentParser
 import os
 import sys
 
-from code_writer import CodeWriter, GENERATE_ALL_NODE_NAME
+from code_writer import CodeWriter, GENERATE_ALL_NODE_NAME, InvalidDBCNodeError
+from color import ColorString
 
 
 def get_args():
@@ -37,7 +38,14 @@ def main():
         print("Unable to find DBC file: [{}]".format(dbc_filepath))
         return 1  # Return early
 
+    try:
+        code_writer = CodeWriter(dbc_filepath, dbc_node_name)
+    except InvalidDBCNodeError as err:
+        print(ColorString(str(err)).red)
+        return 1  # Return early
+
     if not print_only:
+        dbc_filename = os.path.basename(dbc_filepath)
         basename, ext = os.path.splitext(os.path.basename(dbc_filepath))
         output_filename = "{}.h".format(basename)
 
@@ -48,16 +56,11 @@ def main():
         else:
             output_filepath = output
 
-        print("Generating code [{}] -> [{}] using node [{}]".format(
-            os.path.basename(dbc_filepath),
-            os.path.basename(output_filepath),
-            dbc_node_name,
-            )
-        )
+        message = "Generating code [{}] -> [{}]".format(dbc_filename, output_filename)
+        if dbc_node_name != GENERATE_ALL_NODE_NAME:
+            message += " using node [{}]".format(dbc_node_name)
+        print(ColorString(message).green)
 
-    code_writer = CodeWriter(dbc_filepath, dbc_node_name)
-
-    if not print_only:
         if not os.path.isdir(os.path.dirname(output_filepath)):
             os.makedirs(os.path.dirname(output_filepath))
         with open(output_filepath, "w") as file:

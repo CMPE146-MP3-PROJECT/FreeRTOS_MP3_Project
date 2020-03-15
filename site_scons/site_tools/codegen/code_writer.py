@@ -19,6 +19,11 @@ References:
 ENUM_SUFFIX = "_e"
 GENERATE_ALL_NODE_NAME = "ALL"
 
+
+class InvalidDBCNodeError(Exception):
+    pass
+
+
 class CodeWriter(object):
     def __init__(self, dbc_filepath, dbc_node_name):
         self._stream = StringIO()
@@ -26,6 +31,10 @@ class CodeWriter(object):
 
         self._dbc_filepath = dbc_filepath
         self._dbc = cantools.database.load_file(dbc_filepath)
+        self._valid_node_names = list(map(lambda node: node.name, self._dbc.nodes))
+
+        if (self._dbc_node_name != GENERATE_ALL_NODE_NAME) and (self._dbc_node_name not in self._valid_node_names):
+            raise InvalidDBCNodeError("Invalid node [{}]! Available nodes {}".format(self._dbc_node_name, self._valid_node_names))
 
         self._file_header()
         self._common_structs()
@@ -40,6 +49,10 @@ class CodeWriter(object):
 
     def __str__(self):
         return self._stream.getvalue()
+
+    """
+    Private methods
+    """
 
     def _file_header(self):
         dbc_filename = os.path.basename(self._dbc_filepath)
@@ -523,6 +536,7 @@ class CodeWriter(object):
     """
     Accessors
     """
+
     @property
     def dbc_filepath(self):
         return self._dbc_filepath
@@ -530,3 +544,7 @@ class CodeWriter(object):
     @property
     def dbc_node_name(self):
         return self._dbc_node_name
+
+    @property
+    def valid_node_names(self):
+        return self._valid_node_names
