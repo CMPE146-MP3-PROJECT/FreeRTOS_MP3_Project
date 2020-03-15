@@ -14,3 +14,8 @@ gpio_s board_io__get_led0(void);
 gpio_s board_io__get_led1(void);
 gpio_s board_io__get_led2(void);
 gpio_s board_io__get_led3(void);
+
+gpio_s board_io__get_sw0(void);
+gpio_s board_io__get_sw1(void);
+gpio_s board_io__get_sw2(void);
+gpio_s board_io__get_sw3(void);
