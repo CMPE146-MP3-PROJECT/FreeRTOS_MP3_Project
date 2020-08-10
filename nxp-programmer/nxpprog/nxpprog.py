@@ -659,7 +659,7 @@ class AutoLPCPortFinder:
         if len(response) > 0:
             logging.info('Response: %s', response)
         else:
-            logging.warning('No response from %s', port.port)
+            logging.warning('No response from %s', serial.port)
 
         if (response == LPC_CHAR['Synchronized'] or
             response == LPC_CHAR['SynchronizedLeadingZeros']):
