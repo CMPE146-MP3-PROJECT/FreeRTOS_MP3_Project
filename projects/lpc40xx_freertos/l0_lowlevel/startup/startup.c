@@ -53,12 +53,12 @@ static void startup__init_data_sram(void) {
   extern void *_bdata_vma;
   extern void *_data_end;
 
-  uint8_t *src = (uint8_t *)&_bdata_lma;
-  uint8_t *dest = (uint8_t *)&_bdata_vma;
-  while (dest < (uint8_t *)&_data_end) {
-    *dest = *src;
-    dest++;
-    src++;
+  uint8_t *src_flash = (uint8_t *)&_bdata_lma; // Flash
+  uint8_t *dest_ram = (uint8_t *)&_bdata_vma;  // RAM
+  while (dest_ram < (uint8_t *)&_data_end) {
+    *dest_ram = *src_flash;
+    dest_ram++;
+    src_flash++;
   }
 }
 
@@ -66,9 +66,9 @@ static void startup__init_bss_sram(void) {
   extern void *_bss_start;
   extern void *_bss_end;
 
-  uint8_t *ptr = (uint8_t *)&_bss_start;
-  while (ptr < (uint8_t *)&_bss_end) {
-    *ptr = 0U;
-    ptr++;
+  uint8_t *sram_ptr = (uint8_t *)&_bss_start;
+  while (sram_ptr < (uint8_t *)&_bss_end) {
+    *sram_ptr = 0U;
+    sram_ptr++;
   }
 }

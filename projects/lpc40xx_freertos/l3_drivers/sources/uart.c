@@ -115,12 +115,6 @@ static void uart__enable_receive_and_transmit_interrupts(uart_e uart) {
   uart_s *uart_type = &uarts[uart];
   lpc_peripheral__enable_interrupt(uart_peripheral_ids[uart], uart__isrs[uart], uart_type->rtos_isr_trace_name);
 
-  const uint32_t enable_rx_tx_fifo = (1 << 0) | (1 << 6);
-  const uint32_t reset_rx_tx_fifo = (1 << 1) | (1 << 2);
-
-  uart_type->registers->FCR = enable_rx_tx_fifo;
-  uart_type->registers->FCR = reset_rx_tx_fifo;
-
   const uint32_t enable_rx_tx_interrupts = (1 << 0) | (1 << 1) | (1 << 2); // B0:Rx, B1: Tx
   uart_type->registers->IER = enable_rx_tx_interrupts;
 }
@@ -176,9 +170,6 @@ void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
   const uint8_t dlab_bit = (1 << 7);
   const uint8_t eight_bit_datalen = 3;
 
-  // 2-stop bits helps improve baud rate error; you can remove this if bandwidth is critical to you
-  const uint8_t stop_bits_is_2 = (1 << 2);
-
   lpc_uart *uart_regs = uarts[uart].registers;
 
   uart_regs->LCR = dlab_bit; // Set DLAB bit to access DLM & DLL
@@ -190,7 +181,15 @@ void uart__init(uart_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
    */
   const uint32_t default_reset_fdr_value = (1 << 4);
   uart_regs->FDR = default_reset_fdr_value;
-  uart_regs->LCR = eight_bit_datalen | stop_bits_is_2; // DLAB is reset back to zero also
+
+  // Important: Set FCR value before enable UART by writing the LCR register
+  // Important: FCR is a write-only register, and we cannot use R/M/W such as |=
+  const uint8_t enable_fifo = (1 << 0); // Must be done!
+  const uint8_t eight_char_timeout = (2 << 6);
+  uart_regs->FCR = enable_fifo;
+  uart_regs->FCR = enable_fifo | eight_char_timeout;
+
+  uart_regs->LCR = eight_bit_datalen; // DLAB is reset back to zero also
 }
 
 bool uart__is_initialized(uart_e uart) {
