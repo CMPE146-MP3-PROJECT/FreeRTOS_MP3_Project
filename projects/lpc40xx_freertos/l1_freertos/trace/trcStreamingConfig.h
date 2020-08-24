@@ -87,7 +87,7 @@ extern "C" {
  * be stored at the same time. Must be sufficient for all tasks, otherwise there
  * will be warnings (as User Events) from TzCtrl task, that monitors this.
  ******************************************************************************/
-#define TRC_CFG_OBJECT_DATA_SLOTS 40
+#define TRC_CFG_OBJECT_DATA_SLOTS 30
 
 /*******************************************************************************
  * Configuration Macro: TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT
@@ -97,7 +97,7 @@ extern "C" {
  *
  * Note: not used by the J-Link RTT stream port (see trcStreamingPort.h instead)
  ******************************************************************************/
-#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT (5)
+#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT (8)
 
 /*******************************************************************************
  * Configuration Macro: TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE
@@ -110,7 +110,21 @@ extern "C" {
  *
  * Note: not used by the J-Link RTT stream port (see trcStreamingPort.h instead)
  ******************************************************************************/
-#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE (1024 * 3)
+#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE (1024 * 2)
+
+/**
+ * SJ2 hack
+ * When configENABLE_TRACE_ON_SD_CARD is not enabled, we should not be tracing
+ * at all. The problem is that when configUSE_TRACE_FACILITY is enabled, it
+ * pulls in all of the Trace and allocates large memory
+ */
+#include "FreeRTOSConfig.h"
+#if !(configENABLE_TRACE_ON_SD_CARD)
+#undef TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT
+#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT 1
+#undef TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE
+#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE 32
+#endif
 
 /*******************************************************************************
  * TRC_CFG_ISR_TAILCHAINING_THRESHOLD

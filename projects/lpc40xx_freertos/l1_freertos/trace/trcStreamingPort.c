@@ -60,6 +60,18 @@
  */
 #define ALIGN_FWRITE (4 * 1024)
 
+/**
+ * SJ2 hack
+ * When configENABLE_TRACE_ON_SD_CARD is not enabled, we should not be tracing
+ * at all. The problem is that when configUSE_TRACE_FACILITY is enabled, it
+ * pulls in all of the Trace and allocates large memory
+ */
+#include "FreeRTOSConfig.h"
+#if !(configENABLE_TRACE_ON_SD_CARD)
+#undef ALIGN_FWRITE
+#define ALIGN_FWRITE 0
+#endif
+
 #if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)
 #if (TRC_USE_TRACEALYZER_RECORDER == 1)
 

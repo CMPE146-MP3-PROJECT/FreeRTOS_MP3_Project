@@ -101,8 +101,13 @@
 #define INCLUDE_eTaskGetState                   1
 
 // Enable CPU utilization API
-#define configUSE_TRACE_FACILITY                0
+#define configUSE_TRACE_FACILITY                1
+
+// Capture run-time statistics of CPU utilization for all tasks
 #define configGENERATE_RUN_TIME_STATS           1
+
+// If 1, then FreeRTOS trace will be continuously saved on your micro SD card on the SJ2 board
+#define configENABLE_TRACE_ON_SD_CARD           0
 
 // If RTOS trace facility is enabled, then provide the high resolution timer API
 #if (0 != configGENERATE_RUN_TIME_STATS)
@@ -135,6 +140,10 @@ do {                                              \
  */
 #if (configMAX_PRIORITIES <= PRIORITY_CRITICAL)
   #error "Max priority must be greater than CRITICAL!"
+#endif
+
+#if (configENABLE_TRACE_ON_SD_CARD && !configUSE_TRACE_FACILITY)
+  #error "configUSE_TRACE_FACILITY must be non-zero to use configENABLE_TRACE_ON_SD_CARD"
 #endif
 
 /**

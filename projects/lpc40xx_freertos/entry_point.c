@@ -1,16 +1,19 @@
 #include <stdio.h>
 
+#include "FreeRTOS.h"
+#include "trcRecorder.h"
+
 #include "clock.h"
 #include "crash.h"
 #include "peripherals_init.h"
 #include "sensors.h"
 #include "startup.h"
 #include "sys_time.h"
-#include "trcRecorder.h"
 
 extern void main(void);
 static void entry_point__halt(void);
 static void entry_point__handle_crash_report(void);
+static void entry_point__rtos_trace_init_after_mounting_sd_card(void);
 
 void entry_point(void) {
   startup__initialize_ram();
@@ -20,9 +23,9 @@ void entry_point(void) {
   clock__initialize_system_clock_96mhz();
   sys_time__init(clock__get_peripheral_clock_hz());
 
-  /* RTOS trace is an optional component enabled by the following macro at FreeRTOSConfig.h
-   *  - configUSE_TRACE_FACILITY
+  /* RTOS trace is an optional component configured by FreeRTOSConfig.h
    * We need to initialize the trace early before using ANY RTOS API
+   * Note that we cannot do TRC_START here as the SD card is not initialized yet.
    */
   vTraceEnable(TRC_INIT);
 
@@ -34,8 +37,7 @@ void entry_point(void) {
     printf("\n%s(): WARNING: Sensor errors on this board\n", __FUNCTION__);
   }
 
-  // If RTOS trace is compiled in (configUSE_TRACE_FACILITY) then enable it at this point before entering main()
-  vTraceEnable(TRC_START);
+  entry_point__rtos_trace_init_after_mounting_sd_card();
 
   printf("\n%s(): Entering main()\n", __FUNCTION__);
   main();
@@ -56,4 +58,21 @@ static void entry_point__handle_crash_report(void) {
       ; // Deliberately delay the startup and let the user carefully read the information
     }
   }
+}
+
+static void entry_point__rtos_trace_init_after_mounting_sd_card(void) {
+#if !defined(configENABLE_TRACE_ON_SD_CARD) || !defined(configUSE_TRACE_FACILITY)
+#error "configENABLE_TRACE_ON_SD_CARD and configUSE_TRACE_FACILITY must be defined; try including FreeRTOSConfig.h"
+// If instructed to trace on the SD card, then start the trace immediately
+#elif (configENABLE_TRACE_ON_SD_CARD)
+  vTraceEnable(TRC_START);
+/* If we are not tracing to SD card, initialize the trace but do not start it. We need to init the trace because
+ * unfortunately configUSE_TRACE_FACILITY is needed for vTaskList() function even if we are not using the full
+ * trace capability */
+#elif (configUSE_TRACE_FACILITY)
+  // Already initialized above so we do not need to re-do this
+  // vTraceEnable(TRC_INIT);
+#else
+#error "Unexpected configuration"
+#endif
 }

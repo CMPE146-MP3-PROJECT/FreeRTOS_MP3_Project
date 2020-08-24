@@ -3,9 +3,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#if (0 != configUSE_TRACE_FACILITY)
 static void cli__task_list_print(sl_string_t user_input_minus_command_name, app_cli__print_string_function cli_output);
-#endif
 
 app_cli_status_e cli__crash_me(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
                                app_cli__print_string_function cli_output) {
@@ -14,7 +12,6 @@ app_cli_status_e cli__crash_me(app_cli__argument_t argument, sl_string_t user_in
   return APP_CLI_STATUS__SUCCESS;
 }
 
-#if (0 != configUSE_TRACE_FACILITY)
 app_cli_status_e cli__task_list(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
                                 app_cli__print_string_function cli_output) {
   const int sleep_time = sl_string__to_int(user_input_minus_command_name);
@@ -31,6 +28,9 @@ app_cli_status_e cli__task_list(app_cli__argument_t argument, sl_string_t user_i
 }
 
 static void cli__task_list_print(sl_string_t output_string, app_cli__print_string_function cli_output) {
+  void *unused_cli_param = NULL;
+
+#if (0 != configUSE_TRACE_FACILITY)
   // Enum to char : eRunning, eReady, eBlocked, eSuspended, eDeleted
   static const char *const task_status_table[] = {"running", " ready ", "blocked", "suspend", "deleted"};
 
@@ -40,7 +40,6 @@ static void cli__task_list_print(sl_string_t output_string, app_cli__print_strin
   uint32_t total_cpu_runtime = 0;
   uint32_t total_tasks_runtime = 0;
 
-  void *unused_cli_param = NULL;
   const uint32_t total_run_time = portGET_RUN_TIME_COUNTER_VALUE();
   const unsigned portBASE_TYPE task_count = uxTaskGetSystemState(&status[0], max_tasks, &total_cpu_runtime);
 
@@ -68,11 +67,8 @@ static void cli__task_list_print(sl_string_t output_string, app_cli__print_strin
 
   sl_string__printf(output_string, "Overhead: %u uS\n", (unsigned)(total_run_time - total_tasks_runtime));
   cli_output(unused_cli_param, output_string);
-}
 #else
-app_cli_status_e cli__task_list(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
-                                app_cli__print_string_function cli_output) {
-  cli_output(argument, "ERROR: configUSE_TRACE_FACILITY needs to be enabled at FreeRTOSConfig.h\n");
-  return APP_CLI_STATUS__SUCCESS;
+  cli_output(unused_cli_param, "Unable to provide you the task information along with their CPU and stack usage.\n");
+  cli_output(unused_cli_param, "configUSE_TRACE_FACILITY macro at FreeRTOSConfig.h must be non-zero\n");
+#endif
 }
-#endif /* configUSE_TRACE_FACILITY */
