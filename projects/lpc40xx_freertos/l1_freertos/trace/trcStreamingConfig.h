@@ -112,20 +112,6 @@ extern "C" {
  ******************************************************************************/
 #define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE (1024 * 2)
 
-/**
- * SJ2 hack
- * When configENABLE_TRACE_ON_SD_CARD is not enabled, we should not be tracing
- * at all. The problem is that when configUSE_TRACE_FACILITY is enabled, it
- * pulls in all of the Trace and allocates large memory
- */
-#include "FreeRTOSConfig.h"
-#if !(configENABLE_TRACE_ON_SD_CARD)
-#undef TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT
-#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT 1
-#undef TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE
-#define TRC_CFG_PAGED_EVENT_BUFFER_PAGE_SIZE 32
-#endif
-
 /*******************************************************************************
  * TRC_CFG_ISR_TAILCHAINING_THRESHOLD
  *

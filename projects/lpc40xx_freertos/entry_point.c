@@ -25,7 +25,10 @@ void entry_point(void) {
 
   /* RTOS trace is an optional component configured by FreeRTOSConfig.h
    * We need to initialize the trace early before using ANY RTOS API
-   * Note that we cannot do TRC_START here as the SD card is not initialized yet.
+   *
+   *  Notes:
+   *  - We cannot use TRC_START here as the SD card is not initialized yet
+   *  - This can be used even if the trace library is not enabled
    */
   vTraceEnable(TRC_INIT);
 
@@ -66,13 +69,10 @@ static void entry_point__rtos_trace_init_after_mounting_sd_card(void) {
 // If instructed to trace on the SD card, then start the trace immediately
 #elif (configENABLE_TRACE_ON_SD_CARD)
   vTraceEnable(TRC_START);
-/* If we are not tracing to SD card, initialize the trace but do not start it. We need to init the trace because
- * unfortunately configUSE_TRACE_FACILITY is needed for vTaskList() function even if we are not using the full
- * trace capability */
+/* If we are not tracing to SD card, initialize the trace but do not start it.
+ * However, since the vTraceEnable(TRC_INIT) occurs early, we are good here.
+ */
 #elif (configUSE_TRACE_FACILITY)
-  // Already initialized above so we do not need to re-do this
   // vTraceEnable(TRC_INIT);
-#else
-#error "Unexpected configuration"
 #endif
 }

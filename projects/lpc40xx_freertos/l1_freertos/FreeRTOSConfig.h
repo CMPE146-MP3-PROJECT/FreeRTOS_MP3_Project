@@ -154,5 +154,6 @@ do {                                              \
   #error "configMAX_SYSCALL_INTERRUPT_PRIORITY must not be 0"
 #endif
 
-// This should be included regardless of '#if (0 != configUSE_TRACE_FACILITY)'
+// This should be included regardless of either:
+// '#if (0 != configUSE_TRACE_FACILITY)' or '#if (0 != configENABLE_TRACE_ON_SD_CARD)'
 #include "trcRecorder.h"

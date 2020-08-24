@@ -52,7 +52,13 @@
 extern "C" {
 #endif
 
-#define TRC_USE_TRACEALYZER_RECORDER configUSE_TRACE_FACILITY
+/**
+ * SJ2 modification on vendor provided library; this used to be #defined to 'configUSE_TRACE_FACILITY'
+ * We desire to use configENABLE_TRACE_ON_SD_CARD to pull in FreeRTOS CPU monitoring feature
+ * but we may not desire to actually pull in this trace library. Therefore, we changed this
+ * macro to use a different setting defined by FreeRTOSConfig.h
+ */
+#define TRC_USE_TRACEALYZER_RECORDER configENABLE_TRACE_ON_SD_CARD
 
 /*** FreeRTOS version codes **************************************************/
 #define FREERTOS_VERSION_NOT_SET				0
