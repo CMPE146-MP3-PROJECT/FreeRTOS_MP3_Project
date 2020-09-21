@@ -9,30 +9,52 @@ class Sources(object):
         source_dirnodes=None,
         include_filenodes=None,
         include_dirnodes=None,
-        assembly_filenodes=None):
+        assembly_filenodes=None,
+        linker_filenodes=None,
+        unit_test_filenodes=None,
+        unit_test_header_filenodes=None):
 
-        self.source_filenodes = [] if (source_filenodes is None) else list(map(File, source_filenodes))
-        self.source_dirnodes = [] if (source_dirnodes is None) else list(map(Dir, source_dirnodes))
-        self.include_filenodes = [] if (include_filenodes is None) else list(map(File, include_filenodes))
-        self.include_dirnodes = [] if (include_dirnodes is None) else list(map(Dir, include_dirnodes))
-        self.assembly_filenodes = [] if (assembly_filenodes is None) else list(map(File, assembly_filenodes))
-
-    def __iter__(self):
-        for attr_name, attr_value in inspect.getmembers(self, lambda member: not inspect.isroutine(member)):
-            if not attr_name.startswith("_"):
-                yield attr_name, attr_value
+        self.source_filenodes = list(map(File, source_filenodes or []))
+        self.source_dirnodes = list(map(Dir, source_dirnodes or []))
+        self.include_filenodes = list(map(File, include_filenodes or []))
+        self.include_dirnodes = list(map(Dir, include_dirnodes or []))
+        self.assembly_filenodes = list(map(File, assembly_filenodes or []))
+        self.linker_filenodes = list(map(File, linker_filenodes or []))
+        self.unit_test_filenodes = list(map(File, unit_test_filenodes or []))
+        self.unit_test_header_filenodes = list(map(File, unit_test_filenodes or []))
 
     def __str__(self):
         lines = []
-        for attr_name, attr_value in self:
+        for attr_name, attr_value in vars(self).items():
             lines.append(attr_name)
-            for node in attr_value:
-                lines.append(node.abspath)
-            lines.append("")
+            if isinstance(attr_value, list):
+                for node in attr_value:
+                    lines.append(node.abspath)
+                lines.append("")
+            else:
+                pass  # Do nothing
         return "\n".join(lines)
 
     def __add__(self, obj):
-        assert isinstance(obj, Sources)
-        for attr_name, attr_value in obj:
-            getattr(self, attr_name).extend(attr_value)
+        for attr_name, attr_value in vars(obj).items():
+            if isinstance(attr_value, list):
+                for item in attr_value:
+                    if item not in getattr(self, attr_name):
+                        getattr(self, attr_name).append(item)
+                    else:
+                        print("repeated: {}".format(item.name))
+            else:
+                pass  # Do nothing
         return self
+
+    #
+    # Accessors
+    #
+
+    @property
+    def compileable_filenodes(self):
+        return self.source_filenodes + self.assembly_filenodes
+
+    @property
+    def formattable_filenodes(self):
+        return self.source_filenodes + self.include_filenodes + self.unit_test_filenodes + self.unit_test_header_filenodes

@@ -1,0 +1,17 @@
+import fsops
+from sources import Sources
+
+FF_SOURCES = Dir("ff13c/source")
+FF_GLUE_SOURCES = Dir("fatfs_glue")
+
+EXCLUDED_FILES = [
+    FF_SOURCES.File("diskio.c"),
+]
+
+sources = Sources()
+for dirnode in [FF_SOURCES, FF_GLUE_SOURCES]:
+    sources += fsops.scan_tree(dirnode)
+
+sources.source_filenodes, _ = fsops.filter_files(filenodes=sources.source_filenodes, exclude_filenodes=EXCLUDED_FILES)
+
+Return("sources")

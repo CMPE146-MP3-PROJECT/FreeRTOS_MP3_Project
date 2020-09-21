@@ -74,18 +74,21 @@ def unittest_method(env, source, target, sources=None, prepend_include_dirnodes=
     dependent_srcpath_objpath_map = {}
     env_ut = get_unittest_env(env)
 
-    prepend_include_dirnodes = [prepend_include_dirnodes] if (prepend_include_dirnodes is not None) else []
+    prepend_include_dirnodes = []
+    for filenode in sources.unit_test_header_filenodes:
+        if filenode.dir not in prepend_include_dirnodes:
+            prepend_include_dirnodes.append(filenode.dir)
     env_ut.Prepend(CPPPATH=prepend_include_dirnodes)
 
     unittest_obj_filenodes = []
     for source_filenode in SOURCE_FILES:
         unittest_obj_filenodes += env_ut.Object(target=fsops.ch_target_filenode(source_filenode, target.Dir(OBJ_DIRNAME), "o"), source=source_filenode)
 
-    for filenode_ut in search_for_tests(source):
+    for filenode_ut in source:
         output_dirnode = target.Dir(fsops.basename(filenode_ut))
         mock_output_dirnode = output_dirnode.Dir(MOCK_DIRNAME)
 
-        env_ut.Append(CPPPATH=Dir("{}/..".format(filenode_ut.dir.abspath)))
+        env_ut.Append(CPPPATH=Dir(filenode_ut.dir.abspath))
         env_ut.Append(CPPPATH=mock_output_dirnode)
 
         filenode_ut_main = generate_test_main(env, filenode_ut, target_dirnode=output_dirnode)
@@ -93,12 +96,7 @@ def unittest_method(env, source, target, sources=None, prepend_include_dirnodes=
         obj_filenodes = []
 
         if sources is not None:
-            header_filenodes_override = []
-            if prepend_include_dirnodes is not None:
-                for dirnode in prepend_include_dirnodes:
-                    header_filenodes_override.extend(Glob(os.path.join(dirnode.abspath, "*.h*")))
-
-            dependent_source_filenodes, mock_header_filenodes = find_dependencies_from_sources(filenode_ut, sources, header_filenodes_override, verbose)
+            dependent_source_filenodes, mock_header_filenodes = find_dependencies_from_sources(filenode_ut, sources, sources.unit_test_header_filenodes, verbose)
             for filenode in dependent_source_filenodes:
                 if filenode not in dependent_srcpath_objpath_map:
                     objs = env_ut.Object(target=fsops.ch_target_filenode(filenode, target.Dir(OBJ_DIRNAME), "o"), source=filenode)
@@ -155,13 +153,6 @@ def get_unittest_coverage_env(source_env):
         LIBS=["gcov"],
     )
     return env_ut
-
-
-def search_for_tests(dirnode):
-    sources = fsops.scan_tree(dirnode, ignore_dirnames=None)
-    for filenode in sources.source_filenodes:
-        if filenode.dir.name == "test":
-            yield filenode
 
 
 def generate_test_main(env, filenode, target_dirnode):

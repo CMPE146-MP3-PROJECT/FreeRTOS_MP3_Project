@@ -13,7 +13,10 @@ from sources import Sources
 DEFAULT_SOURCE_PATTERNS = ["*.c", "*.cpp"]
 DEFAULT_INCLUDE_PATTERNS = ["*.h", "*.hpp"]
 DEFAULT_ASSEMBLY_PATTERNS = ["*.s", "*.S"]
-DEFAULT_IGNORE_DIRNAMES = ["test"]
+DEFAULT_LINKER_PATTERNS = ["*.ld"]
+DEFAULT_UNIT_TEST_PATTERNS = ["test_*"]
+DEFAULT_UNIT_TEST_HEADER_OVERRIDE = "unittest_header_overrides"
+DEFAULT_IGNORE_DIRNAMES = []
 
 
 def scan_tree(
@@ -21,7 +24,9 @@ def scan_tree(
     source_patterns=DEFAULT_SOURCE_PATTERNS,
     include_patterns=DEFAULT_INCLUDE_PATTERNS,
     assembly_patterns=DEFAULT_ASSEMBLY_PATTERNS,
-    subsidiary_scons_filename="subsidiary-scons",
+    linker_patterns=DEFAULT_LINKER_PATTERNS,
+    unit_test_patterns=DEFAULT_UNIT_TEST_PATTERNS,
+    subsidiary_scons_filename="subsidiary_scons",
     ignore_dirnames=DEFAULT_IGNORE_DIRNAMES,
     recursive=True):
     """
@@ -30,6 +35,8 @@ def scan_tree(
     :param source_patterns: A list of source file name patterns to search (list of str)
     :param include_patterns: A list of include file name patterns to search (list of str)
     :param assembly_patterns: A list of assembly file name patterns to search (list of str)
+    :param linker_patterns: A list of linker script file name patterns to search (list of str)
+    :param unit_test_patterns: A list of unit test file name patterns to search (list of str)
     :param subsidiary_scons_filename: Subsidiary SCons file name (str)
     :param ignore_dirnames: List of directory names to ignore (list of str)
     :param recursive: Flag to determine if file/directory search operation should be recursive (bool)
@@ -41,29 +48,41 @@ def scan_tree(
         sources.include_dirnodes  # A list of all include directory nodes
     """
     dirnode = Dir(dirnode)
-    ignore_dirnames = ignore_dirnames if ignore_dirnames is not None else []
+    ignore_dirnames = ignore_dirnames or []
     sources = Sources()
 
-    for dirpath, dirnames, filenames in os.walk(os.path.relpath(dirnode.abspath)):
+    unit_test_source_patterns = []
+    for unit_test_pattern in unit_test_patterns:
+        for source_pattern in source_patterns:
+            unit_test_source_patterns.append("{}{}".format(unit_test_pattern, source_pattern))
+
+    root_dirpath = os.path.relpath(dirnode.abspath)
+    for dirpath, dirnames, filenames in os.walk(root_dirpath):
         if os.path.basename(dirpath) in ignore_dirnames:
             continue
 
-        if subsidiary_scons_filename in filenames:
-            subsidary_sources = SConscript(Dir(dirpath).File(subsidiary_scons_filename))
-            if isinstance(subsidary_sources, Sources):
-                sources += subsidary_sources
-                dirnames[:] = []  # End recursion for this directory tree
-                continue
+        if os.path.basename(dirpath) == DEFAULT_UNIT_TEST_HEADER_OVERRIDE:
+            for include_pattern in include_patterns:
+                matching_include_filenodes = Glob(os.path.join(dirpath, include_pattern))
+                sources.unit_test_header_filenodes.extend(matching_include_filenodes)
+            continue
+
+        # Do not invoke subsidiary scons in root directory to avoid infinite recursion
+        if (dirpath != root_dirpath) and (subsidiary_scons_filename in filenames):
+                subsidary_sources = SConscript(Dir(dirpath).File(subsidiary_scons_filename))
+                if isinstance(subsidary_sources, Sources):
+                    sources += subsidary_sources
+                    dirnames[:] = []  # End recursion for this directory tree
+                    continue
 
         for source_pattern in source_patterns:
             matching_source_filenodes = Glob(os.path.join(dirpath, source_pattern))
-            sources.source_filenodes.extend(matching_source_filenodes)
-            if Dir(dirpath) not in sources.source_dirnodes:
-                sources.source_dirnodes.append(Dir(dirpath))
-
-        for assembly_pattern in assembly_patterns:
-            matching_assembly_filenodes = Glob(os.path.join(dirpath, assembly_pattern))
-            sources.assembly_filenodes.extend(matching_assembly_filenodes)
+            for filenode in matching_source_filenodes:
+                for unit_test_pattern in unit_test_patterns:
+                    if not fnmatch.fnmatch(filenode.name, unit_test_pattern):
+                        sources.source_filenodes.append(filenode)
+                        if Dir(dirpath) not in sources.source_dirnodes:
+                            sources.source_dirnodes.append(Dir(dirpath))
 
         for include_pattern in include_patterns:
             matching_include_filenodes = Glob(os.path.join(dirpath, include_pattern))
@@ -71,45 +90,94 @@ def scan_tree(
             if (len(fnmatch.filter(filenames, include_pattern)) > 0) and (Dir(dirpath) not in sources.include_dirnodes):
                 sources.include_dirnodes.append(Dir(dirpath))
 
+        for assembly_pattern in assembly_patterns:
+            matching_assembly_filenodes = Glob(os.path.join(dirpath, assembly_pattern))
+            sources.assembly_filenodes.extend(matching_assembly_filenodes)
+
+        for linker_pattern in linker_patterns:
+            matching_linker_filenodes = Glob(os.path.join(dirpath, linker_pattern))
+            sources.linker_filenodes.extend(matching_linker_filenodes)
+
+        for unit_test_source_pattern in unit_test_source_patterns:
+            matching_unit_test_source_filenodes = Glob(os.path.join(dirpath, unit_test_source_pattern))
+            sources.unit_test_filenodes.extend(matching_unit_test_source_filenodes)
+
         if not recursive:
             break
 
     return sources
 
 
-def filter_files(filenodes, exclude_filenodes=None, exclude_dirnodes=None, exclude_filename_pattern=None):
+def filter_files(filenodes, exclude_filenodes=None, exclude_dirnodes=None, exclude_filename_patterns=None, exclude_dirname_patterns=None):
     """
     Filter file nodes
     :param filenodes: A list of file nodes (list of File)
     :param exclude_filenodes: A list of file nodes to filter out (list of File)
     :param exclude_dirnodes: A list of directory nodes to filter out (list of Dir)
-    :param exclude_filename_pattern: A file name pattern to filter out files with a matching file name pattern (str)
+    :param exclude_filename_pattern: A file name pattern to filter out files with a matching file name (str)
+    :param exclude_dirname_patterns: A directory name pattern to filter out files with a matching parent(s) directory name (str)
     :return: A list of filtered file nodes (list of File)
     """
-    exclude_filenodes = exclude_filenodes if (exclude_filenodes is not None) else []
-    exclude_dirnodes = exclude_dirnodes if (exclude_dirnodes is not None) else []
+    exclude_filenodes = exclude_filenodes or []
+    exclude_dirnodes = exclude_dirnodes or []
+    exclude_filename_patterns = exclude_filename_patterns or []
+    exclude_dirname_patterns = exclude_dirname_patterns or []
 
     filenodes = list(map(File, filenodes))
     exclude_filenodes = list(map(File, exclude_filenodes))
     exclude_dirnodes = list(map(Dir, exclude_dirnodes))
 
-    filtered_filenodes = []
-    filtered_filenodes.extend(list(filter(lambda filenode: filenode not in exclude_filenodes, filenodes)))
+    filtered_filenodes = filenodes
+    excluded_filenodes = []
 
-    if exclude_filename_pattern is not None:
-        filtered_filenodes.extend(list(filter(lambda filenode: not fnmatch(filenode.name, exclude_filename_pattern), filtered_filenodes)))
+    if exclude_filenodes:
+        new_filtered_filenodes = []
+        for filenode in filenodes:
+            if filenode not in exclude_filenodes:
+                new_filtered_filenodes.append(filenode)
+            else:
+                excluded_filenodes.append(filenode)
+        filtered_filenodes = new_filtered_filenodes or filtered_filenodes
 
-    new_filtered_filenodes = []
-    if exclude_dirnodes is not None:
+    if exclude_filename_patterns:
+        new_filtered_filenodes = []
         for filenode in filtered_filenodes:
-            for dirnode in exclude_dirnodes:
-                if dirnode.abspath in filenode.abspath:
+            for exclude_filename_pattern in exclude_filename_patterns:
+                if not fnmatch.fnmatch(filenode.name, exclude_filename_pattern):
+                    new_filtered_filenodes.append(filenode)
+                    break
+                else:
+                    excluded_filenodes.append(filenode)
+        filtered_filenodes = new_filtered_filenodes or filtered_filenodes
+
+    if exclude_dirname_patterns:
+        new_filtered_filenodes = []
+        for filenode in filtered_filenodes:
+            parent_dirnames = filenode.abspath.split(os.path.sep)
+            for parent_dirname in parent_dirnames:
+                matched_parent_directory_name = False
+                for exclude_dirname_pattern in exclude_dirname_patterns:
+                    if fnmatch.fnmatch(parent_dirname, exclude_dirname_pattern):
+                        excluded_filenodes.append(filenode)
+                        matched_parent_directory_name = True
+                        break
+                if matched_parent_directory_name:
                     break
             else:
                 new_filtered_filenodes.append(filenode)
-        filtered_filenodes = new_filtered_filenodes
+        filtered_filenodes = new_filtered_filenodes or filtered_filenodes
 
-    return filtered_filenodes
+    if exclude_dirnodes:
+        new_filtered_filenodes = []
+        for filenode in filtered_filenodes:
+            for dirnode in exclude_dirnodes:
+                if dirnode.abspath in filenode.abspath:
+                    excluded_filenodes.append(filenode)
+            else:
+                new_filtered_filenodes.append(filenode)
+        filtered_filenodes = new_filtered_filenodes or filtered_filenodes
+
+    return filtered_filenodes, excluded_filenodes
 
 
 def ch_filename_ext(filenode, ext=None):

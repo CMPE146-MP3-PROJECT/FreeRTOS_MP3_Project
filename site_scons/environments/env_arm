@@ -51,26 +51,24 @@ COMMON_FLAGS = [
     "-O{}".format(OPTIMIZATION_LEVEL),
     "-mcpu={}".format(CORE),
     "-mthumb",
-    # Be explicit about float type on the CPU
-    #"-mfpu=auto",
+    "-g",
+    "-pipe",
+    # Float
     "-mfpu=fpv4-sp-d16",
     "-mfloat-abi=hard",
+    # Warnings
     "-Wall",
     "-Wshadow",
-    # Float warnings
     "-Wfloat-equal",
     "-Wdouble-promotion",
-    # Others
     "-Wundef",
     "-Wswitch",
     "-Wformat=2",
     "-Wnull-dereference",
     "-Wno-format-nonliteral",
-    # These cause a lot of warnings but should ideally be solved in code
+    # Warnings - These cause a lot of warnings but should ideally be solved in code
     #"-Wextra",
     #"-Wconversion",
-    "-g",
-    "-pipe",
 ]
 
 """ Define conditional flags """

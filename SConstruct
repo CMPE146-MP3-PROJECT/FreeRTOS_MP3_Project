@@ -39,6 +39,4 @@ def has_subsidary_scons(dirnode):
     return len(list(filter(lambda filename: filename == "SConscript", filenames))) > 0
 
 
-
-
 main()

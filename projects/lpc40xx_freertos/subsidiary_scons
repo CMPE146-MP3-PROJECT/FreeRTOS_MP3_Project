@@ -1,0 +1,10 @@
+import fsops
+
+EXCLUDED_FILES = [
+    File("l5_application/main.c"),
+]
+
+sources = fsops.scan_tree(".")
+sources.source_filenodes, _ = fsops.filter_files(sources.source_filenodes, exclude_filenodes=EXCLUDED_FILES)
+
+Return("sources")

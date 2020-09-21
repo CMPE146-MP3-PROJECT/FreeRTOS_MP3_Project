@@ -1,8 +1,8 @@
 import sys
 
 import env
+from environment_builder import EnvironmentBuilder
 import fsops
-from sources import Sources
 
 """
 CLI
@@ -14,12 +14,11 @@ test_output = GetOption("test_output")
 timeout = GetOption("timeout")
 verbose = GetOption("verbose")
 
-
 """
 Imports
 """
 Import("project_dirnode")
-
+Import("sources")
 
 """
 Define file nodes and directory nodes
@@ -28,118 +27,43 @@ PROJECT_DIR = project_dirnode
 
 """ Build artifact nodes """
 VARIANT_DIR = Dir("#/_build_{}".format(PROJECT_DIR.name))
-OBJ_DIR = VARIANT_DIR.Dir("obj")
-MAP_FILE = VARIANT_DIR.File("{}.map".format(PROJECT_DIR.name))
-SIZE_FILE = VARIANT_DIR.File("{}.size".format(PROJECT_DIR.name))
 UNIT_TEST_BUILD_DIR = VARIANT_DIR.Dir("test")
 AUTO_GENERATED_CODE_DIR = VARIANT_DIR.Dir("auto_generated")
 MOCK_DIR = project_dirnode.Dir("unittest_header_overrides")
 DBC_DIRS = Dir("#/dbc")
 
-""" Source and include nodes """
-INCLUDE_DIRS = []
-
-INCLUDE_DIRS_ROOT = [
-    PROJECT_DIR,
-]
-
-SRC_DIRS_ROOT = [
-    PROJECT_DIR,
-]
-
-LINKER_FILES = [
-    PROJECT_DIR.File("l0_lowlevel/linker/layout_lpc4078.ld"),
-]
-
-EXCLUDED_SRC_FILES = []
-
-EXCLUDED_INCLUDE_DIRNAMES = [
-    MOCK_DIR.name,
-    "test",
-]
-
 """
 Import build environment
 """
 env_arm = env.register_environment("env_arm")
-
 env_arm.PrintToolchainDescription()
+environment_builder = EnvironmentBuilder(environment=env_arm)
 
-env_arm.VariantDir(variant_dir=VARIANT_DIR, src_dir=Dir("."), duplicate=0)
-
-env_arm["LINKFLAGS"] += [
-    "-Wl,-Map,{}".format(MAP_FILE.abspath),
-]
-
-
-"""
-Search and group files to build
-"""
-all_sources = Sources()
-
-""" Search and group source files and source directories """
-for dir in SRC_DIRS_ROOT:
-    sources = fsops.scan_tree(dir, ignore_dirnames=EXCLUDED_INCLUDE_DIRNAMES)
-    all_sources += sources
-
-""" Group linker scripts """
-for linker_file in LINKER_FILES:
-    env_arm["LINKFLAGS"].append("-T{}".format(File(linker_file).abspath))
-
-""" Search and group include paths """
-for dir in INCLUDE_DIRS_ROOT:
-    sources = fsops.scan_tree(dir, ignore_dirnames=EXCLUDED_INCLUDE_DIRNAMES)
-    all_sources.include_dirnodes += sources.include_dirnodes
-env_arm["CPPPATH"].extend(INCLUDE_DIRS)
-env_arm["CPPPATH"].extend(all_sources.include_dirnodes)
-
-""" Filter build files """
-all_sources.source_filenodes = fsops.filter_files(all_sources.source_filenodes, EXCLUDED_SRC_FILES)
-all_sources.source_filenodes = fsops.remove_duplicate_filenodes(all_sources.source_filenodes)
-
-
-"""
-Perform builds
-"""
-
-""" Compile all sources -> objects """
-obj_filenodes = []
-for filenodes in all_sources.source_filenodes + all_sources.assembly_filenodes:
-    dest_filepath = fsops.ch_target_filenode(filenodes, OBJ_DIR, "o")
-    new_obj_filenodes = env_arm.Object(target=dest_filepath, source=filenodes)
-    obj_filenodes.extend(new_obj_filenodes)
-
-elf_filenodes = env_arm.Program(target=VARIANT_DIR.File("{}.elf".format(PROJECT_DIR.name)), source=obj_filenodes)
-hex_filenodes = env_arm.Objcopy(target=VARIANT_DIR.File("{}.hex".format(PROJECT_DIR.name)), source=elf_filenodes)
-bin_filenodes = env_arm.Objcopy(target=VARIANT_DIR.File("{}.bin".format(PROJECT_DIR.name)), source=elf_filenodes)
-lst_filenodes = env_arm.Objdump(target=VARIANT_DIR.File("{}.lst".format(PROJECT_DIR.name)), source=elf_filenodes)
-size_filenodes = env_arm.Size(target=VARIANT_DIR.File("{}.size".format(PROJECT_DIR.name)), source=elf_filenodes)
-
-Depends(elf_filenodes, LINKER_FILES)
-
+artifacts = environment_builder.build(
+    base_filename=PROJECT_DIR.name,
+    output_dirnode=VARIANT_DIR,
+    sources=sources
+)
 
 """
 Automatically format all files
 """
-format_sources = fsops.scan_tree(PROJECT_DIR, ignore_dirnames=None)
-
-FORMAT_EXCLUDED_FILES = [
-    PROJECT_DIR.File("lpc40xx.h"),
-]
-
-FORMAT_EXCLUDED_DIRS = [
-    PROJECT_DIR.Dir("l0_lowlevel/arm-software"),
-    PROJECT_DIR.Dir("l1_freertos"),
-    PROJECT_DIR.Dir("l4_io/fatfs"),
-]
-
-format_filenodes = fsops.filter_files(
-    filenodes=(format_sources.source_filenodes + format_sources.include_filenodes),
-    exclude_filenodes=FORMAT_EXCLUDED_FILES,
-    exclude_dirnodes=FORMAT_EXCLUDED_DIRS,
-)
-
 if not no_clang_format:
+    exclude_file_patterns = [
+        "lpc40xx.h",
+    ]
+
+    exclude_dir_patterns = [
+        "arm-software",
+        "l1_freertos",
+        "fatfs",
+    ]
+
+    format_filenodes, _ = fsops.filter_files(
+        filenodes=sources.formattable_filenodes,
+        exclude_filename_patterns=exclude_file_patterns,
+        exclude_dirname_patterns=exclude_dir_patterns,
+    )
     for filenode in format_filenodes:
         env_arm.ClangFormat(filenode=filenode, verbose=verbose)
 
@@ -149,7 +73,6 @@ Generate code based on discovered DBCs
 for node in Glob("{}/*.dbc".format(DBC_DIRS.abspath)):
     env_arm.DatabaseCodeGenerator(source=node, target=AUTO_GENERATED_CODE_DIR, node_name=dbc_node_name)
 
-
 """
 Unit test
 """
@@ -157,12 +80,11 @@ if not no_unit_test:
     env_x86 = env.register_environment("env_x86")
     env_x86.Append(CPPPATH=env_arm["CPPPATH"])
     unit_test_results = env_x86.Test(
-        source=PROJECT_DIR,
+        source=sources.unit_test_filenodes,
         target=UNIT_TEST_BUILD_DIR,
-        sources=all_sources,
-        prepend_include_dirnodes=MOCK_DIR,
+        sources=sources,
         summary_only=not test_output,
         timeout=timeout,
         verbose=verbose,
     )
-    Requires(obj_filenodes, unit_test_results)
+    Requires(artifacts.object_filenodes, unit_test_results)
