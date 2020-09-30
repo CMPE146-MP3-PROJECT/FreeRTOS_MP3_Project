@@ -20,6 +20,10 @@ void sj2_cli__init(void) {
   sj2_cli_struct = app_cli__initialize(4, sj2_cli__output_function, separator);
 
   // Need static struct that does not go out of scope
+  static app_cli__command_s uart3_transmit = {.command_name = "uart3",
+                                              .help_message_for_command = "Send a string to UART3",
+                                              .app_cli_handler = cli__uart3_transmit};
+
   static app_cli__command_s crash = {.command_name = "crash",
                                      .help_message_for_command =
                                          "Deliberately crashes the system to demonstrate how to debug a crash",
@@ -34,7 +38,8 @@ void sj2_cli__init(void) {
                                              "tasklist <time>' will display CPU utilization within this time window.",
                                          .app_cli_handler = cli__task_list};
 
-  // Add your CLI commands in descending sorted order
+  // Add your CLI commands in descending sorted order to make them appear in sorted order
+  app_cli__add_command_handler(&sj2_cli_struct, &uart3_transmit);
   app_cli__add_command_handler(&sj2_cli_struct, &task_list);
   app_cli__add_command_handler(&sj2_cli_struct, &i2c);
   app_cli__add_command_handler(&sj2_cli_struct, &crash);

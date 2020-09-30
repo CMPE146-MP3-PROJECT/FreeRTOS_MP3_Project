@@ -29,6 +29,7 @@ void uart_puts(uart_e uart, const char *message) {
   for (size_t byte = 0; byte < message_length; byte++) {
     uart__put(uart, message[byte], UINT32_MAX);
   }
+  uart__put(uart, '\r', UINT32_MAX);
   uart__put(uart, '\n', UINT32_MAX);
 }
 

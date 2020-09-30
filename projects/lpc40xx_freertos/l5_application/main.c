@@ -5,10 +5,10 @@
 
 #include "board_io.h"
 #include "common_macros.h"
-#include "gpio.h"
 #include "periodic_scheduler.h"
 #include "sj2_cli.h"
 
+// 'static' to make these functions 'private' to this file
 static void create_blinky_tasks(void);
 static void create_uart_task(void);
 static void blink_task(void *params);
@@ -17,6 +17,11 @@ static void uart_task(void *params);
 int main(void) {
   create_blinky_tasks();
   create_uart_task();
+
+  // If you have the ESP32 wifi module soldered on the board, you can try uncommenting this code
+  // See esp32/README.md for more details
+  // uart3_init();                                                                     // Also include:  uart3_init.h
+  // xTaskCreate(esp32_tcp_hello_world_task, "uart3", 1000, NULL, PRIORITY_LOW, NULL); // Include esp32_task.h
 
   puts("Starting RTOS");
   vTaskStartScheduler(); // This function never returns unless RTOS scheduler runs out of memory and fails

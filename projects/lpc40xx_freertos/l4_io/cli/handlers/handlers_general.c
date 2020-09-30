@@ -3,7 +3,20 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "uart_printf.h"
+
 static void cli__task_list_print(sl_string_t user_input_minus_command_name, app_cli__print_string_function cli_output);
+
+app_cli_status_e cli__uart3_transmit(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
+                                     app_cli__print_string_function cli_output) {
+  uart_puts(UART__3, user_input_minus_command_name);
+
+  cli_output(NULL, "Output to UART3: ");
+  cli_output(NULL, user_input_minus_command_name);
+  cli_output(NULL, "\r\n");
+
+  return APP_CLI_STATUS__SUCCESS;
+}
 
 app_cli_status_e cli__crash_me(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
                                app_cli__print_string_function cli_output) {
