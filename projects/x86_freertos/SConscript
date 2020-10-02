@@ -24,6 +24,8 @@ Import("project_dirnode")
 Define file nodes and directory nodes
 """
 PROJECT_DIR = project_dirnode
+FREERTOS_SOURCE_POSIX_SOURCE_DIR = PROJECT_DIR.Dir("freertos_source")
+FREERTOS_SOURCE_COMMON = Dir("#/projects/lpc40xx_freertos/l1_freertos")
 
 """ Build artifact nodes """
 VARIANT_DIR = Dir("#/_build_{}".format(PROJECT_DIR.name))
@@ -40,6 +42,16 @@ env_x86 = env_x86.Clone(
     tools=["clangformat"]
 )
 
+""" Source and include nodes """
+INCLUDE_DIRS = [
+    FREERTOS_SOURCE_COMMON.Dir("include"),
+    FREERTOS_SOURCE_COMMON.Dir("customized_code"),
+    FREERTOS_SOURCE_COMMON.Dir("mem_mang"),
+]
+
+EXCLUDED_SRC_FILES = [
+]
+
 env_x86.VariantDir(variant_dir=VARIANT_DIR, src_dir=Dir("."), duplicate=0)
 
 
@@ -47,6 +59,11 @@ env_x86.VariantDir(variant_dir=VARIANT_DIR, src_dir=Dir("."), duplicate=0)
 Search and group files to build
 """
 sources = fsops.scan_tree(project_dirnode)
+sources += fsops.scan_tree(FREERTOS_SOURCE_COMMON.Dir("source"))
+sources += fsops.scan_tree(FREERTOS_SOURCE_COMMON.Dir("mem_mang"))
+sources.source_filenodes,_ = fsops.filter_files(sources.source_filenodes, EXCLUDED_SRC_FILES)
+
+env_x86["CPPPATH"].extend(INCLUDE_DIRS)
 env_x86["CPPPATH"].extend(sources.include_dirnodes)
 
 
@@ -63,10 +80,30 @@ for filenode in sources.source_filenodes + sources.assembly_filenodes:
 
 exe_filenodes = env_x86.Program(target=VARIANT_DIR.File("{}.exe".format(PROJECT_DIR.name)), source=obj_filenodes)
 
+"""
+Automatically format all files
+"""
 if not no_clang_format:
-    for filenode in sources.formattable_filenodes:
+    exclude_file_patterns = [
+        "FreeRTOSConfig.h",
+    ]
+
+    exclude_dir_patterns = [
+        "freertos_source", # POSIX code
+        "l1_freertos",     # This is for '#/projects/lpc40xx_freertos/l1_freertos'
+    ]
+
+    format_filenodes, _ = fsops.filter_files(
+        filenodes=sources.formattable_filenodes,
+        exclude_filename_patterns=exclude_file_patterns,
+        exclude_dirname_patterns=exclude_dir_patterns,
+    )
+    for filenode in format_filenodes:
         env_x86.ClangFormat(filenode=filenode, verbose=verbose)
 
+"""
+Run unit tests
+"""
 if not no_unit_test:
     unit_test_results = env_x86.Test(
         source=sources.unit_test_filenodes,
