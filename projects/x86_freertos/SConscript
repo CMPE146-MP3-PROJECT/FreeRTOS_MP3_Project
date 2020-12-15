@@ -2,6 +2,7 @@ import sys
 
 import env
 import fsops
+import osops
 from sources import Sources
 
 """
@@ -42,6 +43,11 @@ env_x86 = env_x86.Clone(
     tools=["clangformat"]
 )
 
+""" Add Linux based macros and libraries that enable FreeRTOS simulator """
+if osops.is_linux():
+    env_x86["CPPDEFINES"].append("_DEFAULT_SOURCE")
+    env_x86["LIBS"].append("pthread")
+
 """ Source and include nodes """
 INCLUDE_DIRS = [
     FREERTOS_SOURCE_COMMON.Dir("include"),
@@ -65,7 +71,6 @@ sources.source_filenodes,_ = fsops.filter_files(sources.source_filenodes, EXCLUD
 
 env_x86["CPPPATH"].extend(INCLUDE_DIRS)
 env_x86["CPPPATH"].extend(sources.include_dirnodes)
-
 
 """
 Perform builds
