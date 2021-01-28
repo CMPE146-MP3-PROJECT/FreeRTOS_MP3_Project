@@ -100,12 +100,23 @@ int _isatty(int file_descriptor) {
 }
 
 /**
- * Low level _open() used by fopen()
+ * Low level function used by fopen()
  */
 int _open(const char *path, int flags, ...) {
   system_calls__print_and_halt("ERROR: Call to _open() not expected\n");
   return 0;
 }
+
+/**
+ * Low level function used by fclose()
+ */
+int _close(int file_descriptor) {
+  system_calls__print_and_halt("ERROR: Call to _close() not expected\n");
+  return 0;
+}
+
+int _fstat() { return 0; }
+int _lseek() { return 0; }
 
 /**
  * Low level write routine used by standard output (printf) and also file writes after fopen() has been called

@@ -36,8 +36,9 @@ env_arm = Environment(
     LINKFLAGS=[
         "-nostartfiles",
         "-specs=nano.specs",
-        "-specs=nosys.specs",
         "-Wl,--gc-sections",
+        # This provides non operational stubs for _write(), _sbrk() etc.
+        # "-specs=nosys.specs",
     ],
     CPPPATH=[],
     CPPDEFINES=[],

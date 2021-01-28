@@ -1,0 +1,63 @@
+import fsops
+import sys
+import env
+from environment_builder import EnvironmentBuilder
+
+Import("project_dirnode")
+
+sources = fsops.scan_tree(".")
+sources.source_filenodes, _ = fsops.filter_files(sources.source_filenodes)
+Export("sources")
+
+"""
+CLI
+"""
+no_clang_format = GetOption("no_clang_format")
+verbose = GetOption("verbose")
+
+"""
+Imports
+"""
+Import("project_dirnode")
+Import("sources")
+
+"""
+Define file nodes and directory nodes
+"""
+PROJECT_DIR = project_dirnode
+
+""" Build artifact nodes """
+VARIANT_DIR = Dir("#/_build_{}".format(PROJECT_DIR.name))
+
+"""
+Import build environment
+"""
+env_arm = env.register_environment("env_arm")
+env_arm.PrintToolchainDescription()
+environment_builder = EnvironmentBuilder(environment=env_arm)
+
+artifacts = environment_builder.build(
+    base_filename=PROJECT_DIR.name,
+    output_dirnode=VARIANT_DIR,
+    sources=sources
+)
+
+"""
+Automatically format all files
+"""
+if not no_clang_format:
+    exclude_file_patterns = [
+        "lpc40xx.h",
+    ]
+
+    exclude_dir_patterns = [
+        "arm-software",
+    ]
+
+    format_filenodes, _ = fsops.filter_files(
+        filenodes=sources.formattable_filenodes,
+        exclude_filename_patterns=exclude_file_patterns,
+        exclude_dirname_patterns=exclude_dir_patterns,
+    )
+    for filenode in format_filenodes:
+        env_arm.ClangFormat(filenode=filenode, verbose=verbose)
