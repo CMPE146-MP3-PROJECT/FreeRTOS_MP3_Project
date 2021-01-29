@@ -24,6 +24,13 @@ Infrastructure highlights:
 - [Build and Flash Project](README-GETTING-STARTED.md) 
 - [Read more about SCons](README-SCons.md) to figure out how to build projects
 
+## Videos
+
+We have made some videos that you may find useful
+
+- [Comprehensive Development Environment](https://www.youtube.com/watch?v=EbiCummaIM0)
+- [Compile ARM project](https://www.youtube.com/watch?v=--AL0VKzvU8)
+
 ----
 
 ## Build System
