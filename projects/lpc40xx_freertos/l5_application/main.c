@@ -95,14 +95,13 @@ void lab2_led_task0(void *task_parameter) {
 void lab2_led_task1(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
-  ;
   LPC_IOCON->P1_26 &= ~(7 << 0);
   gpiox__set_as_output(*led_num);
   while (true) {
     // do: insert code here to blink an LED
     // Hint: Also use vTaskDelay() to sleep the task
     // turn on
-      vTaskDelay(500);
+    vTaskDelay(500);
     gpiox__set_high(*led_num);
     vTaskDelay(500);
     // turn off
@@ -116,7 +115,7 @@ int main(void) {
   vTaskStartScheduler();
   return 0;*/
 
-  // lab 2 part 2
+  /*// lab 2 part 2
   // DO:
   // Create two tasks using led_task() function
   // Pass each task its own parameter:
@@ -128,10 +127,10 @@ int main(void) {
   xTaskCreate(lab2_led_task1, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
   // vTaskDelay(1500);
   vTaskStartScheduler();
-  return 0;
+  return 0;*/
 
   // lab 2 part 3
-  /*static SemaphoreHandle_t switch_press_indication;
+  static SemaphoreHandle_t switch_press_indication;
 
   void led_task(void *task_parameter) {
       while (true) {
