@@ -144,7 +144,7 @@ void switch_task(void *task_parameter) {
 }*/
 
 int main(void) {
-  ///lab 2 part 0, 1
+  /// lab 2 part 0, 1
   /*xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
   return 0;*/
