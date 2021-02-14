@@ -25,11 +25,11 @@ void lab2_led_task(void *pvParameters) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   // 0x1000100101 & 0x000 = 0x1000100000
   // 1) Set the DIR register bit for the LED port pin, 1:output, 0:input
-  LPC_GPIO0->DIR |= (1 << 3);
+  LPC_GPIO1->DIR |= (1 << 3);
 
   while (true) {
     // 2) Set PIN register bit to 0 to turn ON LED (led may be active low)
-    LPC_GPIO1->SET = (1 << 3);
+    LPC_GPIO2->SET = (1 << 3);
     vTaskDelay(500);
 
     // 3) Set PIN register bit to 1 to turn OFF LED
