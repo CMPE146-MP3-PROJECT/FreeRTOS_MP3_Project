@@ -67,10 +67,10 @@ void lab2_led_task(void *task_parameter) {
     // do: insert code here to blink an LED
     // Hint: Also use vTaskDelay() to sleep the task
     // turn on
-    gpiox__set_high(*led_num);
+    gpio__set_high(*led_num);
     vTaskDelay(500);
     // turn off
-    gpiox__set_low(*led_num);
+    gpio__set_low(*led_num);
     vTaskDelay(500);
   }
 }
