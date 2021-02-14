@@ -173,7 +173,7 @@ int main(void) {
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
 
-  return 0;
+  //return 0;
 }
 
 // This sends periodic messages over printf() which uses system_calls.c to send them to UART0
