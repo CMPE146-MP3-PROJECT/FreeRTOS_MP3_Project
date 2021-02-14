@@ -30,9 +30,9 @@ void gpio0__set_low(uint8_t pin_num) { LPC_GPIO2->CLR = (1 << pin_num); }
 
 void gpio0__set(uint8_t pin_num, bool high) {
   if (high == 1) {
-    gpio0__set_high(uint8_t pin_num);
+      gpio0__set_high(uint8_t pin_num);
   } else {
-    gpio0__set_low(uint8_t pin_num);
+      gpio0__set_low(uint8_t pin_num);
   }
 }
 bool gpio0__get_level(uint8_t pin_num);
