@@ -33,7 +33,7 @@ void lab2_led_task(void *pvParameters) {
     vTaskDelay(500);
 
     // 3) Set PIN register bit to 1 to turn OFF LED
-    LPC_GPIO1->CLR = (1 << 3);
+    LPC_GPIO2->CLR = (1 << 3);
     vTaskDelay(500);
   }
 }
