@@ -18,7 +18,7 @@ static SemaphoreHandle_t binary_semaphore;
 static SemaphoreHandle_t mutex;
 static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
 
-// lab 2 part 0
+/// lab 2 part 0
 /*void lab2_led_task(void *pvParameters) {
   // Choose one of the onboard LEDS by looking into schematics and write code for the below
   // 0) Set the IOCON MUX function(if required) select pins to 000
@@ -40,7 +40,7 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
   }
 }*/
 
-// lab 2 part 1
+/// lab 2 part 1
 /*static void lab2_led_task(void *pvParameters) {
   // Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= ~(7 << 0); //~0111 = 1000
@@ -57,7 +57,7 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
   }
 }*/
 
-// lab 2 part 2 blink together
+/// lab 2 part 2 blink together
 /*void lab2_led_task(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
@@ -75,8 +75,8 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
     vTaskDelay(500);
   }
 }*/
-// lab 2 part 2 blink separate
-/*void lab2_led_task0(void *task_parameter) {
+/// lab 2 part 2 blink separate
+void lab2_led_task0(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
   LPC_IOCON->P2_3 &= ~(7 << 0);
@@ -108,9 +108,10 @@ void lab2_led_task1(void *task_parameter) {
     gpiox__set_low(*led_num);
     vTaskDelay(500);
   }
-}*/
-// lab 2 part3
-static SemaphoreHandle_t switch_press_indication;
+}
+
+/// lab 2 part3
+/*static SemaphoreHandle_t switch_press_indication;
 
 void lab2_led_task(void *task_parameter) {
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
@@ -140,14 +141,15 @@ void switch_task(void *task_parameter) {
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
   }
-}
+}*/
+
 int main(void) {
-  /* //lab 2 part 0, 1
-  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
+  ///lab 2 part 0, 1
+  /*xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
   return 0;*/
 
-  /*// lab 2 part 2
+  /// lab 2 part 2
   // DO:
   // Create two tasks using led_task() function
   // Pass each task its own parameter:
@@ -159,21 +161,21 @@ int main(void) {
   xTaskCreate(lab2_led_task1, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
   // vTaskDelay(1500);
   vTaskStartScheduler();
-  return 0;*/
+  return 0;
 
-  // lab 2 part 3
-  switch_press_indication = xSemaphoreCreateBinary();
+  /// lab 2 part 3
+  /*switch_press_indication = xSemaphoreCreateBinary();
 
   // Hint: Use on-board LEDs first to get this logic to work
   //       After that, you can simply switch these parameters to off-board LED and a switch
   static port_pin_s test_led = {2, 3};     // SW0
   static port_pin_s test_switch = {1, 10}; // LED1
-  //printf("level: %d", gpiox__get_level(test_switch));
+  // printf("level: %d", gpiox__get_level(test_switch));
 
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
 
-  return 0;
+  return 0;*/
 }
 
 // This sends periodic messages over printf() which uses system_calls.c to send them to UART0
