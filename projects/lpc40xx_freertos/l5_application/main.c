@@ -18,69 +18,53 @@ static SemaphoreHandle_t binary_semaphore;
 static SemaphoreHandle_t mutex;
 static const uint32_t pin26 = (1 << 26); // 0x02000000?
 
-/*static void hw2_led_task(void *pvParameters) {
-  // Choose one of the onboard LEDS by looking into schematics and write code for the below
-  // 1) Set the PIN register bits for the LED//P2_3
-  // 2) Set the DIR register bit for the LED
-  LPC_IOCON->P2_3 &= ~(7 << 0);
-  // LPC_GPIO2->DIR |= (1 << 3);
-  port_pin_s led3 = {2, 3};
-  gpiox__set_as_output(led3);
-
-  LPC_IOCON->P1_26 &= ~(7 << 0);
-  port_pin_s led2 = {1, 26};
-  gpiox__set_as_output(led2);
-  // LPC_GPIO1->DIR |= (1 << 26);
-
-  while (1) {
-    // 3) Use CLR register to turn the LED ON (led may be active low)
-    // LPC_GPIO2->CLR = (1 << 3);
-    // LPC_GPIO1->SET = (1 << 26);
-    // LPC_GPIO1->PIN &= ~(1 << 26);
-    gpiox__set_high(led3);
-    gpiox__set_low(led2);
-    //printf("level low: %d", gpiox__get_level(led2));
-    vTaskDelay(500);
-
-    // 4) Use SET register to turn the LED OFF
-    // LPC_GPIO2->SET = (1 << 3);
-    // LPC_GPIO1->CLR = (1 << 26);
-    // LPC_GPIO1->PIN |= (1 << 26);
-    gpiox__set_low(led3);
-    gpiox__set_high(led2);
-    // printf("level high: %d ", gpiox__get_level(led2));
-    vTaskDelay(500);
-  }
-}
-
-*/
 // lab 2 part 0
-void lab2_led_task_0(void *pvParameters) {
+void lab2_led_task(void *pvParameters) {
   // Choose one of the onboard LEDS by looking into schematics and write code for the below
   // 0) Set the IOCON MUX function(if required) select pins to 000
-  LPC_IOCON->P2_3 &= ~(7 << 3);
-  // 1) Set the DIR register bit for the LED port pin
-  LPC_GPIO1->DIR |= (1 << 3);
+  LPC_IOCON->P2_3 &= ~(7 << 0);
+  // 0x1000100101 & 0x000 = 0x1000100000
+  // 1) Set the DIR register bit for the LED port pin, 1:output, 0:input
+  LPC_GPIO0->DIR |= (1 << 3);
 
   while (true) {
     // 2) Set PIN register bit to 0 to turn ON LED (led may be active low)
-    LPC_GPIO2->SET = (1 << 3);
+    LPC_GPIO0->SET = (1 << 3);
     vTaskDelay(500);
 
     // 3) Set PIN register bit to 1 to turn OFF LED
-    LPC_GPIO2->CLR = (1 << 3);
+    LPC_GPIO0->CLR = (1 << 3);
     vTaskDelay(500);
   }
 }
-int main(void) {
-  // Create FreeRTOS LED task
-  xTaskCreate(lab2_led_task_0, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
 
+// lab 2 part 1
+/*static void lab2_led_task(void *pvParameters) {
+  // Set the IOCON MUX function(if required) select pins to 000
+  LPC_IOCON->P2_3 &= ~(7 << 0); //~0111 = 1000
+  // port_pin_s led3 = {1, 26};
+  gpiox__set_as_output(3);
+  while (1) {
+    // turn the LED on using CLR register
+    gpiox__set_high(3);
+    vTaskDelay(500); // delay for batter result showing
+
+    // turn the LED off using SET register
+    gpiox__set_low(3);
+    vTaskDelay(500);
+  }
+}*/
+
+// lab 2 part 2
+int main(void) {
+  // lab 2 part 0, 1
+  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
   return 0;
 }
 
 // This sends periodic messages over printf() which uses system_calls.c to send them to UART0
+
 static void uart_task(void *params) {
   TickType_t previous_tick = 0;
   TickType_t ticks = 0;
