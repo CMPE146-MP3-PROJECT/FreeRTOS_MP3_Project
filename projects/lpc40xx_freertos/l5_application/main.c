@@ -46,14 +46,14 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
   // Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= ~(7 << 0); //~0111 = 1000
   // port_pin_s led3 = {1, 26};
-  gpio__set_as_output(3);
+  gpiox__set_as_output(3);
   while (1) {
     // turn the LED on using CLR register
-    gpio__set_high(3);
+    gpiox__set_high(3);
     vTaskDelay(500); // delay for batter result showing
 
     // turn the LED off using SET register
-    gpio__set_low(3);
+    gpiox__set_low(3);
     vTaskDelay(500);
   }
 }*/
@@ -62,15 +62,15 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
 void lab2_led_task(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
-  gpio__set_as_output(*led_num);
+  gpiox__set_as_output(*led_num);
   while (true) {
     // do: insert code here to blink an LED
     // Hint: Also use vTaskDelay() to sleep the task
     // turn on
-    gpio__set_high(*led_num);
+    gpiox__set_high(*led_num);
     vTaskDelay(500);
     // turn off
-    gpio__set_low(*led_num);
+    gpiox__set_low(*led_num);
     vTaskDelay(500);
   }
 }
