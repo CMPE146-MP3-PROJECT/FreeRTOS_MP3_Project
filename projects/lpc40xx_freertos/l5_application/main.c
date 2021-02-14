@@ -62,6 +62,8 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
 void lab2_led_task(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
+    LPC_IOCON->P2_3 &= ~(7 << 0);
+    LPC_IOCON->P1_16 &= ~(7 << 0);
   gpiox__set_as_output(*led_num);
   while (true) {
     // do: insert code here to blink an LED
