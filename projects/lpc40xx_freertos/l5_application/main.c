@@ -45,14 +45,14 @@ static void lab2_led_task(void *pvParameters) {
   // Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= ~(7 << 0); //~0111 = 1000
   // port_pin_s led3 = {1, 26};
-  gpiox__set_as_output(3);
+  gpio0__set_as_output(3);
   while (1) {
     // turn the LED on using CLR register
-    gpiox__set_high(3);
-    vTaskDelay(500); // delay for batter result showing
+    gpio0__set_high(3);
+    vTasDelay(500); // delay for batter result showing
 
     // turn the LED off using SET register
-    gpiox__set_low(3);
+    gpio0__set_low(3);
     vTaskDelay(500);
   }
 }
