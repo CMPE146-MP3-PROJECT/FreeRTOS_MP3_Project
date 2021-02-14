@@ -16,7 +16,7 @@ static void blink_task(void *params);
 static void uart_task(void *params);
 static SemaphoreHandle_t binary_semaphore;
 static SemaphoreHandle_t mutex;
-static const uint32_t pin26 = (1 << 26); // 0x02000000?
+static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
 
 // lab 2 part 0
 void lab2_led_task(void *pvParameters) {
@@ -25,8 +25,10 @@ void lab2_led_task(void *pvParameters) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   // 0x1000100101 & 0x000 = 0x1000100000
   // 1) Set the DIR register bit for the LED port pin, 1:output, 0:input
-  LPC_GPIO1->DIR |= (1 << 3);
-
+  LPC_GPIO2->DIR |= (1 << 3); //0001 << 3 = 1000
+  // 0xFFAB56DF
+  // 0x00000008
+  //=0xFFAB56DF
   while (true) {
     // 2) Set PIN register bit to 0 to turn ON LED (led may be active low)
     LPC_GPIO2->SET = (1 << 3);
