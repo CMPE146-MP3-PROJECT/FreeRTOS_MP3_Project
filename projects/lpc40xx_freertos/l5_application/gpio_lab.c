@@ -10,7 +10,7 @@ void gpio__set_as_input(port_pin_s pin_num) {
     LPC_GPIO0->DIR &= ~(1 << pin_num.pin);
   } else if (pin_num.port == 1) {
     LPC_GPIO1->DIR &= ~(1 << pin_num.pin);
-  } else if (pin_num.port == 2) {
+  } else if (pin_num.port == 3) {
     LPC_GPIO2->DIR &= ~(1 << pin_num.pin);
   }
 }
