@@ -62,7 +62,7 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
 void lab2_led_task(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
-  LPC_IOCON->P2_3 &= ~(7 << 0);
+  //LPC_IOCON->P2_3 &= ~(7 << 0);
   LPC_IOCON->P1_16 &= ~(7 << 0);
   gpiox__set_as_output(*led_num);
   while (true) {
@@ -91,10 +91,10 @@ int main(void) {
   static port_pin_s led0 = {2, 3};
   static port_pin_s led1 = {1, 16};
 
-   xTaskCreate(lab2_led_task, "LED0", 1024 / sizeof(void *), &led0, 1,NULL); /* &led0 is a task parameter going to
+  //xTaskCreate(lab2_led_task, "LED0", 1024 / sizeof(void *), &led0, 1, NULL); /* &led0 is a task parameter going to
   // led_task */
   // vTaskDelay(1500);
-  //xTaskCreate(lab2_led_task, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
+  xTaskCreate(lab2_led_task, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
   // vTaskDelay(1500);
 
   vTaskStartScheduler();
