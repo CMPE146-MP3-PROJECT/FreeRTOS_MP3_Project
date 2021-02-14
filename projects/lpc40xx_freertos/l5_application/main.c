@@ -41,26 +41,56 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
 }*/
 
 // lab 2 part 1
-static void lab2_led_task(void *pvParameters) {
+/*static void lab2_led_task(void *pvParameters) {
   // Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= ~(7 << 0); //~0111 = 1000
   // port_pin_s led3 = {1, 26};
-  gpio0__set_as_output(3);
+  gpio__set_as_output(3);
   while (1) {
     // turn the LED on using CLR register
-    gpio0__set_high(3);
+    gpio__set_high(3);
     vTaskDelay(500); // delay for batter result showing
 
     // turn the LED off using SET register
-    gpio0__set_low(3);
+    gpio__set_low(3);
     vTaskDelay(500);
   }
-}
+}*/
 
 // lab 2 part 2
+void lab2_led_task(void *task_parameter) {
+    // Type-cast the paramter that was passed from xTaskCreate()
+    port_pin_s *led = (port_pin_s *)(task_parameter);
+    gpio__set_as_output(*led);
+    while (true) {
+        // do: insert code here to blink an LED
+        // Hint: Also use vTaskDelay() to sleep the task
+        // turn on
+        gpiox__set_high(*led);
+        vTaskDelay(500);
+        // turn off
+        gpiox__set_low(*led);
+        vTaskDelay(500);
+    }
+}
+
 int main(void) {
   // lab 2 part 0, 1
-  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
+  /*xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
+  return 0;*/
+
+  // lab 2 part 2
+  // DO:
+  // Create two tasks using led_task() function
+  // Pass each task its own parameter:
+  // This is static such that these variables will be allocated in RAM and not go out of scope
+  static port_pin_s led0 = {0};
+  static port_pin_s led1 = {1};
+
+  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, &led0); /* &led0 is a task parameter going to led_task */
+  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, &led1);
+
   vTaskStartScheduler();
   return 0;
 }
