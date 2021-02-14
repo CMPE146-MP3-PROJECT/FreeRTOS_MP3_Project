@@ -31,11 +31,11 @@ void lab2_led_task(void *pvParameters) {
   //=0xFFAB56DF
   while (true) {
     // 2) Set PIN register bit to 0 to turn ON LED (led may be active low)
-    LPC_GPIO2->SET = (1 << 26);
+    LPC_GPIO1->SET = (1 << 26);
     vTaskDelay(500);
 
     // 3) Set PIN register bit to 1 to turn OFF LED
-    LPC_GPIO2->CLR = (1 << 26);
+    LPC_GPIO1->CLR = (1 << 26);
     vTaskDelay(500);
   }
 }
