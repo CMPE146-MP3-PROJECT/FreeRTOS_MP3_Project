@@ -168,9 +168,7 @@ int main(void) {
   //       After that, you can simply switch these parameters to off-board LED and a switch
   static port_pin_s test_led = {2, 3};     // SW0
   static port_pin_s test_switch = {1, 10}; // LED1
-  gpiox__get_level(test_switch);
-  gpiox__get_level(test_led);
-  printf("level: %d", gpiox__get_level(switch_test));
+  printf("level: %d", gpiox__get_level(test_switch));
 
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
