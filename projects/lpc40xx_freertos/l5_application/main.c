@@ -109,38 +109,37 @@ void lab2_led_task1(void *task_parameter) {
     vTaskDelay(500);
   }
 }*/
-  //lab 2 part3
-    static SemaphoreHandle_t switch_press_indication;
+// lab 2 part3
+static SemaphoreHandle_t switch_press_indication;
 
-    void lab2_led_task(void *task_parameter) {
-    port_pin_s *led_num = (port_pin_s *)(task_parameter);
-    gpiox__set_as_output(*led_num);
-    while (1) {
-        gpiox__set_high(*led_num);
-        // Note: There is no vTaskDelay() here, but we use sleep mechanism while waiting for the binary semaphore
-        (signal) if (xSemaphoreTake(switch_press_indication, 1000)) {
-            // DO: Blink the LED
-         gpiox__set_low(*led_num);
-        }
-        else {
-            puts("Timeout: No switch press indication for 1000ms");
-        }
+void lab2_led_task(void *task_parameter) {
+  port_pin_s *led_num = (port_pin_s *)(task_parameter);
+  gpiox__set_as_output(*led_num);
+  while (1) {
+    gpiox__set_high(*led_num);
+    // Note: There is no vTaskDelay() here, but we use sleep mechanism while waiting for the binary semaphore
+    if (xSemaphoreTake(switch_press_indication, 1000)) {
+      // DO: Blink the LED
+      gpiox__set_low(*led_num);
     }
+    else {
+      puts("Timeout: No switch press indication for 1000ms");
+    }
+  }
 }
 
-    void switch_task(void *task_parameter) {
-    port_pin_s *switch1 = (port_pin_s *)task_parameter;
-    gpiox__set_as_input(*switch1)
-    while (true) {
-        // DO: If switch pressed, set the binary semaphore
-        if (gpiox__get_level(*switch1)) {
-            xSemaphoreGive(switch_press_indication);
-        }
-
-        // Task should always sleep otherwise they will use 100% CPU
-        // This task sleep also helps avoid spurious semaphore give during switch debeounce
-        vTaskDelay(100);
+void switch_task(void *task_parameter) {
+  port_pin_s *switch1 = (port_pin_s *)task_parameter;
+  gpiox__set_as_input(*switch1) while (true) {
+    // DO: If switch pressed, set the binary semaphore
+    if (gpiox__get_level(*switch1)) {
+      xSemaphoreGive(switch_press_indication);
     }
+
+    // Task should always sleep otherwise they will use 100% CPU
+    // This task sleep also helps avoid spurious semaphore give during switch debeounce
+    vTaskDelay(100);
+  }
 }
 int main(void) {
   /* //lab 2 part 0, 1
@@ -163,17 +162,17 @@ int main(void) {
   return 0;*/
 
   // lab 2 part 3
-    switch_press_indication = xSemaphoreCreateBinary();
+  switch_press_indication = xSemaphoreCreateBinary();
 
-    // Hint: Use on-board LEDs first to get this logic to work
-    //       After that, you can simply switch these parameters to off-board LED and a switch
-    static port_pin_s test_led = {1, 26}; //SW0
-    static port_pin_s test_switch = {1, 10}; //LED1
+  // Hint: Use on-board LEDs first to get this logic to work
+  //       After that, you can simply switch these parameters to off-board LED and a switch
+  static port_pin_s test_led = {1, 26};    // SW0
+  static port_pin_s test_switch = {1, 10}; // LED1
 
-    xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
-    xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
+  xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
+  xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
 
-    return 0;
+  return 0;
 }
 
 // This sends periodic messages over printf() which uses system_calls.c to send them to UART0
