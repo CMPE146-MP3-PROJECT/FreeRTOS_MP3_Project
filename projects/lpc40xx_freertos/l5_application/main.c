@@ -89,7 +89,8 @@ int main(void) {
   static port_pin_s led0 = {2, 3};
   static port_pin_s led1 = {1, 16};
 
-  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 2, &led0); /* &led0 is a task parameter going to led_task */
+  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 2,
+              &led0); /* &led0 is a task parameter going to led_task */
   xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, &led1);
 
   vTaskStartScheduler();
