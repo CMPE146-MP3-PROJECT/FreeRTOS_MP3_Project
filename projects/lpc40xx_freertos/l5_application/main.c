@@ -165,8 +165,8 @@ int main(void) {
 
   // Hint: Use on-board LEDs first to get this logic to work
   //       After that, you can simply switch these parameters to off-board LED and a switch
-  static port_pin_s test_led = {1, 26};    // SW0
-  static port_pin_s test_switch = {1, 10}; // LED1
+  static port_pin_s test_led = {2, 3};    // SW0
+  static port_pin_s test_switch = {0, 30}; // LED1
 
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
@@ -205,39 +205,4 @@ static void uart_task(void *params) {
     printf(" %lu ticks\n\n", (xTaskGetTickCount() - ticks));
   }
 }
-/*
-static void hw2_led_task(void *pvParameters) {
-  // Choose one of the onboard LEDS by looking into schematics and write code for the below
-  // 1) Set the PIN register bits for the LED//P2_3
-  // 2) Set the DIR register bit for the LED
-  LPC_IOCON->P2_3 &= ~(7 << 0);
-  // LPC_GPIO2->DIR |= (1 << 3);
-  port_pin_s led3 = {2, 3};
-  gpiox__set_as_output(led3);
 
-  LPC_IOCON->P1_26 &= ~(7 << 0);
-  port_pin_s led2 = {1, 26};
-  gpiox__set_as_output(led2);
-  // LPC_GPIO1->DIR |= (1 << 26);
-
-  while (1) {
-    // 3) Use CLR register to turn the LED ON (led may be active low)
-    // LPC_GPIO2->CLR = (1 << 3);
-    // LPC_GPIO1->SET = (1 << 26);
-    // LPC_GPIO1->PIN &= ~(1 << 26);
-    gpiox__set_high(led3);
-    gpiox__set_low(led2);
-    //printf("level low: %d", gpiox__get_level(led2));
-    vTaskDelay(500);
-
-    // 4) Use SET register to turn the LED OFF
-    // LPC_GPIO2->SET = (1 << 3);
-    // LPC_GPIO1->CLR = (1 << 26);
-    // LPC_GPIO1->PIN |= (1 << 26);
-    gpiox__set_low(led3);
-    gpiox__set_high(led2);
-    // printf("level high: %d ", gpiox__get_level(led2));
-    vTaskDelay(500);
-  }
-}
-*/
