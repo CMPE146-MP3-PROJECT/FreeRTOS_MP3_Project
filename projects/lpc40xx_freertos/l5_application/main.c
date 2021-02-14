@@ -93,9 +93,9 @@ int main(void) {
 
   xTaskCreate(lab2_led_task, "LED0", 1024 / sizeof(void *), &led0, 1,
               NULL); /* &led0 is a task parameter going to led_task */
-  vTaskDelay(1500);
+  //vTaskDelay(1500);
   xTaskCreate(lab2_led_task, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
-  vTaskDelay(1500);
+  //vTaskDelay(1500);
 
   vTaskStartScheduler();
   return 0;
