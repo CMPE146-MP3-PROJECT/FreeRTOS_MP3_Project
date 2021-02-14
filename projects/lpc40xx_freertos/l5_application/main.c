@@ -22,20 +22,20 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
 void lab2_led_task(void *pvParameters) {
   // Choose one of the onboard LEDS by looking into schematics and write code for the below
   // 0) Set the IOCON MUX function(if required) select pins to 000
-  LPC_IOCON->P2_3 &= ~(7 << 0);
+  LPC_IOCON->P1_26 &= ~(7 << 0);
   // 0x1000100101 & 0x000 = 0x1000100000
   // 1) Set the DIR register bit for the LED port pin, 1:output, 0:input
-  LPC_GPIO2->DIR |= (1 << 3); // 0001 << 3 = 1000; which port to use does not matter
+  LPC_GPIO2->DIR |= (1 << 26); // 0001 << 3 = 1000; which port to use does not matter
   // 0xFFAB56DF
   // 0x00000008
   //=0xFFAB56DF
   while (true) {
     // 2) Set PIN register bit to 0 to turn ON LED (led may be active low)
-    LPC_GPIO2->SET = (1 << 3);
+    LPC_GPIO2->SET = (1 << 26);
     vTaskDelay(500);
 
     // 3) Set PIN register bit to 1 to turn OFF LED
-    LPC_GPIO2->CLR = (1 << 3);
+    LPC_GPIO2->CLR = (1 << 26);
     vTaskDelay(500);
   }
 }
