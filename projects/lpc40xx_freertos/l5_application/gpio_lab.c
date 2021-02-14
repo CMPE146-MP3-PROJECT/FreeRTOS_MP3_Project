@@ -32,7 +32,7 @@ void gpio__set(port_pin_s pin_num, bool high) {
   }
 }
 bool gpio__get_level(port_pin_s pin_num) {
-  if (LPC_GPIO0->PIN & (1 << pin_num) == 1) {
+  if (LPC_GPIO0->PIN & (1 << pin_num.pin) == 1) {
     return 1;
   } else
     return 0;
