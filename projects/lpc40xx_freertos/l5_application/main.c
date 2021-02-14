@@ -49,7 +49,7 @@ static void lab2_led_task(void *pvParameters) {
   while (1) {
     // turn the LED on using CLR register
     gpio0__set_high(3);
-    vTasDelay(500); // delay for batter result showing
+    vTaskDelay(500); // delay for batter result showing
 
     // turn the LED off using SET register
     gpio0__set_low(3);
