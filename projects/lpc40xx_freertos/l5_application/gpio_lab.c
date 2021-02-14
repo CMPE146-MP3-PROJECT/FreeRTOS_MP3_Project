@@ -56,14 +56,12 @@ void gpiox__set(port_pin_s pin_num, bool high) {
   }
 }
 bool gpiox__get_level(port_pin_s pin_num) {
-        switch (pin_num.port) {
-            case 0:
-                return (LPC_GPIO0->PIN & (1 << pin_num.pin));
-            case 1:
-                return (LPC_GPIO1->PIN & (1 << pin_num.pin));
-            case 2:
-                return (LPC_GPIO2->PIN & (1 << pin_num.pin));
-        }
-    }
-    return false;
+    if (pin_num.port == 0) {
+        return (LPC_GPIO0->PIN & (1 << pin_num.pin));
+    }else if (pin_num.port == 1) {
+        return (LPC_GPIO1->PIN & (1 << pin_num.pin));
+    }else if (pin_num.port == 2) {
+        return (LPC_GPIO2->PIN & (1 << pin_num.pin));
+    }else
+        return false;
 }
