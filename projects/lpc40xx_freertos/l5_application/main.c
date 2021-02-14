@@ -121,6 +121,7 @@ void lab2_led_task(void *task_parameter) {
     if (xSemaphoreTake(switch_press_indication, 1000)) {
       // DO: Blink the LED
       gpiox__set_low(*led_num);
+      vTaskDelay(500);
     } else {
       puts("Timeout: No switch press indication for 1000ms");
     }
@@ -134,10 +135,10 @@ void switch_task(void *task_parameter) {
     // DO: If switch pressed, set the binary semaphore
     if (gpiox__get_level(*switch1)) {
       xSemaphoreGive(switch_press_indication);
+      vTaskDelay(100);
     }
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
-    vTaskDelay(100);
   }
 }
 int main(void) {
@@ -165,8 +166,8 @@ int main(void) {
 
   // Hint: Use on-board LEDs first to get this logic to work
   //       After that, you can simply switch these parameters to off-board LED and a switch
-  static port_pin_s test_led = {2, 3};    // SW0
-  static port_pin_s test_switch = {0, 30}; // LED1
+  static port_pin_s test_led = {2, 3};     // SW0
+  static port_pin_s test_switch = {1, 10}; // LED1
 
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
@@ -205,4 +206,3 @@ static void uart_task(void *params) {
     printf(" %lu ticks\n\n", (xTaskGetTickCount() - ticks));
   }
 }
-
