@@ -17,35 +17,35 @@ void gpiox__set_as_input(port_pin_s pin_num) {
 
 /// Should alter the hardware registers to set the pin as output
 void gpiox__set_as_output(port_pin_s pin_num) {
-    if (pin_num.port == 0){
-        LPC_GPIO0->DIR |= (1 << pin_num.pin);
-    }else if (pin_num.port == 1){
-        LPC_GPIO1->DIR |= (1 << pin_num.pin);
-    }else if (pin_num.port == 2) {
-        LPC_GPIO2->DIR |= (1 << pin_num.pin);
-    }
+  if (pin_num.port == 0) {
+    LPC_GPIO0->DIR |= (1 << pin_num.pin);
+  } else if (pin_num.port == 1) {
+    LPC_GPIO1->DIR |= (1 << pin_num.pin);
+  } else if (pin_num.port == 2) {
+    LPC_GPIO2->DIR |= (1 << pin_num.pin);
+  }
 }
 
 /// Should alter the hardware registers to set the pin as high
 void gpiox__set_high(port_pin_s pin_num) {
-    if (pin_num.port == 0) {
-        LPC_GPIO0->SET = (1 << pin_num.pin);
-    }else if (pin_num.port == 1){
-        LPC_GPIO1->SET = (1 << pin_num.pin);
-    }else if (pin_num.port == 2){
-        LPC_GPIO2->SET = (1 << pin_num.pin);
-    }
+  if (pin_num.port == 0) {
+    LPC_GPIO0->SET = (1 << pin_num.pin);
+  } else if (pin_num.port == 1) {
+    LPC_GPIO1->SET = (1 << pin_num.pin);
+  } else if (pin_num.port == 2) {
+    LPC_GPIO2->SET = (1 << pin_num.pin);
+  }
 }
 
 /// Should alter the hardware registers to set the pin as low
 void gpiox__set_low(port_pin_s pin_num) {
-    if (pin_num.port == 0) {
-        LPC_GPIO0->CLR = (1 << pin_num.pin);
-    }else if (pin_num.port == 1){
-        LPC_GPIO1->CLR = (1 << pin_num.pin);
-    }else if (pin_num.port == 2){
-        LPC_GPIO2->CLR = (1 << pin_num.pin);
-    }
+  if (pin_num.port == 0) {
+    LPC_GPIO0->CLR = (1 << pin_num.pin);
+  } else if (pin_num.port == 1) {
+    LPC_GPIO1->CLR = (1 << pin_num.pin);
+  } else if (pin_num.port == 2) {
+    LPC_GPIO2->CLR = (1 << pin_num.pin);
+  }
 }
 
 void gpiox__set(port_pin_s pin_num, bool high) {
