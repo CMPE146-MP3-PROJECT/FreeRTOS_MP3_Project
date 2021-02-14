@@ -121,8 +121,7 @@ void lab2_led_task(void *task_parameter) {
     if (xSemaphoreTake(switch_press_indication, 1000)) {
       // DO: Blink the LED
       gpiox__set_low(*led_num);
-    }
-    else {
+    } else {
       puts("Timeout: No switch press indication for 1000ms");
     }
   }
@@ -130,7 +129,8 @@ void lab2_led_task(void *task_parameter) {
 
 void switch_task(void *task_parameter) {
   port_pin_s *switch1 = (port_pin_s *)task_parameter;
-  gpiox__set_as_input(*switch1) while (true) {
+  gpiox__set_as_input(*switch1);
+  while (true) {
     // DO: If switch pressed, set the binary semaphore
     if (gpiox__get_level(*switch1)) {
       xSemaphoreGive(switch_press_indication);
