@@ -19,7 +19,7 @@ static SemaphoreHandle_t mutex;
 static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
 
 // lab 2 part 0
-void lab2_led_task(void *pvParameters) {
+/*void lab2_led_task(void *pvParameters) {
   // Choose one of the onboard LEDS by looking into schematics and write code for the below
   // 0) Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= ~(7 << 0);
@@ -38,10 +38,10 @@ void lab2_led_task(void *pvParameters) {
     LPC_GPIO2->CLR = (1 << 3);
     vTaskDelay(500);
   }
-}
+}*/
 
 // lab 2 part 1
-/*static void lab2_led_task(void *pvParameters) {
+static void lab2_led_task(void *pvParameters) {
   // Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= ~(7 << 0); //~0111 = 1000
   // port_pin_s led3 = {1, 26};
@@ -55,7 +55,7 @@ void lab2_led_task(void *pvParameters) {
     gpiox__set_low(3);
     vTaskDelay(500);
   }
-}*/
+}
 
 // lab 2 part 2
 int main(void) {

@@ -12,11 +12,11 @@ typedef struct {
 void gpiox__set_as_input(port_pin_s pin_num);
 
 /// Should alter the hardware registers to set the pin as output
-void gpiox__set_as_output(int pin_num);
+void gpiox__set_as_output(uint8_t pin_num);
 
 /// Should alter the hardware registers to set the pin as high
-void gpiox__set_high(int pin_num);
+void gpiox__set_high(uint8_t pin_num);
 
 /// Should alter the hardware registers to set the pin as low
-void gpiox__set_low(int pin_num);
+void gpiox__set_low(uint8_t pin_num);
 void gpiox__set(port_pin_s pin_num, bool high);
