@@ -36,8 +36,8 @@ void gpio0__set(uint8_t pin_num, bool high) {
   }
 }
 bool gpio0__get_level(uint8_t pin_num) {
-  if (LPC_GPIO0->PIN & (1 << pin_num) == 1)
-    return 1;
-}
-else {return 0;}
+    if (LPC_GPIO0->PIN & (1 << pin_num) == 1){
+        return 1;
+    }else
+        return 0;
 }
