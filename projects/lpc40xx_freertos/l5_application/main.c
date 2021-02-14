@@ -8,6 +8,7 @@
 #include "semphr.h"
 #include "sj2_cli.h"
 #include <stdio.h>
+#include "gpio_lab.h"
 
 // 'static' to make these functions 'private' to this file
 static void create_blinky_tasks(void);
@@ -59,19 +60,19 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
 
 // lab 2 part 2
 void lab2_led_task(void *task_parameter) {
-    // Type-cast the paramter that was passed from xTaskCreate()
-    port_pin_s *led = (port_pin_s *)(task_parameter);
-    gpio__set_as_output(*led);
-    while (true) {
-        // do: insert code here to blink an LED
-        // Hint: Also use vTaskDelay() to sleep the task
-        // turn on
-        gpiox__set_high(*led);
-        vTaskDelay(500);
-        // turn off
-        gpiox__set_low(*led);
-        vTaskDelay(500);
-    }
+  // Type-cast the paramter that was passed from xTaskCreate()
+  port_pin_s *led = (port_pin_s *)(task_parameter);
+  gpio__set_as_output(*led);
+  while (true) {
+    // do: insert code here to blink an LED
+    // Hint: Also use vTaskDelay() to sleep the task
+    // turn on
+    gpiox__set_high(*led);
+    vTaskDelay(500);
+    // turn off
+    gpiox__set_low(*led);
+    vTaskDelay(500);
+  }
 }
 
 int main(void) {
@@ -88,7 +89,8 @@ int main(void) {
   static port_pin_s led0 = {0};
   static port_pin_s led1 = {1};
 
-  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, &led0); /* &led0 is a task parameter going to led_task */
+  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1,
+              &led0); /* &led0 is a task parameter going to led_task */
   xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, &led1);
 
   vTaskStartScheduler();
