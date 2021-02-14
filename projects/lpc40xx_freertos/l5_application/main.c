@@ -130,12 +130,11 @@ void lab2_led_task(void *task_parameter) {
 void switch_task(void *task_parameter) {
   port_pin_s *switch1 = (port_pin_s *)task_parameter;
   gpiox__set_as_input(*switch1);
-  while (true) {
+  while (1) {
     // DO: If switch pressed, set the binary semaphore
     if (gpiox__get_level(*switch1)) {
       xSemaphoreGive(switch_press_indication);
     }
-
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
     vTaskDelay(100);
