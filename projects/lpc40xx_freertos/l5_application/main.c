@@ -25,7 +25,7 @@ void lab2_led_task(void *pvParameters) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   // 0x1000100101 & 0x000 = 0x1000100000
   // 1) Set the DIR register bit for the LED port pin, 1:output, 0:input
-  LPC_GPIO3->DIR |= (1 << 3); // 0001 << 3 = 1000
+  LPC_GPIO2->DIR |= (1 << 3); // 0001 << 3 = 1000; which port to use does not matter
   // 0xFFAB56DF
   // 0x00000008
   //=0xFFAB56DF
