@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 typedef struct {
-  int port;
-  int pin;
+    uint8_t port;
+    uint8_t pin;
 } port_pin_s;
 
 /// Should alter the hardware registers to set the pin as input
