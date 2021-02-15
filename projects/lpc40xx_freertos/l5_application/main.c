@@ -122,7 +122,7 @@ void lab2_led_task(void *task_parameter) {
     if (xSemaphoreTake(switch_press_indication, 1000)) {
       // DO: Blink the LED
       gpiox__set_low(*led_num);
-      vTaskDelay(500);
+      //vTaskDelay(500);
     } else {
       puts("Timeout: No switch press indication for 1000ms");
     }
@@ -137,6 +137,8 @@ void switch_task(void *task_parameter) {
     if (gpiox__get_level(*switch1)) {
       xSemaphoreGive(switch_press_indication);
       vTaskDelay(100);
+    } else {
+        puts("No responds");
     }
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
@@ -168,7 +170,6 @@ int main(void) {
 
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
-
 
   return 0;
 }
