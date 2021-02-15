@@ -130,7 +130,7 @@ void lab2_led_task(void *task_parameter) {
 
 void switch_task(void *task_parameter) {
   port_pin_s *switch0 = (port_pin_s *)(task_parameter);
-  //gpiox__set_as_input(*switch0);
+  // gpiox__set_as_input(*switch0);
   // printf("level: %d", gpiox__get_level(*switch0));
   while (true) {
     // DO: If switch pressed, set the binary semaphore
@@ -162,8 +162,8 @@ int main(void) {
 
   /// lab 2 part 3
   switch_press_indication = xSemaphoreCreateBinary();
-  static port_pin_s test_switch = {1, 15}; // SW
-  static port_pin_s test_led = {1, 26};    // LED
+  static port_pin_s test_switch = {0, 30}; // SW
+  static port_pin_s test_led = {1, 24};    // LED
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
