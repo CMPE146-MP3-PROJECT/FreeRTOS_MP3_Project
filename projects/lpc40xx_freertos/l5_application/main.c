@@ -163,13 +163,14 @@ int main(void) {
   // return 0;*/
 
   /// lab 2 part 3
-  //switch_press_indication = xSemaphoreCreateBinary();
-  //static port_pin_s test_switch = {0, 30}; // SW1
-  //static port_pin_s test_led = {2, 3};     // LED0
-                                           // printf("level: %d", gpiox__get_level(test_switch))
-  // xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
+  switch_press_indication = xSemaphoreCreateBinary();
+  static port_pin_s test_switch = {0, 30}; // SW1
+  static port_pin_s test_led = {2, 3};     // LED0
+  // printf("level: %d", gpiox__get_level(test_switch))
+  xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
-  // xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
+  //xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
   // xTaskCreate(lab2_led_task, "test_led", configMINIMAL_STACK_SIZE, (void *)&test_led, 1, NULL);
+  vTaskStartScheduler();
   return 0;
 }
