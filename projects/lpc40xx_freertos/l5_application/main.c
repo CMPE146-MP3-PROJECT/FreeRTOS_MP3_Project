@@ -82,9 +82,6 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
   LPC_IOCON->P2_3 &= ~(7 << 0);
   gpiox__set_as_output(*led_num);
   while (true) {
-    // do: insert code here to blink an LED
-    // Hint: Also use vTaskDelay() to sleep the task
-    // turn on
     gpiox__set_high(*led_num);
     vTaskDelay(500);
     // turn off
@@ -98,9 +95,6 @@ void lab2_led_task1(void *task_parameter) {
   LPC_IOCON->P1_26 &= ~(7 << 0);
   gpiox__set_as_output(*led_num);
   while (true) {
-    // do: insert code here to blink an LED
-    // Hint: Also use vTaskDelay() to sleep the task
-    // turn on
     vTaskDelay(500);
     gpiox__set_high(*led_num);
     vTaskDelay(500);
@@ -134,7 +128,7 @@ void lab2_led_task(void *task_parameter) {
 }
 
 void switch_task(void *task_parameter) {
-  port_pin_s *switch0 = (port_pin_s *)task_parameter;
+  port_pin_s *switch0 = (port_pin_s *)(task_parameter);
   gpiox__set_as_input(*switch0);
   puts("entering the switch function");
   while (1) {
@@ -169,7 +163,7 @@ int main(void) {
 
   /// lab 2 part 3
   switch_press_indication = xSemaphoreCreateBinary();
-  static port_pin_s test_led = {2, 3}; // SW0
+  static port_pin_s test_led = {2, 3};     // SW0
   static port_pin_s test_switch = {1, 10}; // LED0
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
