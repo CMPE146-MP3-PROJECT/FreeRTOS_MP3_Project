@@ -109,7 +109,7 @@ static SemaphoreHandle_t switch_press_indication;
 
 void lab2_led_task(void *task_parameter) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
-  port_pin_s *led_num = (port_pin_s *)(task_parameter);
+  const port_pin_s *led_num = (port_pin_s *)(task_parameter);
   gpiox__set_as_output(*led_num);
   puts("entering the led function");
   while (1) {
@@ -165,7 +165,7 @@ int main(void) {
   /// lab 2 part 3
   switch_press_indication = xSemaphoreCreateBinary();
   static port_pin_s test_led = {2, 3};     // SW0
-  static port_pin_s test_switch = {1, 10}; // LED0
+  static port_pin_s test_switch = {1, 15}; // LED0
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
