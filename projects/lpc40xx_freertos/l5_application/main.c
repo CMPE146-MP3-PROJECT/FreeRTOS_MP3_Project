@@ -162,7 +162,7 @@ int main(void) {
 
   /// lab 2 part 3
   switch_press_indication = xSemaphoreCreateBinary();
-  static port_pin_s test_switch = {0, 30}; // SW1
+  static port_pin_s test_switch = {1, 10}; // SW0
   static port_pin_s test_led = {2, 3};     // LED0
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
