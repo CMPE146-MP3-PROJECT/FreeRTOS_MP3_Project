@@ -118,20 +118,11 @@ void lab2_led_task(void *task_parameter) {
     // Note: There is no vTaskDelay() here, but we use sleep mechanism while waiting for the binary semaphore
     if (xSemaphoreTake(switch_press_indication, 1000)) {
       // Blink the LED
-      //gpiox__set_as_output(*led_num);
-      //gpiox__set_high(*led_num);
-      //vTaskDelay(500);
-      //gpiox__set_low(*led_num);
-      //vTaskDelay(500);
-        gpiox__set_as_output(*led_num);
-        while (true) {
-            vTaskDelay(500);
-            gpiox__set_high(*led_num);
-            vTaskDelay(500);
-            // turn off
-            gpiox__set_low(*led_num);
-            vTaskDelay(500);
-        }
+      gpiox__set_as_output(*led_num);
+      gpiox__set_high(*led_num);
+      vTaskDelay(500);
+      gpiox__set_low(*led_num);
+      vTaskDelay(500);
     } else {
       puts("Timeout: No switch press indication for 1000ms");
     }
@@ -174,7 +165,7 @@ int main(void) {
 
   /// lab 2 part 3
   switch_press_indication = xSemaphoreCreateBinary();
-  static port_pin_s test_switch = {1, 15}; // SW1
+  static port_pin_s test_switch = {0, 30}; // SW1
   static port_pin_s test_led = {2, 3};     // LED0
                                            // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);

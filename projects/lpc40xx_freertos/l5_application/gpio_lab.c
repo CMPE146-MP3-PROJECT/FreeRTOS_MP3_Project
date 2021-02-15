@@ -57,11 +57,11 @@ void gpiox__set(port_pin_s pin_num, bool high) {
 }
 bool gpiox__get_level(port_pin_s pin_num) {
   if (pin_num.port == 0) {
-    return (LPC_GPIO0->PIN & (1 << pin_num.pin));
+    return 1;
   } else if (pin_num.port == 1) {
-    return (LPC_GPIO1->PIN & (1 << pin_num.pin));
+    return 1;
   } else if (pin_num.port == 2) {
-    return (LPC_GPIO2->PIN & (1 << pin_num.pin));
+    return 1;
   } else
     return 0;
 }
