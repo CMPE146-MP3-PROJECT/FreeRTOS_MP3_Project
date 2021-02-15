@@ -76,7 +76,7 @@ static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; 
   }
 }*/
 /// lab 2 part 2 blink separate
-/*void lab2_led_task0(void *task_parameter) {
+void lab2_led_task0(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
   LPC_IOCON->P2_3 &= ~(7 << 0);
@@ -108,10 +108,10 @@ void lab2_led_task1(void *task_parameter) {
     gpiox__set_low(*led_num);
     vTaskDelay(500);
   }
-}*/
+}
 
 /// lab 2 part3
-static SemaphoreHandle_t switch_press_indication;
+/*static SemaphoreHandle_t switch_press_indication;
 
 void lab2_led_task(void *task_parameter) {
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
@@ -145,31 +145,31 @@ void switch_task(void *task_parameter) {
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
   }
-}
+}*/
 
 int main(void) {
   /// lab 2 part 0, 1
   /*xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
-  return 0;*/
+  //return 0;*/
 
   /// lab 2 part 2
   // This is static such that these variables will be allocated in RAM and not go out of scope
-  /*static port_pin_s led0 = {2, 3};
+  static port_pin_s led0 = {2, 3};
   static port_pin_s led1 = {1, 26};
   xTaskCreate(lab2_led_task0, "LED0", 1024 / sizeof(void *), &led0, 1, NULL); // &led0 is a task parameter going to
   // vTaskDelay(1500);
   xTaskCreate(lab2_led_task1, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
   // vTaskDelay(1500);
   vTaskStartScheduler();
-  return 0;*/
+  //return 0;
 
   /// lab 2 part 3
-  switch_press_indication = xSemaphoreCreateBinary();
-  static port_pin_s test_led = {2, 3};     // SW0
-  static port_pin_s test_switch = {1, 10}; // LED1
+  /*switch_press_indication = xSemaphoreCreateBinary();
+  static port_pin_s test_led = {2, 3}; // SW0
+  static port_pin_s test_switch = {1, 10}; // LED0
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
-  //return 0;
+  // return 0;*/
 }
