@@ -110,10 +110,8 @@ void lab2_led_task1(void *task_parameter) {
 void lab2_led_task(void *task_parameter) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   const port_pin_s *led_num = (port_pin_s *)(task_parameter);
-
-  puts("entering the led function");
   while (true) {
-    printf("Blinking\n");
+    printf("entering the led function\n");
     // gpiox__set_high(*led_num);
     // Note: There is no vTaskDelay() here, but we use sleep mechanism while waiting for the binary semaphore
     if (xSemaphoreTake(switch_press_indication, 1000)) {
@@ -133,7 +131,7 @@ void switch_task(void *task_parameter) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   port_pin_s *switch0 = (port_pin_s *)(task_parameter);
   gpiox__set_as_input(*switch0);
-  //printf("level: %d", gpiox__get_level(*switch0));
+  // printf("level: %d", gpiox__get_level(*switch0));
   while (true) {
     // DO: If switch pressed, set the binary semaphore
     if (gpiox__get_level(*switch0)) {
