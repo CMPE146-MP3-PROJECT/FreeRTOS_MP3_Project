@@ -14,9 +14,9 @@ static void create_blinky_tasks(void);
 static void create_uart_task(void);
 static void blink_task(void *params);
 static void uart_task(void *params);
-//static SemaphoreHandle_t binary_semaphore;
-//static SemaphoreHandle_t mutex;
-//static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
+// static SemaphoreHandle_t binary_semaphore;
+// static SemaphoreHandle_t mutex;
+// static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
 static SemaphoreHandle_t switch_press_indication;
 
 /// lab 2 part 0
@@ -117,10 +117,10 @@ void lab2_led_task(void *task_parameter) {
     // gpiox__set_high(*led_num);
     // Note: There is no vTaskDelay() here, but we use sleep mechanism while waiting for the binary semaphore
     if (xSemaphoreTake(switch_press_indication, 1000)) {
-      // DO: Blink the LED
-      gpiox__set_low(*led_num);
-      vTaskDelay(500);
+      // Blink the LED
       gpiox__set_high(*led_num);
+      vTaskDelay(500);
+      gpiox__set_low(*led_num);
       vTaskDelay(500);
     } else {
       puts("Timeout: No switch press indication for 1000ms");
