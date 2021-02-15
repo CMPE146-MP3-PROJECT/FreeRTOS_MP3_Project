@@ -171,5 +171,5 @@ int main(void) {
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "switch_test", 1024 / sizeof(void *), &test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "led_test", 1024 / sizeof(void *), &test_led, 1, NULL);
-  return 0;
+  //return 0;
 }
