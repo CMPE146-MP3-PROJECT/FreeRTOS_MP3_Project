@@ -130,8 +130,9 @@ void lab2_led_task(void *task_parameter) {
 }
 
 void switch_task(void *task_parameter) {
+    LPC_IOCON->P2_3 &= ~(7 << 0);
   port_pin_s *switch0 = (port_pin_s *)(task_parameter);
-  //gpiox__set_as_input(*switch0);
+  // gpiox__set_as_input(*switch0);
   puts("entering the switch function");
   while (1) {
     // DO: If switch pressed, set the binary semaphore
