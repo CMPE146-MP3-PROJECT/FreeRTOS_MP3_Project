@@ -133,7 +133,7 @@ void switch_task(void *task_parameter) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   port_pin_s *switch0 = (port_pin_s *)(task_parameter);
   gpiox__set_as_input(*switch0);
-  printf("level: %d", gpiox__get_level(switch0));
+  printf("level: %d", gpiox__get_level(*switch0));
   /*while (true) {
     // DO: If switch pressed, set the binary semaphore
     if (gpiox__get_level(*switch0)) {
@@ -167,9 +167,9 @@ int main(void) {
   static port_pin_s test_switch = {0, 30}; // SW1
   static port_pin_s test_led = {2, 3};     // LED0
                                            // printf("level: %d", gpiox__get_level(test_switch))
-  xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
+  //xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
-  //xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
+  // xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
   // xTaskCreate(lab2_led_task, "test_led", configMINIMAL_STACK_SIZE, (void *)&test_led, 1, NULL);
   return 0;
 }
