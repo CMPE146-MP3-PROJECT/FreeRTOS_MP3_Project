@@ -117,6 +117,7 @@ void lab2_led_task(void *task_parameter) {
     // Note: There is no vTaskDelay() here, but we use sleep mechanism while waiting for the binary semaphore
     if (xSemaphoreTake(switch_press_indication, 1000)) {
       // Blink the LED
+      printf("Blinking\n");
       gpiox__set_high(*led_num);
       vTaskDelay(500);
       gpiox__set_low(*led_num);
