@@ -14,9 +14,10 @@ static void create_blinky_tasks(void);
 static void create_uart_task(void);
 static void blink_task(void *params);
 static void uart_task(void *params);
-static SemaphoreHandle_t binary_semaphore;
-static SemaphoreHandle_t mutex;
-static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
+//static SemaphoreHandle_t binary_semaphore;
+//static SemaphoreHandle_t mutex;
+//static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
+static SemaphoreHandle_t switch_press_indication;
 
 /// lab 2 part 0
 /*void lab2_led_task(void *pvParameters) {
@@ -105,7 +106,6 @@ void lab2_led_task1(void *task_parameter) {
 }*/
 
 /// lab 2 part3
-static SemaphoreHandle_t switch_press_indication;
 
 void lab2_led_task(void *task_parameter) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
@@ -164,8 +164,8 @@ int main(void) {
 
   /// lab 2 part 3
   switch_press_indication = xSemaphoreCreateBinary();
-  static port_pin_s test_led = {2, 3};     // SW0
-  static port_pin_s test_switch = {1, 15}; // LED0
+  static port_pin_s test_switch = {1, 15}; // SW1
+  static port_pin_s test_led = {2, 3};     // LED0
                                            // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
