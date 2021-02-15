@@ -63,5 +63,6 @@ bool gpiox__get_level(port_pin_s pin_num) {
     return (LPC_GPIO1->PIN & (1 << pin_num.pin));
   case 2:
     return (LPC_GPIO2->PIN & (1 << pin_num.pin));
-  }return false;
+  }
+  return false;
 }
