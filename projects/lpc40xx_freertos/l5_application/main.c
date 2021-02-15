@@ -108,6 +108,7 @@ void lab2_led_task1(void *task_parameter) {
 static SemaphoreHandle_t switch_press_indication;
 
 void lab2_led_task(void *task_parameter) {
+  LPC_IOCON->P2_3 &= ~(7 << 0);
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
   gpiox__set_as_output(*led_num);
   puts("entering the led function");
@@ -128,12 +129,12 @@ void lab2_led_task(void *task_parameter) {
 }
 
 void switch_task(void *task_parameter) {
-  port_pin_s *sw = (port_pin_s *)(task_parameter);
-  gpiox__set_as_input(*sw);
+  port_pin_s *switch0 = (port_pin_s *)(task_parameter);
+  gpiox__set_as_input(*switch0);
   puts("entering the switch function");
   while (1) {
     // DO: If switch pressed, set the binary semaphore
-    if (gpiox__get_level(*sw)) {
+    if (gpiox__get_level(*switch0)) {
       xSemaphoreGive(switch_press_indication);
       vTaskDelay(100);
     } else {
