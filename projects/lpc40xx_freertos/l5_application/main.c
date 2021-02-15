@@ -76,6 +76,7 @@ static SemaphoreHandle_t switch_press_indication;
     vTaskDelay(500);
   }
 }*/
+
 /// lab 2 part 2 blink separate
 /*void lab2_led_task0(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
@@ -106,8 +107,7 @@ void lab2_led_task1(void *task_parameter) {
 }*/
 
 /// lab 2 part3
-
-void lab2_led_task(void *task_parameter) {
+/*void lab2_led_task(void *task_parameter) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   const port_pin_s *led_num = (port_pin_s *)(task_parameter);
 
@@ -127,14 +127,14 @@ void lab2_led_task(void *task_parameter) {
       puts("Timeout: No switch press indication for 1000ms");
     }
   }
-}
+}*/
 
 void switch_task(void *task_parameter) {
   LPC_IOCON->P2_3 &= ~(7 << 0);
   port_pin_s *switch0 = (port_pin_s *)(task_parameter);
   gpiox__set_as_input(*switch0);
-  //puts("entering the switch function");
-  while (true) {
+  printf("level: %d", gpiox__get_level(switch0));
+  /*while (true) {
     // DO: If switch pressed, set the binary semaphore
     if (gpiox__get_level(*switch0)) {
       xSemaphoreGive(switch_press_indication);
@@ -142,7 +142,7 @@ void switch_task(void *task_parameter) {
     }
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
-  }
+  }*/
 }
 
 int main(void) {
@@ -169,7 +169,7 @@ int main(void) {
                                            // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
-  xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
+  //xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
   // xTaskCreate(lab2_led_task, "test_led", configMINIMAL_STACK_SIZE, (void *)&test_led, 1, NULL);
   return 0;
 }
