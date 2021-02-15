@@ -119,8 +119,8 @@ void lab2_led_task(void *task_parameter) {
       printf("Blinking\n");
       gpiox__set_low(*led_num);
       vTaskDelay(500);
-      gpiox__set_high(*led_num);
-      vTaskDelay(500);
+      //gpiox__set_high(*led_num);
+      //vTaskDelay(500);
     } else {
       puts("Timeout: No switch press indication for 1000ms");
     }
