@@ -23,13 +23,11 @@ static SemaphoreHandle_t switch_press_indication;
 /*void lab2_led_task(void *pvParameters) {
   // Choose one of the onboard LEDS by looking into schematics and write code for the below
   // 0) Set the IOCON MUX function(if required) select pins to 000
-  LPC_IOCON->P2_3 &= ~(7 << 0);
+  LPC_IOCON->P2_3 &= (7 << 0);
   // 0x1000100101 & 0x000 = 0x1000100000
   // 1) Set the DIR register bit for the LED port pin, 1:output, 0:input
-  LPC_GPIO2->DIR |= (1 << 3); // 0001 << 3 = 1000; which port to use does not matter
-  // 0xFFAB56DF
-  // 0x00000008
-  //=0xFFAB56DF
+  LPC_GPIO2->DIR |= (1 << 4); //0001 << 4 = 10000;
+  // 0001 << 3 = 1000; which port to use does not matter
   while (true) {
     // 2) Set PIN register bit to 0 to turn ON LED (led may be active low)
     LPC_GPIO2->SET = (1 << 3);
@@ -162,8 +160,8 @@ int main(void) {
 
   /// lab 2 part 3
   switch_press_indication = xSemaphoreCreateBinary();
-  static port_pin_s test_switch = {1, 19}; // SW
-  static port_pin_s test_led = {2, 3};     // LED
+  static port_pin_s test_switch = {0, 30}; // SW
+  static port_pin_s test_led = {1, 24};     // LED
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
