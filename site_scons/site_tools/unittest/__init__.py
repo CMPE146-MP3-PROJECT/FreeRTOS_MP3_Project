@@ -157,7 +157,7 @@ def get_unittest_coverage_env(source_env):
 
 def generate_test_main(env, filenode, target_dirnode):
     output_filenode = target_dirnode.File(fsops.suffix_filenode_name(filenode, suffix="_runner").name)
-    return env.Command(action="ruby {} $SOURCE $TARGET".format(GENERATE_TEST_RUNNER_RB.abspath), source=filenode, target=output_filenode)[0]
+    return env.Command(action="ruby \"{}\" $SOURCE $TARGET".format(GENERATE_TEST_RUNNER_RB.abspath), source=filenode, target=output_filenode)[0]
 
 
 def find_dependencies_from_sources(filenode, sources, header_filenodes_override=None, verbose=False):
@@ -210,7 +210,7 @@ def generate_mocks(env, header_filenodes, target_dirnode):
         basename, ext = os.path.splitext(header_filenode.name)
         mock_header_filenode = target_dirnode.File("{}{}".format(MOCK_HEADER_PREFIX, header_filenode.name))
         mock_source_filenode = target_dirnode.File("{}{}{}".format(MOCK_HEADER_PREFIX, basename, ext.replace("h", "c")))
-        results = env.Command(action="ruby {} $SOURCE {}".format(MOCK_GENERATOR_RB.abspath, target_dirnode.abspath), source=header_filenode, target=[mock_header_filenode, mock_source_filenode])
+        results = env.Command(action="ruby \"{}\" $SOURCE \"{}\"".format(MOCK_GENERATOR_RB.abspath, target_dirnode.abspath), source=header_filenode, target=[mock_header_filenode, mock_source_filenode])
         mock_header_filenodes.append(mock_header_filenode)
         mock_source_filenodes.append(mock_source_filenode)
     return mock_header_filenodes, mock_source_filenodes
@@ -221,14 +221,14 @@ def execute_unit_tests(env, exe_filenodes, summary_only=False, timeout=None):
     # python <UNIT_TEST_RUNNER_PY> -i <exe> -i <exe> -i <exe>
     command = [
         "python",
-        UNIT_TEST_RUNNER_PY.abspath,
+        "\"{}\"".format(UNIT_TEST_RUNNER_PY.abspath),
     ]
     if summary_only:
         command.append("--summary-only")
     if timeout is not None:
         command.append("--timeout={}".format(str(timeout)))
 
-    command.extend(map(lambda filenode: "-i {}".format(filenode.abspath), exe_filenodes))
+    command.extend(map(lambda filenode: "-i \"{}\"".format(filenode.abspath), exe_filenodes))
 
     result = env.Command(target=None, source=exe_filenodes, action=" ".join(command))
 
