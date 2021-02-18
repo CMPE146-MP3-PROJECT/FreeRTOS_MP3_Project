@@ -68,6 +68,7 @@ bool gpiox__get_level(port_pin_s pin_num) {
 }
 
 void gpiox__trigger_level(port_pin_s gpio_pin, int posedge_or_negedge) {
+    //only port 0 and port 2 are support interrupt
   if (gpio_pin.port == 0) {
     if (posedge_or_negedge == 0) {
       LPC_GPIOINT->IO0IntEnF |= (1 << gpio_pin.pin);
