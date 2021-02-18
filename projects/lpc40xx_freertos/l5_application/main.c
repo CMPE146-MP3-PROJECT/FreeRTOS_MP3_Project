@@ -105,7 +105,7 @@ void lab2_led_task1(void *task_parameter) {
 }*/
 
 /// lab 2 part3
-void lab2_led_task(void *task_parameter) {
+/*void lab2_led_task(void *task_parameter) {
   // LPC_IOCON->P2_3 &= ~(7 << 0);
   const port_pin_s *led_num = (port_pin_s *)(task_parameter);
   gpiox__set_as_output(*led_num);
@@ -139,6 +139,12 @@ void switch_task(void *task_parameter) {
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
   }
+}*/
+
+/// lab 3 part 0
+void gpio_interrupt(void) {
+  // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
+  // b) Use fprintf(stderr) or blink and LED here to test your ISR
 }
 
 int main(void) {
@@ -159,14 +165,36 @@ int main(void) {
   // return 0;*/
 
   /// lab 2 part 3
-  switch_press_indication = xSemaphoreCreateBinary();
+  /*switch_press_indication = xSemaphoreCreateBinary();
   static port_pin_s test_switch = {0, 30}; // SW
-  static port_pin_s test_led = {1, 24};     // LED
+  static port_pin_s test_led = {1, 24};    // LED
   // printf("level: %d", gpiox__get_level(test_switch))
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
   // xTaskCreate(lab2_led_task, "test_led", configMINIMAL_STACK_SIZE, (void *)&test_led, 1, NULL);
   vTaskStartScheduler();
-  return 0;
+  return 0;*/
+
+  /// lab 3 part 0
+  // Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
+  // a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
+  //.   Warning: P0.30, and P0.31 require pull-down resistors
+  static port_pin_s test_switch = {0, 30}; // SW
+  static port_pin_s test_led = {1, 24};    // LED
+  gpiox__set_as_input(test_switch);
+  // b) Configure the registers to trigger Port0 interrupt (such as falling edge)
+  gpiox__trigger_level(test_switch, 0); // set as triggering at the falling edge
+  // Install GPIO interrupt function at the CPU interrupt (exception) vector
+  // c) Hijack the interrupt vector at interrupt_vector_table.c and have it call our gpio_interrupt()
+  //    Hint: You can declare 'void gpio_interrupt(void)' at interrupt_vector_table.c such that it can see this function
+  // Most important step: Enable the GPIO interrupt exception using the ARM Cortex M API (this is from lpc40 qxx.h)
+  NVIC_EnableIRQ(GPIO_IRQn);
+
+  // Toggle an LED in a loop to ensure/test that the interrupt is entering ane exiting
+  // For example, if the GPIO interrupt gets stuck, this LED will stop blinking
+  while (1) {
+    delay__ms(100);
+    // T/ODO: Toggle an LED here
+  }
 }
