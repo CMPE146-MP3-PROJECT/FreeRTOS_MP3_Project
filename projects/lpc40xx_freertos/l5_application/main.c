@@ -162,24 +162,23 @@ void switch_task(void *task_parameter) {
 
 /// lab 3 part 1
 void gpio_interrupt(void) {
-    fprintf(stderr, "Calling ISR...");
-    xSemaphoreGiveFromISR(switch_pressed_signal, NULL);
-    LPC_GPIOINT->IO0IntClr = (1 << 30); // clr the INT register for the switch's Port/Pin
-                                        // (the switch that trigger interrupt)
+  fprintf(stderr, "Calling ISR...");
+  xSemaphoreGiveFromISR(switch_pressed_signal, NULL);
+  LPC_GPIOINT->IO0IntClr = (1 << 30); // clr the INT register for the switch's Port/Pin
+                                      // (the switch that trigger interrupt)
 }
-void sleep_on_sem_task(void * p) {
-    port_pin_s *sem_led = (port_pin_s *) p;
-    gpiox__set_as_output(sem_led);
-    while (1) {
-        if (gpiox__get_level(switch_pressed_signal)) {
-            gpiox__set_low( sem_led);
-            vTaskDelay(100);
-        }
-        // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+void sleep_on_sem_task(void *p) {
+  port_pin_s *sem_led = (port_pin_s *)p;
+  gpiox__set_as_output(sem_led);
+  while (1) {
+    if (gpiox__get_level(switch_pressed_signal)) {
+      gpiox__set_low(sem_led);
+      vTaskDelay(100);
     }
+    // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+  }
 }
 /// lab 3 part 2
-
 
 int main(void) {
   /// lab 2 part 0, 1
@@ -240,16 +239,16 @@ int main(void) {
   // return 0;*/
 
   /// lab3 part 1
-    switch_pressed_signal = xSemaphoreCreateBinary();    // Create your binary semaphore
-    static port_pin_s test_switch2 = {0, 30};
-    static port_pin_s test_led2 = {1, 24};
-    gpiox__set_as_input(test_switch2);
-    gpiox__trigger_level(test_switch2, 0);
-    //configure_your_gpio_interrupt(); // T/ODO: Setup interrupt by re-using code from Part 0
-    NVIC_EnableIRQ(GPIO_IRQn);       // Enable interrupt gate for the GPIO
-    lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt2);
-    xTaskCreate(sleep_on_sem_task, "sleep_sem", (512U * 4) / sizeof(void *), &test_led2, 1, NULL);
-    vTaskStartScheduler();
+  switch_pressed_signal = xSemaphoreCreateBinary(); // Create your binary semaphore
+  static port_pin_s test_switch2 = {0, 30};
+  static port_pin_s test_led2 = {1, 24};
+  gpiox__set_as_input(test_switch2);
+  gpiox__trigger_level(test_switch2, 0);
+  // configure_your_gpio_interrupt(); // T/ODO: Setup interrupt by re-using code from Part 0
+  NVIC_EnableIRQ(GPIO_IRQn); // Enable interrupt gate for the GPIO
+  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt2);
+  xTaskCreate(sleep_on_sem_task, "sleep_sem", (512U * 4) / sizeof(void *), &test_led2, 1, NULL);
+  vTaskStartScheduler();
 
   /// lab3 part 2
 }
