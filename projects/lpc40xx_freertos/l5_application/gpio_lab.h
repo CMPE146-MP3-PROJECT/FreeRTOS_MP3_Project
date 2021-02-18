@@ -25,4 +25,4 @@ void gpiox__set(port_pin_s pin_num, bool high);
 
 bool gpiox__get_level(port_pin_s pin_num);
 
-void gpiox__trigger_level(port_pin_s gpio_pin, int 1_or_0);
+void gpiox__trigger_level(port_pin_s gpio_pin, int posedge_or_negedge);

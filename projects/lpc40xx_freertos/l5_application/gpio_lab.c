@@ -74,7 +74,7 @@ void gpiox__trigger_level(port_pin_s gpio_pin, int posedge_or_negedge) {
     } else {
       LPC_GPIOINT->IO0IntEnR |= (1 << gpio_pin.pin);
     }
-  }else if (gpio_pin.port == 2) {
+  } else if (gpio_pin.port == 2) {
     if (posedge_or_negedge == 0) {
       LPC_GPIOINT->IO2IntEnF |= (1 << gpio_pin.pin);
     } else {
