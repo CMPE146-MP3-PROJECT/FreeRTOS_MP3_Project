@@ -144,7 +144,7 @@ void switch_task(void *task_parameter) {
 /// lab 3 part 0
 void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-  LPC_GPIOINT->IO0IntClr = (1 << 30);
+  LPC_GPIOINT->IO2IntClr = (1 << 30);
   static port_pin_s test_led2 = {1, 24}; // LED2
   static port_pin_s test_led1 = {1, 26}; // LED1
 
@@ -158,6 +158,9 @@ void gpio_interrupt(void) {
   fprintf(stderr, "HEY THERE!\n");
 }
 
+///lab 3 part 1
+
+///lab 3 part 2
 int main(void) {
   /// lab 2 part 0, 1
   /*xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
@@ -215,4 +218,8 @@ int main(void) {
   }
   // vTaskStartScheduler();
   // return 0;
+
+  ///lab3 part 1
+
+  ///lab3 part 2
 }
