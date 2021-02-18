@@ -1,8 +1,8 @@
 #include "FreeRTOS.h"
 #include "board_io.h"
 #include "common_macros.h"
-#include "gpio_lab.h"
 #include "gpio_isr.h"
+#include "gpio_lab.h"
 #include "lpc40xx.h"
 #include "periodic_scheduler.h"
 #include "semphr.h"
@@ -162,7 +162,7 @@ void switch_task(void *task_parameter) {
 }*/
 
 /// lab 3 part 1
-void gpio_interrupt(void) {
+void gpio_interrupt2(void) {
   fprintf(stderr, "Calling ISR...");
   xSemaphoreGiveFromISR(switch_pressed_signal, NULL);
   LPC_GPIOINT->IO0IntClr = (1 << 30); // clr the INT register for the switch's Port/Pin
