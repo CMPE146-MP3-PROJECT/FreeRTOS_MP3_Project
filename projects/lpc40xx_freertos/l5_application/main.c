@@ -144,7 +144,7 @@ void switch_task(void *task_parameter) {
 /// lab 3 part 0
 void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-  LPC_GPIOINT->IO0IntClr = (1 << 10);
+  LPC_GPIOINT->IO1IntClr = (1 << 10);
   static port_pin_s test_led2 = {1, 24}; // LED2
   static port_pin_s test_led1 = {1, 26}; // LED1
 
