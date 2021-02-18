@@ -149,7 +149,7 @@ void gpio_interrupt(void) {
   static port_pin_s test_led1 = {1, 28}; // LED1
 
   // b) Use fprintf(stderr) or blink and LED here to test your ISR
-  LPC_IOCON->P1_24 &= ~(7 << 0);
+  LPC_IOCON->P1_28 &= ~(7 << 0);
   gpiox__set_as_output(test_led1);
   gpiox__set_high(test_led1);
   delay__ms(250);
