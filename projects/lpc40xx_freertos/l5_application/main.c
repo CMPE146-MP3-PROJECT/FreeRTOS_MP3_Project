@@ -206,8 +206,8 @@ int main(void) {
     delay__ms(100);
     // T/ODO: Toggle an LED here
     gpiox__set_high(test_led);
-    vTaskDelay(500);
+    delay__ms(500);
     gpiox__set_low(test_led);
-    vTaskDelay(500);
+    delay__ms(500);
   }
 }
