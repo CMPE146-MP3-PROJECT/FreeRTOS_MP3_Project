@@ -168,7 +168,7 @@ void gpio_interrupt(void) {
                                       // (the switch that trigger interrupt)
 }
 void sleep_on_sem_task(void *p) {
-  port_pin_s *sem_led = (port_pin_s *)p;
+  const port_pin_s *sem_led = (port_pin_s *)(p);
   gpiox__set_as_output(sem_led);
   while (1) {
     if (gpiox__get_level(switch_pressed_signal)) {
