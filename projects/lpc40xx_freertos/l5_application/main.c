@@ -148,12 +148,13 @@ void gpio_interrupt(void) {
   static port_pin_s test_led = {1, 24}; // LED
 
   // b) Use fprintf(stderr) or blink and LED here to test your ISR
-  LPC_IOCON->P1_24 &= ~(7 << 0);
+  /*LPC_IOCON->P1_24 &= ~(7 << 0);
   gpiox__set_as_output(test_led);
   gpiox__set_high(test_led);
   vTaskDelay(150);
   gpiox__set_low(test_led);
-  vTaskDelay(150);
+  vTaskDelay(150);*/
+  fprintf(stderr, "HEY THERE!n");
 }
 
 int main(void) {
@@ -204,13 +205,13 @@ int main(void) {
   // For example, if the GPIO interrupt gets stuck, this LED will stop blinking
   vTaskStartScheduler();
   while (1) {
-  delay__ms(100);
-  // T/ODO: Toggle an LED here
-  gpiox__set_high(test_led);
-  delay__ms(500);
-  gpiox__set_low(test_led);
-  delay__ms(500);
+    delay__ms(100);
+    // T/ODO: Toggle an LED here
+    gpiox__set_high(test_led);
+    delay__ms(500);
+    gpiox__set_low(test_led);
+    delay__ms(500);
   }
-  //vTaskStartScheduler();
-  //return 0;
+  // vTaskStartScheduler();
+  // return 0;
 }
