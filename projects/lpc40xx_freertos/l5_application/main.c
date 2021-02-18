@@ -169,11 +169,11 @@ void gpio_interrupt2(void) {
                                       // (the switch that trigger interrupt)
 }
 void sleep_on_sem_task(void *p) {
-  const port_pin_s *sem_led = (port_pin_s *)(p);
-  gpiox__set_as_output(sem_led);
+  const port_pin_s *semled = (port_pin_s *)(p);
+  gpiox__set_as_output(semled);
   while (1) {
     if (xSemaphoreTake(switch_pressed_signal, 1000000)) {
-      gpiox__set_low(sem_led);
+      gpiox__set_low(semled);
       vTaskDelay(100);
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
