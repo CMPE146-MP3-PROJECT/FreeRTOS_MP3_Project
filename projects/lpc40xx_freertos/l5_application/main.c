@@ -2,6 +2,7 @@
 #include "board_io.h"
 #include "common_macros.h"
 #include "gpio_lab.h"
+#include "gpio_isr.h"
 #include "lpc40xx.h"
 #include "periodic_scheduler.h"
 #include "semphr.h"
@@ -171,7 +172,7 @@ void sleep_on_sem_task(void *p) {
   const port_pin_s *sem_led = (port_pin_s *)(p);
   gpiox__set_as_output(sem_led);
   while (1) {
-    if (gpiox__get_level(switch_pressed_signal)) {
+    if (xSemaphoreTake(switch_pressed_signal, 1000000)) {
       gpiox__set_low(sem_led);
       vTaskDelay(100);
     }
