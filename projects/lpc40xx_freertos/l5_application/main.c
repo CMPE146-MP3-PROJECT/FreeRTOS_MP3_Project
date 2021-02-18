@@ -203,7 +203,7 @@ int main(void) {
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt);
   // Toggle an LED in a loop to ensure/test that the interrupt is entering ane exiting
   // For example, if the GPIO interrupt gets stuck, this LED will stop blinking
-  vTaskStartScheduler();
+  //vTaskStartScheduler();
   while (1) {
     delay__ms(100);
     // T/ODO: Toggle an LED here
