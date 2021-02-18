@@ -68,23 +68,17 @@ bool gpiox__get_level(port_pin_s pin_num) {
 }
 
 void gpiox__trigger_level(port_pin_s gpio_pin, int posedge_or_negedge) {
-    if (gpio_pin.port == 0){
-        if (posedge_or_negedge == 0){
-            LPC_GPIOINT->IO0IntEnF |= (1 << gpio_pin.pin);
-        }else{
-            LPC_GPIOINT->IO0IntEnR |= (1 << gpio_pin.pin);
-        }
-    }else if (gpio_pin.port == 1){
-        if (posedge_or_negedge == 0){
-            LPC_GPIOINT->IO1IntEnF |= (1 << gpio_pin.pin);
-        }else{
-            LPC_GPIOINT->IO1IntEnR |= (1 << gpio_pin.pin);
-        }
-    }else if (gpio_pin.port == 2){
-        if (posedge_or_negedge == 0){
-            LPC_GPIOINT->IO2IntEnF |= (1 << gpio_pin.pin);
-        }else{
-            LPC_GPIOINT->IO2IntEnR |= (1 << gpio_pin.pin);
-        }
+  if (gpio_pin.port == 0) {
+    if (posedge_or_negedge == 0) {
+      LPC_GPIOINT->IO0IntEnF |= (1 << gpio_pin.pin);
+    } else {
+      LPC_GPIOINT->IO0IntEnR |= (1 << gpio_pin.pin);
     }
+  }else if (gpio_pin.port == 2) {
+    if (posedge_or_negedge == 0) {
+      LPC_GPIOINT->IO2IntEnF |= (1 << gpio_pin.pin);
+    } else {
+      LPC_GPIOINT->IO2IntEnR |= (1 << gpio_pin.pin);
+    }
+  }
 }
