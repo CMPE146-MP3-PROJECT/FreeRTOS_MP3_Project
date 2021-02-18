@@ -142,9 +142,9 @@ void switch_task(void *task_parameter) {
 }*/
 
 /// lab 3 part 0
-void gpio_interrupt(void) {
+/*void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-  LPC_GPIOINT->IO0IntClr = (1 << 29);
+  LPC_GPIOINT->IO0IntClr = (1 << 29); //clr the INT register for the switch's Port/Pin (the switch that trigger the interrupt)
   static port_pin_s test_led2 = {1, 24}; // LED2
   static port_pin_s test_led1 = {1, 26}; // LED1
 
@@ -156,11 +156,13 @@ void gpio_interrupt(void) {
   gpiox__set_low(test_led1);
   delay__ms(250);
   fprintf(stderr, "HEY THERE!\n");
-}
+}*/
 
 /// lab 3 part 1
 
+
 /// lab 3 part 2
+
 int main(void) {
   /// lab 2 part 0, 1
   /*xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
@@ -191,7 +193,7 @@ int main(void) {
   return 0;*/
 
   /// lab 3 part 0
-  // Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
+  /*// Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
   // a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
   //.   Warning: P0.30, and P0.31 require pull-down resistors
   static port_pin_s test_switch = {0, 29}; // SW
@@ -217,7 +219,7 @@ int main(void) {
     delay__ms(500);
   }
   // vTaskStartScheduler();
-  // return 0;
+  // return 0;*/
 
   /// lab3 part 1
 
