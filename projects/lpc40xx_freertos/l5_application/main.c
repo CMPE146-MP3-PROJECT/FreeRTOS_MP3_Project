@@ -18,6 +18,7 @@ static void uart_task(void *params);
 // static SemaphoreHandle_t mutex;
 // static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
 static SemaphoreHandle_t switch_press_indication;
+static SemaphoreHandle_t switch_pressed_signal;
 
 /// lab 2 part 0
 /*void lab2_led_task(void *pvParameters) {
@@ -142,10 +143,10 @@ void switch_task(void *task_parameter) {
 }*/
 
 /// lab 3 part 0
-void gpio_interrupt(void) {
+/*void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-  LPC_GPIOINT->IO0IntClr =(1 << 29); // clr the INT register for the switch's Port/Pin
-                                    // (the switch that trigger interrupt)
+  LPC_GPIOINT->IO0IntClr = (1 << 29);    // clr the INT register for the switch's Port/Pin
+                                         // (the switch that trigger interrupt)
   static port_pin_s test_led2 = {1, 24}; // LED2
   static port_pin_s test_led1 = {1, 26}; // LED1
 
@@ -153,15 +154,17 @@ void gpio_interrupt(void) {
   LPC_IOCON->P1_26 &= ~(7 << 0);
   gpiox__set_as_output(test_led1);
   gpiox__set_high(test_led1);
-  delay__ms(250);
+  delay__ms(150);
   gpiox__set_low(test_led1);
-  delay__ms(250);
+  delay__ms(150);
   fprintf(stderr, "HEY THERE!\n");
-}
+}*/
 
 /// lab 3 part 1
 
+
 /// lab 3 part 2
+
 
 int main(void) {
   /// lab 2 part 0, 1
@@ -193,7 +196,7 @@ int main(void) {
   return 0;*/
 
   /// lab 3 part 0
-  // Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
+  /*// Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
   // a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
   //.   Warning: P0.30, and P0.31 require pull-down resistors
   static port_pin_s test_switch = {0, 29}; // SW
@@ -219,9 +222,16 @@ int main(void) {
     delay__ms(500);
   }
   // vTaskStartScheduler();
-  // return 0;
+  // return 0;*/
 
   /// lab3 part 1
+    switch_pressed_signal = ... ;    // Create your binary semaphore
+
+    configure_your_gpio_interrupt(); // T/ODO: Setup interrupt by re-using code from Part 0
+    NVIC_EnableIRQ(GPIO_IRQn);       // Enable interrupt gate for the GPIO
+
+    xTaskCreate(sleep_on_sem_task, "sem", (512U * 4) / sizeof(void *), NULL, PRIORITY_LOW, NULL);
+    vTaskStartScheduler();
 
   /// lab3 part 2
 }
