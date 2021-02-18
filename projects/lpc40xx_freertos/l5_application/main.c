@@ -154,7 +154,7 @@ void gpio_interrupt(void) {
   vTaskDelay(150);
   gpiox__set_low(test_led);
   vTaskDelay(150);*/
-  fprintf(stderr, "HEY THERE!n");
+  fprintf(stderr, "HEY THERE!\n");
 }
 
 int main(void) {
