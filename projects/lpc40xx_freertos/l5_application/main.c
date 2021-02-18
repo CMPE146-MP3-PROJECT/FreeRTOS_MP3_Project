@@ -144,7 +144,7 @@ void switch_task(void *task_parameter) {
 /// lab 3 part 0
 void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-  LPC_GPIOINT->IO1IntClr = (1 << 10);
+  LPC_GPIOINT->IO0IntClr = (1 << 20);
   static port_pin_s test_led2 = {1, 24}; // LED2
   static port_pin_s test_led1 = {1, 26}; // LED1
 
@@ -194,7 +194,7 @@ int main(void) {
   // Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
   // a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
   //.   Warning: P0.30, and P0.31 require pull-down resistors
-  static port_pin_s test_switch = {1, 10}; // SW
+  static port_pin_s test_switch = {1, 20}; // SW
   static port_pin_s test_led = {1, 24};    // LED
   gpiox__set_as_input(test_switch);
   // b) Configure the registers to trigger Port0 interrupt (such as falling edge)
