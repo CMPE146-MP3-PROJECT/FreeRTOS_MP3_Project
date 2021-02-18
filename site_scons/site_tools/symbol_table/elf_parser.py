@@ -118,9 +118,7 @@ class ElfParser(object):
             regex_pattern = "^<(0x[\da-fA-F]+)>\t$"
         elif "DW_AT_location" == attr.name:
             regex_pattern = ".*DW_OP_addr: ([\w]+)"
-        elif "DW_AT_data_member_location" == attr.name:
-            regex_pattern = "^([\d]+\t)$"
-        elif "DW_AT_byte_size" == attr.name:
+        elif attr.name in ["DW_AT_data_member_location", "DW_AT_byte_size", "DW_AT_bit_size", "DW_AT_bit_offset"]:
             regex_pattern = "^([\d]+\t)$"
 
         if "" != regex_pattern:
@@ -133,7 +131,7 @@ class ElfParser(object):
                     description = match_group[0].rstrip()
                     description = int(description, 16)
 
-                elif attr.name in ["DW_AT_data_member_location", "DW_AT_byte_size"]:
+                elif attr.name in ["DW_AT_data_member_location", "DW_AT_byte_size", "DW_AT_bit_size", "DW_AT_bit_offset"]:
                     description = match_group[0].rstrip()
                     description = int(description)
 

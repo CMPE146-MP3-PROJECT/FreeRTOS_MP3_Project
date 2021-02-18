@@ -21,6 +21,7 @@ env_arm = Environment(
         "mingw",
         "clangformat",
         "codegen",
+        "symbol_table",
     ],
     CC="arm-none-eabi-gcc",
     OBJCOPY="arm-none-eabi-objcopy",
