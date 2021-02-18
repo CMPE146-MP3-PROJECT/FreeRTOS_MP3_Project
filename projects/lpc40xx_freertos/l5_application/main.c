@@ -194,7 +194,7 @@ int main(void) {
   // Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
   // a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
   //.   Warning: P0.30, and P0.31 require pull-down resistors
-  static port_pin_s test_switch = {1, 29}; // SW
+  static port_pin_s test_switch = {0, 29}; // SW
   static port_pin_s test_led = {1, 24};    // LED
   gpiox__set_as_input(test_switch);
   // b) Configure the registers to trigger Port0 interrupt (such as falling edge)
