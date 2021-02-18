@@ -144,7 +144,7 @@ void switch_task(void *task_parameter) {
 /// lab 3 part 0
 void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-  LPC_GPIOINT->IO0IntClr = (1 << 3);
+  LPC_GPIOINT->IO0IntClr = (1 << 30);
   static port_pin_s test_led = {1, 24}; // LED
 
   // b) Use fprintf(stderr) or blink and LED here to test your ISR
