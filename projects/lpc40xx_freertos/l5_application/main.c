@@ -202,12 +202,12 @@ int main(void) {
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt);
   // Toggle an LED in a loop to ensure/test that the interrupt is entering ane exiting
   // For example, if the GPIO interrupt gets stuck, this LED will stop blinking
-  while (1) {
-    delay__ms(100);
-    // T/ODO: Toggle an LED here
-    gpiox__set_high(test_led);
-    delay__ms(500);
-    gpiox__set_low(test_led);
-    delay__ms(500);
-  }
+  // while (1) {
+  delay__ms(100);
+  // T/ODO: Toggle an LED here
+  gpiox__set_high(test_led);
+  delay__ms(500);
+  gpiox__set_low(test_led);
+  delay__ms(500);
+  //}
 }
