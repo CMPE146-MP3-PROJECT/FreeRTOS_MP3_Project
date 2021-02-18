@@ -146,10 +146,10 @@ void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
   LPC_GPIOINT->IO0IntClr = (1 << 30);
   static port_pin_s test_led2 = {1, 24}; // LED2
-  static port_pin_s test_led1 = {1, 28}; // LED1
+  static port_pin_s test_led1 = {1, 26}; // LED1
 
   // b) Use fprintf(stderr) or blink and LED here to test your ISR
-  LPC_IOCON->P1_28 &= ~(7 << 0);
+  LPC_IOCON->P1_26 &= ~(7 << 0);
   gpiox__set_as_output(test_led1);
   gpiox__set_high(test_led1);
   delay__ms(250);
