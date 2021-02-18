@@ -144,16 +144,16 @@ void switch_task(void *task_parameter) {
 /// lab 3 part 0
 void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-    LPC_GPIOINT->IO0IntClr = (1 << 30);
-    static port_pin_s test_led = {1, 24};    // LED
+  LPC_GPIOINT->IO0IntClr = (1 << 30);
+  static port_pin_s test_led = {1, 24}; // LED
 
   // b) Use fprintf(stderr) or blink and LED here to test your ISR
-    LPC_IOCON->P1_24 &= ~(7 << 0);
-    gpiox__set_as_output(test_led);
-    gpiox__set_high(test_led);
-    vTaskDelay(150);
-    gpiox__set_low(test_led);
-    vTaskDelay(150);
+  LPC_IOCON->P1_24 &= ~(7 << 0);
+  gpiox__set_as_output(test_led);
+  gpiox__set_high(test_led);
+  vTaskDelay(150);
+  gpiox__set_low(test_led);
+  vTaskDelay(150);
 }
 
 int main(void) {
@@ -206,5 +206,8 @@ int main(void) {
     delay__ms(100);
     // T/ODO: Toggle an LED here
     gpiox__set_high(test_led);
+    vTaskDelay(500);
+    gpiox__set_low(test_led);
+    vTaskDelay(500);
   }
 }
