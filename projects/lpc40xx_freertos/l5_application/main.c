@@ -144,7 +144,7 @@ void switch_task(void *task_parameter) {
 /// lab 3 part 0
 void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
-  LPC_GPIOINT->IO0IntClr = (1 << 30);
+  LPC_GPIOINT->IO0IntClr = (1 << 3);
   static port_pin_s test_led = {1, 24}; // LED
 
   // b) Use fprintf(stderr) or blink and LED here to test your ISR
@@ -203,7 +203,7 @@ int main(void) {
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt);
   // Toggle an LED in a loop to ensure/test that the interrupt is entering ane exiting
   // For example, if the GPIO interrupt gets stuck, this LED will stop blinking
-  //vTaskStartScheduler();
+  // vTaskStartScheduler();
   while (1) {
     delay__ms(100);
     // T/ODO: Toggle an LED here
