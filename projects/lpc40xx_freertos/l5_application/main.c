@@ -170,7 +170,7 @@ void gpio_interrupt2(void) {
 }
 void sleep_on_sem_task(void *p) {
   port_pin_s *sem_led = (port_pin_s *)(p);
-  gpiox__set_as_output(sem_led)
+  gpiox__set_as_output(sem_led);
   while (1) {
     if (xSemaphoreTake(switch_pressed_signal, 1000000)) {
       gpiox__set_low(sem_led);
