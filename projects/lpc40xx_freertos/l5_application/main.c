@@ -241,8 +241,8 @@ int main(void) {
 
   /// lab3 part 1
   switch_pressed_signal = xSemaphoreCreateBinary(); // Create your binary semaphore
-  static port_pin_s test_switch2 = {0, 30};
-  static port_pin_s test_led2 = {1, 24};
+  port_pin_s test_switch2 = {0, 30};
+  port_pin_s test_led2 = {1, 24};
   gpiox__set_as_input(test_switch2);
   gpiox__trigger_level(test_switch2, 0);
   // configure_your_gpio_interrupt(); // T/ODO: Setup interrupt by re-using code from Part 0
