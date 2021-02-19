@@ -173,6 +173,7 @@ void sleep_on_sem_task(void *p) {
   gpiox__set_as_output(*sem_led);
   while (1) {
     if (xSemaphoreTake(switch_pressed_signal, 1000000)) {
+      fprintf(stderr, "Servicing Interrupt");
       gpiox__set_low(*sem_led);
       vTaskDelay(100);
     }
