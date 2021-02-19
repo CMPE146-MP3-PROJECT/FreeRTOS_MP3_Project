@@ -11,10 +11,10 @@
 #include <stdio.h>
 
 // 'static' to make these functions 'private' to this file
-static void create_blinky_tasks(void);
-static void create_uart_task(void);
-static void blink_task(void *params);
-static void uart_task(void *params);
+// static void create_blinky_tasks(void);
+// static void create_uart_task(void);
+// static void blink_task(void *params);
+// static void uart_task(void *params);
 // static SemaphoreHandle_t binary_semaphore;
 // static SemaphoreHandle_t mutex;
 // static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
@@ -169,11 +169,11 @@ void gpio_interrupt2(void) {
                                       // (the switch that trigger interrupt)
 }
 void sleep_on_sem_task(void *p) {
-  port_pin_s *sem_led = (port_pin_s *)(p);
-  gpiox__set_as_output(sem_led);
+  const port_pin_s *sem_led = (port_pin_s *)(p);
+  gpiox__set_as_output(*sem_led);
   while (1) {
     if (xSemaphoreTake(switch_pressed_signal, 1000000)) {
-      gpiox__set_low(sem_led);
+      gpiox__set_low(*sem_led);
       vTaskDelay(100);
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal

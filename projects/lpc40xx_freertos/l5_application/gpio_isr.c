@@ -1,5 +1,5 @@
-/*// @file gpio_isr.c
-#include "gpio_isr.h"
+// @file gpio_isr.c
+/*#include "gpio_isr.h"
 
 // Note: You may want another separate array for falling vs. rising edge callbacks
 static function_pointer_t gpio0_callbacks[32];
@@ -18,4 +18,4 @@ void gpiox__interrupt_dispatcher(void) {
   // Invoke the user registered callback, and then clear the interrupt
   attached_user_handler();
   clear_pin_interrupt(pin_that_generated_interrupt);
-}
+}*/
