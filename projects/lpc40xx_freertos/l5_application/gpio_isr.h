@@ -8,8 +8,8 @@ typedef enum {
 } gpio_interrupt_e;
 
 typedef struct {
-    port_pin_s port_pin;
-    int trigger;
+  port_pin_s port_pin;
+  int trigger;
 } port_pin_trigger;
 
 // Function pointer type (demonstrated later in the code sample)

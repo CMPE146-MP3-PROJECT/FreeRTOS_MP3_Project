@@ -187,41 +187,37 @@ void sleep_on_sem_task(void *p) {
 }*/
 
 /// lab 3 part 2
-void gpio_interrupt_part2_0(void){
-    xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL);
-}
-void gpio_interrupt_part2_1(void){
-    xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL);
-}
+void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); }
+void gpio_interrupt_part2_1(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL); }
 void pin30_isr(void *p) {
-    const port_pin_s *sem_led = (port_pin_s *)(p);
-    gpiox__set_as_output(*sem_led);
-    while (1) {
-        if (xSemaphoreTake(switch_pressed_signal_hw3_part2_30, 1000000)) {
-            fprintf(stderr, "Servicing Interrupt\n");
-            gpiox__set_high(*sem_led);
-            delay__ms(150);
-            gpiox__set_low(*sem_led);
-            delay__ms(150);   //blinking LED
-            // vTaskDelay(100);
-        }
-        // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+  const port_pin_s *sem_led = (port_pin_s *)(p);
+  gpiox__set_as_output(*sem_led);
+  while (1) {
+    if (xSemaphoreTake(switch_pressed_signal_hw3_part2_30, 1000000)) {
+      fprintf(stderr, "Servicing Interrupt\n");
+      gpiox__set_high(*sem_led);
+      delay__ms(150);
+      gpiox__set_low(*sem_led);
+      delay__ms(150); // blinking LED
+      // vTaskDelay(100);
     }
+    // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+  }
 }
 void pin31_isr(void *p) {
-    const port_pin_s *sem_led = (port_pin_s *)(p);
-    gpiox__set_as_output(*sem_led);
-    while (1) {
-        if (xSemaphoreTake(switch_pressed_signal_hw3_part2_31, 1000000)) {
-            fprintf(stderr, "Servicing Interrupt\n");
-            gpiox__set_high(*sem_led);
-            delay__ms(150);
-            gpiox__set_low(*sem_led);
-            delay__ms(150);   //blinking LED
-            // vTaskDelay(100);
-        }
-        // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+  const port_pin_s *sem_led = (port_pin_s *)(p);
+  gpiox__set_as_output(*sem_led);
+  while (1) {
+    if (xSemaphoreTake(switch_pressed_signal_hw3_part2_31, 1000000)) {
+      fprintf(stderr, "Servicing Interrupt\n");
+      gpiox__set_high(*sem_led);
+      delay__ms(150);
+      gpiox__set_low(*sem_led);
+      delay__ms(150); // blinking LED
+      // vTaskDelay(100);
     }
+    // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+  }
 }
 
 int main(void) {
