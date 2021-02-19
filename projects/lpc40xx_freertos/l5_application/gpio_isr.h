@@ -1,6 +1,6 @@
 // @file gpio_isr.h
 #include "gpio_lab.h"
-#pragma once
+//#pragma once
 
 typedef enum {
   GPIO_INTR__FALLING_EDGE,

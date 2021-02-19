@@ -303,7 +303,7 @@ int main(void) {
   static port_pin_s part2_test_led_1 = {1, 26};
 
   fprintf(stderr, "Entering...\n")
-  gpiox__attach_interrupt(part2_test_switch_2, GPIO_INTR__RISING_EDGE, gpio_interrupt_part2_0);
+      gpiox__attach_interrupt(part2_test_switch_2, GPIO_INTR__RISING_EDGE, gpio_interrupt_part2_0);
   gpiox__attach_interrupt(part2_test_switch_3, GPIO_INTR__FALLING_EDGE, gpio_interrupt_part2_1);
 
   NVIC_EnableIRQ(GPIO_IRQn);

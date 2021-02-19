@@ -46,7 +46,7 @@ port_pin_trigger check_interrupt_pin() {
       // fprintf(stderr, "Recent int port pin: p%u_%u\n", temp_gpio.port, temp_gpio.pin);
 
       if (Check_signle_Int_Status(temp_gpio, 0) == 1) {
-        //fprintf(stderr, "Port0: Found interrupt from Falling Edge!\n");
+        // fprintf(stderr, "Port0: Found interrupt from Falling Edge!\n");
         save_pin_trigger_level.trigger = 0;
         save_pin_trigger_level.port_pin = temp_gpio;
 
@@ -62,7 +62,7 @@ port_pin_trigger check_interrupt_pin() {
 
       if (Check_signle_Int_Status(temp_gpio, 1) == 1) {
 
-        //fprintf(stderr, "Port0: Found interrupt from Rising Edge!\n");
+        // fprintf(stderr, "Port0: Found interrupt from Rising Edge!\n");
         save_pin_trigger_level.trigger = 1;
         save_pin_trigger_level.port_pin = temp_gpio;
 
@@ -79,7 +79,7 @@ port_pin_trigger check_interrupt_pin() {
 
       if (Check_signle_Int_Status(temp_gpio, 0) == 1) {
 
-        //fprintf(stderr, "Port2: Found interrupt from Falling Edge!\n");
+        // fprintf(stderr, "Port2: Found interrupt from Falling Edge!\n");
         save_pin_trigger_level.trigger = 0;
         save_pin_trigger_level.port_pin = temp_gpio;
 
@@ -95,7 +95,7 @@ port_pin_trigger check_interrupt_pin() {
 
       if (Check_signle_Int_Status(temp_gpio, 1) == 1) {
 
-        //fprintf(stderr, "Port2: Found interrupt from Rising Edge!\n");
+        // fprintf(stderr, "Port2: Found interrupt from Rising Edge!\n");
         save_pin_trigger_level.trigger = 1;
         save_pin_trigger_level.port_pin = temp_gpio;
 
