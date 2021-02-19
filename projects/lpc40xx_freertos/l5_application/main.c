@@ -173,12 +173,12 @@ void sleep_on_sem_task(void *p) {
   gpiox__set_as_output(*sem_led);
   while (1) {
     if (xSemaphoreTake(switch_pressed_signal, 1000000)) {
-      fprintf(stderr, "Servicing Interrupt");
-        gpiox__set_high(*sem_led);
-        delay__ms(150);
-        gpiox__set_low(*sem_led);
-        delay__ms(150);
-      //vTaskDelay(100);
+      fprintf(stderr, "Servicing Interrupt\n");
+      gpiox__set_high(*sem_led);
+      delay__ms(150);
+      gpiox__set_low(*sem_led);
+      delay__ms(150);
+      // vTaskDelay(100);
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
   }
