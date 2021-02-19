@@ -10,7 +10,7 @@
 #include "task.h"
 #include <stdio.h>
 
-// 'static' to make these functions 'private' to this file
+/// 'static' to make these functions 'private' to this file
 // static void create_blinky_tasks(void);
 // static void create_uart_task(void);
 // static void blink_task(void *params);
@@ -20,6 +20,8 @@
 // static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
 static SemaphoreHandle_t switch_press_indication;
 static SemaphoreHandle_t switch_pressed_signal;
+static SemaphoreHandle_t switch_pressed_signal_hw3_part2_30;
+static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
 
 /// lab 2 part 0
 /*void lab2_led_task(void *pvParameters) {
@@ -185,7 +187,42 @@ void sleep_on_sem_task(void *p) {
 }*/
 
 /// lab 3 part 2
-
+void gpio_interrupt_part2_0(void){
+    xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL);
+}
+void gpio_interrupt_part2_1(void){
+    xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL);
+}
+void pin30_isr(void *p) {
+    const port_pin_s *sem_led = (port_pin_s *)(p);
+    gpiox__set_as_output(*sem_led);
+    while (1) {
+        if (xSemaphoreTake(switch_pressed_signal_hw3_part2_30, 1000000)) {
+            fprintf(stderr, "Servicing Interrupt\n");
+            gpiox__set_high(*sem_led);
+            delay__ms(150);
+            gpiox__set_low(*sem_led);
+            delay__ms(150);   //blinking LED
+            // vTaskDelay(100);
+        }
+        // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+    }
+}
+void pin31_isr(void *p) {
+    const port_pin_s *sem_led = (port_pin_s *)(p);
+    gpiox__set_as_output(*sem_led);
+    while (1) {
+        if (xSemaphoreTake(switch_pressed_signal_hw3_part2_31, 1000000)) {
+            fprintf(stderr, "Servicing Interrupt\n");
+            gpiox__set_high(*sem_led);
+            delay__ms(150);
+            gpiox__set_low(*sem_led);
+            delay__ms(150);   //blinking LED
+            // vTaskDelay(100);
+        }
+        // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+    }
+}
 
 int main(void) {
   /// lab 2 part 0, 1
@@ -258,5 +295,26 @@ int main(void) {
   vTaskStartScheduler();*/
 
   /// lab 3 part 2
+  switch_pressed_signal_hw3_part2_30 = xSemaphoreCreateBinary();
+  switch_pressed_signal_hw3_part2_31 = xSemaphoreCreateBinary();
 
+  static port_pin_s part2_test_switch_2 = {0, 30};
+  gpiox__set_as_input(part2_test_switch_2);
+  static port_pin_s part2_test_switch_3 = {0, 29};
+  gpiox__set_as_input(part2_test_switch_3);
+
+  static port_pin_s part2_test_led_0 = {2, 3};
+  static port_pin_s part2_test_led_1 = {1, 26};
+
+  fprintf(stderr, "Entering...\n")
+  gpiox__attach_interrupt(part2_test_switch_2, GPIO_INTR__RISING_EDGE, gpio_interrupt_part2_0);
+  gpiox__attach_interrupt(part2_test_switch_3, GPIO_INTR__FALLING_EDGE, gpio_interrupt_part2_1);
+
+  NVIC_EnableIRQ(GPIO_IRQn);
+  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpiox__interrupt_dispatcher);
+
+  xTaskCreate(pin30_isr, "30isr", (512U * 4) / sizeof(void *), &part2_test_led_0, 1, NULL);
+  xTaskCreate(pin31_isr, "31isr", (512U * 4) / sizeof(void *), &part2_test_led_1, 1, NULL);
+  vTaskStartScheduler();
+  return 0;
 }
