@@ -1,5 +1,7 @@
 // @file gpio_isr.c
 #include "gpio_isr.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 // Note: You may want another separate array for falling vs. rising edge callbacks
 static function_pointer_t gpiox_callbacks_falling[32];
