@@ -1,5 +1,5 @@
 // @file gpio_isr.h
-/*#include "gpio_lab.h"
+#include "gpio_lab.h"
 #pragma once
 
 typedef enum {
@@ -15,4 +15,4 @@ void gpiox__attach_interrupt(port_pin_s pin, gpio_interrupt_e interrupt_type, fu
 
 // Our main() should configure interrupts to invoke this dispatcher where we will invoke user attached callbacks
 // You can hijack 'interrupt_vector_table.c' or use API at lpc_peripherals.h
-void gpiox__interrupt_dispatcher(void){}*/
+void gpiox__interrupt_dispatcher(void){}
