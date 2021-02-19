@@ -162,7 +162,7 @@ void switch_task(void *task_parameter) {
 }*/
 
 /// lab 3 part 1
-void gpio_interrupt2(void) {
+/*void gpio_interrupt2(void) {
   fprintf(stderr, "Calling ISR...");
   xSemaphoreGiveFromISR(switch_pressed_signal, NULL);
   LPC_GPIOINT->IO0IntClr = (1 << 30); // clr the INT register for the switch's Port/Pin
@@ -177,13 +177,15 @@ void sleep_on_sem_task(void *p) {
       gpiox__set_high(*sem_led);
       delay__ms(150);
       gpiox__set_low(*sem_led);
-      delay__ms(150);
+      delay__ms(150);   //blinking LED
       // vTaskDelay(100);
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
   }
-}
+}*/
+
 /// lab 3 part 2
+
 
 int main(void) {
   /// lab 2 part 0, 1
@@ -192,8 +194,8 @@ int main(void) {
   //return 0;*/
 
   /// lab 2 part 2
-  // This is static such that these variables will be allocated in RAM and not go out of scope
-  /*static port_pin_s led0 = {2, 3};
+  /*// This is static such that these variables will be allocated in RAM and not go out of scope
+  static port_pin_s led0 = {2, 3};
   static port_pin_s led1 = {1, 26};
   xTaskCreate(lab2_led_task0, "LED0", 1024 / sizeof(void *), &led0, 1, NULL); // &led0 is a task parameter going to
   // vTaskDelay(1500);
@@ -243,8 +245,8 @@ int main(void) {
   // vTaskStartScheduler();
   // return 0;*/
 
-  /// lab3 part 1
-  switch_pressed_signal = xSemaphoreCreateBinary(); // Create your binary semaphore
+  /// lab 3 part 1
+  /*switch_pressed_signal = xSemaphoreCreateBinary(); // Create your binary semaphore
   static port_pin_s test_switch2 = {0, 30};
   static port_pin_s test_led2 = {1, 24};
   gpiox__set_as_input(test_switch2);
@@ -253,7 +255,8 @@ int main(void) {
   NVIC_EnableIRQ(GPIO_IRQn); // Enable interrupt gate for the GPIO
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt2);
   xTaskCreate(sleep_on_sem_task, "sleep_sem", (512U * 4) / sizeof(void *), &test_led2, 1, NULL);
-  vTaskStartScheduler();
+  vTaskStartScheduler();*/
 
-  /// lab3 part 2
+  /// lab 3 part 2
+
 }
