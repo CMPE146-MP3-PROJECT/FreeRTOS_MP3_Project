@@ -7,6 +7,7 @@
 typedef struct {
   uint8_t port;
   uint8_t pin;
+  int port_pin;
 } port_pin_s;
 
 /// Should alter the hardware registers to set the pin as input
@@ -26,3 +27,5 @@ void gpiox__set(port_pin_s pin_num, bool high);
 bool gpiox__get_level(port_pin_s pin_num);
 
 void gpiox__trigger_level(port_pin_s gpio_pin, int posedge_or_negedge);
+
+bool get_pin_INT_status(port_pin_s pin_num, int rising_or_falling);

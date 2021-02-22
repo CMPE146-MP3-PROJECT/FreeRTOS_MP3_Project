@@ -32,7 +32,7 @@ void entry_point(void) {
    */
   vTraceEnable(TRC_INIT);
 
-  // Peripherals init initializes UART and then we can print the crash report if applicable
+  // Peripherals init  and then we can print the crash report if applicable
   peripherals_init();
   entry_point__handle_crash_report();
 

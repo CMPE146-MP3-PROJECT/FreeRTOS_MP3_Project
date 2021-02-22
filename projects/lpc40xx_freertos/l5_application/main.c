@@ -4,6 +4,7 @@
 #include "gpio_isr.h"
 #include "gpio_lab.h"
 #include "lpc40xx.h"
+//#include "lpc_peripherals.h"
 #include "periodic_scheduler.h"
 #include "semphr.h"
 #include "sj2_cli.h"
@@ -179,7 +180,7 @@ void sleep_on_sem_task(void *p) {
       gpiox__set_high(*sem_led);
       delay__ms(150);
       gpiox__set_low(*sem_led);
-      delay__ms(150);   //blinking LED
+      delay__ms(150); // blinking LED
       // vTaskDelay(100);
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
@@ -194,7 +195,7 @@ void pin30_isr(void *p) {
   gpiox__set_as_output(*sem_led);
   while (1) {
     if (xSemaphoreTake(switch_pressed_signal_hw3_part2_30, 1000000)) {
-      fprintf(stderr, "Servicing Interrupt\n");
+      fprintf(stderr, "Servicing Interrupt 1\n");
       gpiox__set_high(*sem_led);
       delay__ms(150);
       gpiox__set_low(*sem_led);
@@ -209,7 +210,7 @@ void pin31_isr(void *p) {
   gpiox__set_as_output(*sem_led);
   while (1) {
     if (xSemaphoreTake(switch_pressed_signal_hw3_part2_31, 1000000)) {
-      fprintf(stderr, "Servicing Interrupt\n");
+      fprintf(stderr, "Servicing Interrupt 2\n");
       gpiox__set_high(*sem_led);
       delay__ms(150);
       gpiox__set_low(*sem_led);
@@ -250,8 +251,8 @@ int main(void) {
   return 0;*/
 
   /// lab 3 part 0
-  /*// Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
-  // a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
+  /// Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
+  /*// a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
   //.   Warning: P0.30, and P0.31 require pull-down resistors
   static port_pin_s test_switch = {0, 29}; // SW
   static port_pin_s test_led = {1, 24};    // LED
@@ -263,7 +264,7 @@ int main(void) {
   //    Hint: You can declare 'void gpio_interrupt(void)' at interrupt_vector_table.c such that it can see this function
   // Most important step: Enable the GPIO interrupt exception using the ARM Cortex M API (this is from lpc40 qxx.h)
   NVIC_EnableIRQ(GPIO_IRQn);
-  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt);
+  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt); // gpio_interrupt = ISR
   // Toggle an LED in a loop to ensure/test that the interrupt is entering ane exiting
   // For example, if the GPIO interrupt gets stuck, this LED will stop blinking
   // vTaskStartScheduler();
@@ -299,18 +300,18 @@ int main(void) {
   static port_pin_s part2_test_switch_3 = {0, 29};
   gpiox__set_as_input(part2_test_switch_3);
 
-  static port_pin_s part2_test_led_0 = {2, 3};
-  static port_pin_s part2_test_led_1 = {1, 26};
+  static port_pin_s part2_test_led_0 = {1, 26};
+  static port_pin_s part2_test_led_1 = {2, 3};
 
-  fprintf(stderr, "Entering...\n")
-      gpiox__attach_interrupt(part2_test_switch_2, GPIO_INTR__RISING_EDGE, gpio_interrupt_part2_0);
+  fprintf(stderr, "Entering...\n");
+  gpiox__attach_interrupt(part2_test_switch_2, GPIO_INTR__RISING_EDGE, gpio_interrupt_part2_0);
   gpiox__attach_interrupt(part2_test_switch_3, GPIO_INTR__FALLING_EDGE, gpio_interrupt_part2_1);
 
   NVIC_EnableIRQ(GPIO_IRQn);
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpiox__interrupt_dispatcher);
 
-  xTaskCreate(pin30_isr, "30isr", (512U * 4) / sizeof(void *), &part2_test_led_0, 1, NULL);
-  xTaskCreate(pin31_isr, "31isr", (512U * 4) / sizeof(void *), &part2_test_led_1, 1, NULL);
+  xTaskCreate(pin30_isr, "Interrupt 1", (512U * 4) / sizeof(void *), &part2_test_led_0, 1, NULL);
+  xTaskCreate(pin31_isr, "Interrupt 2", (512U * 4) / sizeof(void *), &part2_test_led_1, 1, NULL);
   vTaskStartScheduler();
   return 0;
 }
