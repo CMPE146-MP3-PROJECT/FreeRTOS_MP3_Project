@@ -296,7 +296,7 @@ void adc_task(void *p) {
     // ing a new routine you created to read an ADC burst reading
     // TODO: You need to write the implementation of this function
     const uint16_t adc_value = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_5);
-    const double adc_voltage = (double)(adc_value) / 4095 * 3.3;
+    const uint16_t adc_voltage = (adc_value) / 4095 * 3.3;
     fprintf(stderr, "ADC value is: %d， ADC voltage is: %.2f \n", adc_value);
     vTaskDelay(500);
   }
