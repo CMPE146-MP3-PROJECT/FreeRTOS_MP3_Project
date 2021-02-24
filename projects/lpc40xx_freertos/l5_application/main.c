@@ -251,7 +251,7 @@ void main_func(void *p) {
   // Locate a GPIO pin that a PWM channel will control
   // NOTE You can use gpio__construct_with_function() API from gpio.h
   // TO/DO Write this function yourself
-  gpio__construct_with_function(GPIO__PORT_2, 0, 1);
+  gpio__construct_w8ith_function(GPIO__PORT_2, 0, 1);
 
   // We only need to set PWM configuration once, and the HW will drive
   // the GPIO at 1000Hz, and control set its duty cycle to 50%
@@ -273,6 +273,8 @@ void main_func(void *p) {
 void pin_configure_adc_channel_as_io_pin() {
   LPC_IOCON->P1_31 &= (4 << 0); // reset IOCON mux
   LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
+                                // gpio__construct_with_function(GPIO__PORT_1, 31, 1);
+ // LPC_IOCON->P1_31 &= ~(1 << 7);
 }
 void adc_task(void *p) {
   adc__initialize();
@@ -281,6 +283,9 @@ void adc_task(void *p) {
   // You can configure burst mode for just the channel you are using
   adc__enable_burst_mode();
 
+  LPC_ADC->CR &= ~(0xFF << 0);
+  LPC_ADC->CR |= (1 << ADC__CHANNEL_5);
+
   // Configure a pin, such as P1.31 with FUNC 011 to route this pin as ADC channel 5
   // You can use gpio__construct_with_function() API from gpio.h
   pin_configure_adc_channel_as_io_pin(); // TODO You need to write this function
@@ -288,9 +293,9 @@ void adc_task(void *p) {
   while (1) {
     // Get the ADC reading using a new routine you created to read an ADC burst reading
     // TODO: You need to write the implementation of this function
-    const uint16_t adc_value = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_2);
-    fprintf(stderr, "ADC value is: %d", adc_value);
-    vTaskDelay(100);
+    const uint16_t adc_value = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_5);
+    fprintf(stderr, "ADC value is: %d \n", adc_value);
+    vTaskDelay(500);
   }
 }
 

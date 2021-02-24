@@ -66,8 +66,10 @@ void adc__enable_burst_mode(void) { LPC_ADC->CR |= (1 << 16); }
  * Read the LPC user manual for more details
  */
 uint16_t adc__get_channel_reading_with_burst_mode(uint8_t channel_number) {
-  uint16_t reading;
-  reading = 0;
-  reading = (LPC_ADC->DR[channel_number] >> 4) & 0xFFF; // the result is stored from bit4 to bit 15
+  uint16_t reading = 0;
+  const uint16_t twelve_bits = 0x0FFF;
+  if ((ADC__CHANNEL_2 == channel_number) || (ADC__CHANNEL_4 == channel_number) || (ADC__CHANNEL_5 == channel_number)) {
+    reading = (LPC_ADC->DR[channel_number] >> 4) & twelve_bits; // the result is stored from bit4 to bit 15
+  }
   return reading;
 }
