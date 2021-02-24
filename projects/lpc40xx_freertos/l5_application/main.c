@@ -1,18 +1,20 @@
+#include <stdio.h>
+
 #include "FreeRTOS.h"
 #include "board_io.h"
 #include "common_macros.h"
 #include "gpio_isr.h"
 #include "gpio_lab.h"
 #include "lpc40xx.h"
+#include "semphr.h"
 //#include "lpc_peripherals.h"
 #include "adc.h"
 #include "gpio.h"
 #include "periodic_scheduler.h"
 #include "pwm1.h"
-#include "semphr.h"
+#include "queue.h"
 #include "sj2_cli.h"
 #include "task.h"
-#include <stdio.h>
 
 /// 'static' to make these functions 'private' to this file
 // static void create_blinky_tasks(void);
@@ -294,10 +296,41 @@ void adc_task(void *p) {
     // ing a new routine you created to read an ADC burst reading
     // TODO: You need to write the implementation of this function
     const uint16_t adc_value = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_5);
-    fprintf(stderr, "ADC value is: %d \n", adc_value);
+    const double adc_voltage = (double)(adc_value) / 4095 * 3.3;
+    fprintf(stderr, "ADC value is: %d， ADC voltage is: %.2f \n", adc_value);
     vTaskDelay(500);
   }
 }
+
+/// lab 4 part 2
+// This is the queue handle we will need for the xQueue Send/Receive API
+/*static QueueHandle_t adc_to_pwm_task_queue;
+
+void adc_task(void *p) {
+    // NOTE: Reuse the code from Part 1
+
+    int adc_reading = 0; // Note that this 'adc_reading' is not the same variable as the one from adc_task
+    while (1) {
+        // Implement code to send potentiometer value on the queue
+        // a) read ADC input to 'int adc_reading'
+        // b) Send to queue: xQueueSend(adc_to_pwm_task_queue, &adc_reading, 0);
+        vTaskDelay(100);
+    }
+}
+
+void pwm_task(void *p) {
+    // NOTE: Reuse the code from Part 0
+    int adc_reading = 0;
+
+    while (1) {
+        // Implement code to receive potentiometer value from queue
+        if (xQueueReceive(adc_to_pwm_task_queue, &adc_reading, 100)) {
+        }
+
+        // We do not need task delay because our queue API will put task to sleep when there is no data in the queue
+        // vTaskDelay(100);
+    }
+}*/
 
 int main(void) {
   /// lab 2 part 0, 1
@@ -409,4 +442,12 @@ int main(void) {
   /// lab 4 part 1
   xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
+
+  /// lab 4 part 2
+  // Queue will only hold 1 integer
+  /*adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int));
+
+  xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();*/
 }
