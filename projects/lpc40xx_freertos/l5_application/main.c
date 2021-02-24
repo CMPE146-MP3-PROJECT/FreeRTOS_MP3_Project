@@ -274,24 +274,24 @@ void pin_configure_adc_channel_as_io_pin() {
   LPC_IOCON->P1_31 &= (4 << 0); // reset IOCON mux
   LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
                                 // gpio__construct_with_function(GPIO__PORT_1, 31, 1);
- // LPC_IOCON->P1_31 &= ~(1 << 7);
+  /*LPC_IOCON->P1_31 &= ~(1 << 7);*/
 }
 void adc_task(void *p) {
   adc__initialize();
 
   // TODO This is the function you need to add to adc.h
   // You can configure burst mode for just the channel you are using
-  adc__enable_burst_mode();
-
-  LPC_ADC->CR &= ~(0xFF << 0);
-  LPC_ADC->CR |= (1 << ADC__CHANNEL_5);
+  adc__enable_burst_mode(1);
+  adc__set_active_channel(ADC__CHANNEL_5);
+  // LPC_ADC->CR &= ~(0xFF << 0); // clear all channel.
 
   // Configure a pin, such as P1.31 with FUNC 011 to route this pin as ADC channel 5
   // You can use gpio__construct_with_function() API from gpio.h
   pin_configure_adc_channel_as_io_pin(); // TODO You need to write this function
 
   while (1) {
-    // Get the ADC reading using a new routine you created to read an ADC burst reading
+    // Get the ADC reading us
+    // ing a new routine you created to read an ADC burst reading
     // TODO: You need to write the implementation of this function
     const uint16_t adc_value = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_5);
     fprintf(stderr, "ADC value is: %d \n", adc_value);

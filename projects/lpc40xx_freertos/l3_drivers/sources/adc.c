@@ -55,7 +55,13 @@ uint16_t adc__get_adc_value(adc_channel_e channel_num) {
  * Implement a new function called adc__enable_burst_mode() which will
  * set the relevant bits in Control Register (CR) to enable burst mode.
  */
-void adc__enable_burst_mode(void) { LPC_ADC->CR |= (1 << 16); }
+void adc__enable_burst_mode(bool mode) {
+  if (mode == 1) {
+    LPC_ADC->CR |= (1 << 16);
+  } else {
+    LPC_ADC->CR &= ~(1 << 16);
+  }
+}
 
 /**
  * Note:
@@ -73,3 +79,5 @@ uint16_t adc__get_channel_reading_with_burst_mode(uint8_t channel_number) {
   }
   return reading;
 }
+
+void adc__set_active_channel(adc_channel_e channel_num) { LPC_ADC->CR |= (1 << channel_num); }

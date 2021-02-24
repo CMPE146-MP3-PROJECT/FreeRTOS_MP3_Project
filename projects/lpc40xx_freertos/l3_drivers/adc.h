@@ -8,8 +8,8 @@
  */
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
-
 // Only Channel2, Channel4 and Channel5 pins are avaible for use on SJ2 Development board
 typedef enum {
   ADC__CHANNEL_2 = 2, // Pin Available on SJ2
@@ -25,6 +25,8 @@ void adc__initialize(void);
  */
 uint16_t adc__get_adc_value(adc_channel_e channel_num);
 
-void adc__enable_burst_mode(void);
+void adc__enable_burst_mode(bool mode);
 
 uint16_t adc__get_channel_reading_with_burst_mode(uint8_t channel_number);
+
+void adc__set_active_channel(adc_channel_e channel_num);
