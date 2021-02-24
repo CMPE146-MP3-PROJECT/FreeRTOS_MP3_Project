@@ -247,13 +247,13 @@ void main_func(void *p) {
 }*/
 
 /// lab 4 part 0
-/*void pwm_task(void *p) {
+/* void pwm_task(void *p) {
   pwm1__init_single_edge(1000);
 
   // Locate a GPIO pin that a PWM channel will control
   // NOTE You can use gpio__construct_with_function() API from gpio.h
   // TO/DO Write this function yourself
-  gpio__construct_w8ith_function(GPIO__PORT_2, 0, 1);
+  gpio__construct_with_function(GPIO__PORT_2, 0, 1);
 
   // We only need to set PWM configuration once, and the HW will drive
   // the GPIO at 1000Hz, and control set its duty cycle to 50%
@@ -269,14 +269,14 @@ void main_func(void *p) {
     }
     vTaskDelay(100);
   }
-}*/
+}
+*/
 
 /// lab 4 part 1
-void pin_configure_adc_channel_as_io_pin() {
+/*void pin_configure_adc_channel_as_io_pin() {
   LPC_IOCON->P1_31 &= (4 << 0); // reset IOCON mux
   LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
-                                // gpio__construct_with_function(GPIO__PORT_1, 31, 1);
-  /*LPC_IOCON->P1_31 &= ~(1 << 7);*/
+                                // gpio__construct_with_function(GPIO__PORT_1, 31, 1); ///LPC_IOCON->P1_31 &= ~(1 << 7);
 }
 void adc_task(void *p) {
   adc__initialize();
@@ -297,40 +297,58 @@ void adc_task(void *p) {
     // TODO: You need to write the implementation of this function
     const uint16_t adc_value = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_5);
     const double adc_voltage = (double)(adc_value) / 4095 * 3.3;
-    fprintf(stderr, "ADC value is: %d， ADC voltage is: %.2f \n", adc_value, adc_voltage);
+    fprintf(stderr, "ADC value is: %d， ADC voltage is: %.2f v\n", adc_value, adc_voltage);
     vTaskDelay(500);
   }
-}
+}*/
 
 /// lab 4 part 2
 // This is the queue handle we will need for the xQueue Send/Receive API
-/*static QueueHandle_t adc_to_pwm_task_queue;
-
+static QueueHandle_t adc_to_pwm_task_queue;
+void pin_configure_adc_channel_as_io_pin() {
+  LPC_IOCON->P1_31 &= (4 << 0); // reset IOCON mux
+  LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
+                                // gpio__construct_with_function(GPIO__PORT_1, 31, 1); ///LPC_IOCON->P1_31 &= ~(1 << 7);
+}
 void adc_task(void *p) {
-    // NOTE: Reuse the code from Part 1
-
-    int adc_reading = 0; // Note that this 'adc_reading' is not the same variable as the one from adc_task
-    while (1) {
-        // Implement code to send potentiometer value on the queue
-        // a) read ADC input to 'int adc_reading'
-        // b) Send to queue: xQueueSend(adc_to_pwm_task_queue, &adc_reading, 0);
-        vTaskDelay(100);
-    }
+  // NOTE: Reuse the code from Part 1
+  adc__initialize();
+  adc__enable_burst_mode(1);
+  adc__set_active_channel(ADC__CHANNEL_5);
+  pin_configure_adc_channel_as_io_pin();
+  int adc_reading = 0; // Note that this 'adc_reading' is not the same variable as the one from adc_task
+  while (1) {
+    // Implement code to send potentiometer value on the queue
+    // a) read ADC input to 'int adc_reading'
+    adc_reading = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_5);
+    // b) Send to queue: xQueueSend(adc_to_pwm_task_queue, &adc_reading, 0);
+    xQueueSend(adc_to_pwm_task_queue, &adc_reading, 0);
+    vTaskDelay(100);
+  }
 }
 
 void pwm_task(void *p) {
-    // NOTE: Reuse the code from Part 0
-    int adc_reading = 0;
+  // NOTE: Reuse the code from Part 0
+  pwm1__init_single_edge(1000);
+  gpio__construct_with_function(GPIO__PORT_2, 0, 1);
+  pwm1__set_duty_cycle(PWM1__2_0, 50);
+  uint8_t percent = 0;
+  int adc_reading = 0;
 
-    while (1) {
-        // Implement code to receive potentiometer value from queue
-        if (xQueueReceive(adc_to_pwm_task_queue, &adc_reading, 100)) {
-        }
-
-        // We do not need task delay because our queue API will put task to sleep when there is no data in the queue
-        // vTaskDelay(100);
+  while (1) {
+    // Implement code to receive potentiometer value from queue
+    if (xQueueReceive(adc_to_pwm_task_queue, &adc_reading, 500)) {
+      const double adc_voltage = (double)(adc_reading) / 4095 * 3.3;
+      fprintf(stderr, "ADC value is: %d， ADC voltage is: %.2f v\n", adc_reading, adc_voltage);
+      percent = (double)(adc_reading) / 4095 * 100;
+      pwm1__set_duty_cycle(PWM1__2_0, percent);
+    } else {
+      puts("Timeout --> No data received");
     }
-}*/
+    // We do not need task delay because our queue API will put task to sleep when there is no data in the queue
+    // vTaskDelay(100);
+  }
+}
 
 int main(void) {
   /// lab 2 part 0, 1
@@ -440,14 +458,14 @@ int main(void) {
   vTaskStartScheduler();*/
 
   /// lab 4 part 1
-  xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  vTaskStartScheduler();
+  /*xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();*/
 
   /// lab 4 part 2
   // Queue will only hold 1 integer
-  /*adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int));
+  adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int));
 
-  xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(adc_task, "adc_task_sending_to_pwm", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  vTaskStartScheduler();*/
+  vTaskStartScheduler();
 }
