@@ -5,7 +5,10 @@
 #include "gpio_lab.h"
 #include "lpc40xx.h"
 //#include "lpc_peripherals.h"
+#include "adc.h"
+#include "gpio.h"
 #include "periodic_scheduler.h"
+#include "pwm1.h"
 #include "semphr.h"
 #include "sj2_cli.h"
 #include "task.h"
@@ -188,7 +191,7 @@ void sleep_on_sem_task(void *p) {
 }*/
 
 /// lab 3 part 2
-void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); }
+/*void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); }
 void gpio_interrupt_part2_1(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL); }
 void pin30_isr(void *p) {
   const port_pin_s *sem_led = (port_pin_s *)(p);
@@ -197,9 +200,13 @@ void pin30_isr(void *p) {
     if (xSemaphoreTake(switch_pressed_signal_hw3_part2_30, 1000000)) {
       fprintf(stderr, "Servicing Interrupt 1\n");
       gpiox__set_high(*sem_led);
-      delay__ms(150);
+      delay__ms(100);
       gpiox__set_low(*sem_led);
-      delay__ms(150); // blinking LED
+      delay__ms(100); // blinking LED
+      gpiox__set_high(*sem_led);
+      delay__ms(100);
+      gpiox__set_low(*sem_led);
+      delay__ms(100); // blinking LED
       // vTaskDelay(100);
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
@@ -212,12 +219,78 @@ void pin31_isr(void *p) {
     if (xSemaphoreTake(switch_pressed_signal_hw3_part2_31, 1000000)) {
       fprintf(stderr, "Servicing Interrupt 2\n");
       gpiox__set_high(*sem_led);
-      delay__ms(150);
+      delay__ms(100);
       gpiox__set_low(*sem_led);
-      delay__ms(150); // blinking LED
+      delay__ms(100); // blinking LED
+      gpiox__set_high(*sem_led);
+      delay__ms(100);
+      gpiox__set_low(*sem_led);
+      delay__ms(100); // blinking LED
       // vTaskDelay(100);
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
+  }
+}
+
+void main_func(void *p) {
+  const port_pin_s *sem_led = (port_pin_s *)(p);
+  while (1) {
+    // delay__ms(100);
+    // T/ODO: Toggle an LED here
+    gpiox__set_high(*sem_led);
+    delay__ms(250);
+    gpiox__set_low(*sem_led);
+    delay__ms(250);
+  }
+}*/
+
+/// lab 4 part 0
+/*void pwm_task(void *p) {
+  pwm1__init_single_edge(1000);
+
+  // Locate a GPIO pin that a PWM channel will control
+  // NOTE You can use gpio__construct_with_function() API from gpio.h
+  // TO/DO Write this function yourself
+  gpio__construct_with_function(GPIO__PORT_2, 0, 1);
+
+  // We only need to set PWM configuration once, and the HW will drive
+  // the GPIO at 1000Hz, and control set its duty cycle to 50%
+  pwm1__set_duty_cycle(PWM1__2_0, 50);
+
+  // Continue to vary the duty cycle in the loop
+  uint8_t percent = 0;
+  while (1) {
+    pwm1__set_duty_cycle(PWM1__2_0, percent);
+
+    if (++percent > 100) {
+      percent = 0;
+    }
+    vTaskDelay(100);
+  }
+}*/
+
+/// lab 4 part 1
+void pin_configure_adc_channel_as_io_pin() {
+  LPC_IOCON->P1_31 &= (4 << 0); // reset IOCON mux
+  LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
+}
+void adc_task(void *p) {
+  adc__initialize();
+
+  // TODO This is the function you need to add to adc.h
+  // You can configure burst mode for just the channel you are using
+  adc__enable_burst_mode();
+
+  // Configure a pin, such as P1.31 with FUNC 011 to route this pin as ADC channel 5
+  // You can use gpio__construct_with_function() API from gpio.h
+  pin_configure_adc_channel_as_io_pin(); // TODO You need to write this function
+
+  while (1) {
+    // Get the ADC reading using a new routine you created to read an ADC burst reading
+    // TODO: You need to write the implementation of this function
+    const uint16_t adc_value = adc__get_channel_reading_with_burst_mode(ADC__CHANNEL_2);
+    fprintf(stderr, "ADC value is: %d", adc_value);
+    vTaskDelay(100);
   }
 }
 
@@ -251,9 +324,10 @@ int main(void) {
   return 0;*/
 
   /// lab 3 part 0
+  /*
   /// Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
-  /*// a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
-  //.   Warning: P0.30, and P0.31 require pull-down resistors
+  /// a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
+  ///Warning: P0.30, and P0.31 require pull-down resistors
   static port_pin_s test_switch = {0, 29}; // SW
   static port_pin_s test_led = {1, 24};    // LED
   gpiox__set_as_input(test_switch);
@@ -292,26 +366,42 @@ int main(void) {
   vTaskStartScheduler();*/
 
   /// lab 3 part 2
-  switch_pressed_signal_hw3_part2_30 = xSemaphoreCreateBinary();
+  /* SW0: P1_19; LED0: P2_3;
+   * SW1: P1_15; LED1: P1_26;
+   * SW2: P0_30; LED2: P1_24;
+   * SW3: P0_29; LED3: P1_18;
+   */
+  /*switch_pressed_signal_hw3_part2_30 = xSemaphoreCreateBinary();
   switch_pressed_signal_hw3_part2_31 = xSemaphoreCreateBinary();
-
   static port_pin_s part2_test_switch_2 = {0, 30};
   gpiox__set_as_input(part2_test_switch_2);
   static port_pin_s part2_test_switch_3 = {0, 29};
   gpiox__set_as_input(part2_test_switch_3);
 
+  static port_pin_s test_led_main = {2, 3};
+  gpiox__set_as_output(test_led_main);
+
   static port_pin_s part2_test_led_0 = {1, 26};
-  static port_pin_s part2_test_led_1 = {2, 3};
+  static port_pin_s part2_test_led_1 = {1, 24};
 
   fprintf(stderr, "Entering...\n");
   gpiox__attach_interrupt(part2_test_switch_2, GPIO_INTR__RISING_EDGE, gpio_interrupt_part2_0);
   gpiox__attach_interrupt(part2_test_switch_3, GPIO_INTR__FALLING_EDGE, gpio_interrupt_part2_1);
 
   NVIC_EnableIRQ(GPIO_IRQn);
-  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpiox__interrupt_dispatcher);
+  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpiox__interrupt_dispatcher, "unused");
 
-  xTaskCreate(pin30_isr, "Interrupt 1", (512U * 4) / sizeof(void *), &part2_test_led_0, 1, NULL);
-  xTaskCreate(pin31_isr, "Interrupt 2", (512U * 4) / sizeof(void *), &part2_test_led_1, 1, NULL);
+  xTaskCreate(pin30_isr, "Interrupt 1", (512U * 4) / sizeof(void *), &part2_test_led_0, 2, NULL);
+  xTaskCreate(pin31_isr, "Interrupt 2", (512U * 4) / sizeof(void *), &part2_test_led_1, 2, NULL);
+  xTaskCreate(main_func, "main function", (512U * 4) / sizeof(void *), &test_led_main, 1, NULL);
   vTaskStartScheduler();
-  return 0;
+  return 0;*/
+
+  /// lab 4 part 0
+  /*xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();*/
+
+  /// lab 4 part 1
+  xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
 }
