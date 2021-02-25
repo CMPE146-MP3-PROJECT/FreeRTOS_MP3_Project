@@ -331,9 +331,18 @@ void pwm_task(void *p) {
   // NOTE: Reuse the code from Part 0
   pwm1__init_single_edge(1000);
   gpio__construct_with_function(GPIO__PORT_2, 0, 1);
-  pwm1__set_duty_cycle(PWM1__2_0, 50);
-  uint8_t percent = 0;
+  pwm1__set_duty_cycle(PWM1__2_0, 10);
+  // uint8_t percent = 0;
   int adc_reading = 0;
+
+  /// extra credit light up RGB LED
+  gpio__construct_with_function(GPIO__PORT_2, 1, 1); // configure LPC_P2_1 to be PWN
+  gpio__construct_with_function(GPIO__PORT_2, 2, 1); // configure LPC_P2_2 to be PWN
+  pwm1__set_duty_cycle(PWM1__2_1, 10);
+  pwm1__set_duty_cycle(PWM1__2_2, 10); // configure duty cycle
+  static double red = 0, green = 0, blue = 0;
+  static double percent = 0;
+  // static int duty_cycle = 0;
 
   while (1) {
     // Implement code to receive potentiometer value from queue
@@ -342,11 +351,45 @@ void pwm_task(void *p) {
       fprintf(stderr, "ADC value is: %d， ADC voltage is: %.2f v\n", adc_reading, adc_voltage);
       percent = (double)(adc_reading) / 4095 * 100;
       pwm1__set_duty_cycle(PWM1__2_0, percent);
+      int duty = percent;
+      /*if (percent <= 30) {
+        red = percent / 30 * 100;
+      } else if (percent < 60 && percent > 30) {
+        red = 100;
+        green = percent / 60 * 100;
+      } else if (percent <= 100 && percent >= 60) {
+        red = 100;
+        green = 100;
+        blue = (percent - 60) / 40 * 100;
+      }*/
+      red = percent;
+      green = (1 - percent / 100) * 100;
+      blue = percent / 1.5;
+      /*int R[] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 240, 220, 200, 180,
+                 160, 140, 120, 100, 80,  60,  40,  20,  0,   0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   20,  40,  60,  80,  100, 120, 140, 160, 180, 200, 220, 240};
+      int G[] = {0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+                 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   20,  40,  60,  80,  100, 120, 140,
+                 160, 180, 200, 220, 240, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+      int B[] = {0,   20,  40,  60,  80,  100, 120, 140, 160, 180, 200, 220, 240, 255, 255, 255, 255,
+                 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                 255, 255, 255, 255, 255, 240, 220, 200, 180, 160, 140, 120, 100, 80,  60,  40,  20,
+                 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
+      red = (R[duty] / 255) * 100;
+      red = (G[duty] / 255) * 100;
+      red = (B[duty] / 255) * 100;
+      fprintf(stderr, " duty number is: %.2d\n", duty);*/
+      fprintf(stderr, " current duty cycle is: %.2f%%, R:%.2f, G:%.2f, B:%.2f\n", percent, red, green, blue);
+      pwm1__set_duty_cycle(PWM1__2_0, red);
+      pwm1__set_duty_cycle(PWM1__2_1, green);
+      pwm1__set_duty_cycle(PWM1__2_2, blue);
     } else {
       puts("Timeout --> No data received");
     }
     // We do not need task delay because our queue API will put task to sleep when there is no data in the queue
-    // vTaskDelay(100);
+    // vTaskDelay(500);
   }
 }
 
