@@ -1,5 +1,5 @@
+#include <stdint.h>
 #include <stdio.h>
-
 #include "FreeRTOS.h"
 #include "board_io.h"
 #include "common_macros.h"
