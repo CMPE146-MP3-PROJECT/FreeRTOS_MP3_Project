@@ -324,10 +324,10 @@ void adc_task(void *p) {
 /// lab 4 part 2
 #if 1
 // This is the queue handle we will need for the xQueue Send/Receive API
-static QueueHandle_t adc_to_pwm_task_queue; //important
+static QueueHandle_t adc_to_pwm_task_queue; // important
 void pin_configure_adc_channel_as_io_pin() {
   LPC_IOCON->P1_31 &= ~(7 << 0); // reset IOCON mux
-  LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
+  LPC_IOCON->P1_31 &= (3 << 0);  // route this pin as ADC channel 5
                                 // gpio__construct_with_function(GPIO__PORT_1, 31, 1); ///LPC_IOCON->P1_31 &= ~(1 << 7);
 }
 void adc_task(void *p) {
@@ -413,15 +413,16 @@ void pwm_task(void *p) {
   }
 }
 #endif
+
 int main(void) {
-  /// lab 2 part 0, 1
-  #if 0
+/// lab 2 part 0, 1
+#if 0
   xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
-  #endif
+#endif
 
-  /// lab 2 part 2
-  #if 0
+/// lab 2 part 2
+#if 0
   // This is static such that these variables will be allocated in RAM and not go out of scope
   static port_pin_s led0 = {2, 3};
   static port_pin_s led1 = {1, 26};
@@ -431,10 +432,10 @@ int main(void) {
   // vTaskDelay(1500);
   vTaskStartScheduler();
   // return 0;
-  #endif
+#endif
 
-  /// lab 2 part 3
-  #if 0
+/// lab 2 part 3
+#if 0
   switch_press_indication = xSemaphoreCreateBinary();
   static port_pin_s test_switch = {0, 30}; // SW
   static port_pin_s test_led = {1, 24};    // LED
@@ -445,10 +446,10 @@ int main(void) {
   // xTaskCreate(lab2_led_task, "test_led", configMINIMAL_STACK_SIZE, (void *)&test_led, 1, NULL);
   vTaskStartScheduler();
   return 0;
-  #endif
+#endif
 
-  /// lab 3 part 0
-  #if 0
+/// lab 3 part 0
+#if 0
   /// Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
   /// a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
   ///Warning: P0.30, and P0.31 require pull-down resistors
@@ -476,10 +477,10 @@ int main(void) {
   }
   // vTaskStartScheduler();
   // return 0;
-  #endif
+#endif
 
-  /// lab 3 part 1
-  #if 0
+/// lab 3 part 1
+#if 0
   switch_pressed_signal = xSemaphoreCreateBinary(); // Create your binary semaphore
   static port_pin_s test_switch2 = {0, 30};
   static port_pin_s test_led2 = {1, 24};
@@ -490,10 +491,10 @@ int main(void) {
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt2);
   xTaskCreate(sleep_on_sem_task, "sleep_sem", (512U * 4) / sizeof(void *), &test_led2, 1, NULL);
   vTaskStartScheduler();
-  #endif
+#endif
 
-  /// lab 3 part 2
-  #if 0
+/// lab 3 part 2
+#if 0
   /* SW0: P1_19; LED0: P2_3;
    * SW1: P1_15; LED1: P1_26;
    * SW2: P0_30; LED2: P1_24;
@@ -524,27 +525,27 @@ int main(void) {
   xTaskCreate(main_func, "main function", (512U * 4) / sizeof(void *), &test_led_main, 1, NULL);
   vTaskStartScheduler();
   return 0;
-  #endif
+#endif
 
-  /// lab 4 part 0
-  #if 0
+/// lab 4 part 0
+#if 0
   xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
-  #endif
+#endif
 
-  /// lab 4 part 1
-  #if 0
+/// lab 4 part 1
+#if 0
   xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
-  #endif
+#endif
 
-  /// lab 4 part 2
-  #if 1
+/// lab 4 part 2
+#if 1
   // Queue will only hold 1 integer
-  adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int));//important to do this initailize step
+  adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int)); // important to do this initailize step
 
   xTaskCreate(adc_task, "adc_task_sending_to_pwm", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
-  #endif
+#endif
 }
