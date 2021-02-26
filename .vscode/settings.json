@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "adc.h": "c",
+        "gpio.h": "c",
+        "periodic_scheduler.h": "c",
+        "gpio_isr.h": "c",
+        "freertos.h": "c",
+        "portable.h": "c",
+        "stdint.h": "c",
+        "lpc40xx.h": "c",
+        "lpc_peripherals.h": "c"
+    }
+}

@@ -1,5 +1,3 @@
-#include <stdint.h>
-#include <stdio.h>
 #include "FreeRTOS.h"
 #include "board_io.h"
 #include "common_macros.h"
@@ -7,6 +5,8 @@
 #include "gpio_lab.h"
 #include "lpc40xx.h"
 #include "semphr.h"
+#include <stdint.h>
+#include <stdio.h>
 //#include "lpc_peripherals.h"
 #include "adc.h"
 #include "gpio.h"
@@ -30,7 +30,8 @@ static SemaphoreHandle_t switch_pressed_signal_hw3_part2_30;
 static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
 
 /// lab 2 part 0
-/*void lab2_led_task(void *pvParameters) {
+#if 0
+void lab2_led_task(void *pvParameters) {
   // Choose one of the onboard LEDS by looking into schematics and write code for the below
   // 0) Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= (7 << 0);
@@ -47,10 +48,12 @@ static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
     LPC_GPIO2->CLR = (1 << 3);
     vTaskDelay(500);
   }
-}*/
+}
+#endif
 
 /// lab 2 part 1
-/*static void lab2_led_task(void *pvParameters) {
+#if 0
+static void lab2_led_task(void *pvParameters) {
   // Set the IOCON MUX function(if required) select pins to 000
   LPC_IOCON->P2_3 &= ~(7 << 0); //~0111 = 1000
   // port_pin_s led3 = {1, 26};
@@ -64,10 +67,12 @@ static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
     gpiox__set_low(3);
     vTaskDelay(500);
   }
-}*/
+}
+#endif
 
 /// lab 2 part 2 blink together
-/*void lab2_led_task(void *task_parameter) {
+#if 0
+void lab2_led_task(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
   LPC_IOCON->P2_3 &= ~(7 << 0);
@@ -83,10 +88,12 @@ static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
     gpiox__set_low(*led_num);
     vTaskDelay(500);
   }
-}*/
+}
+#endif
 
 /// lab 2 part 2 blink separate
-/*void lab2_led_task0(void *task_parameter) {
+#if 0
+void lab2_led_task0(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
   LPC_IOCON->P2_3 &= ~(7 << 0);
@@ -112,10 +119,12 @@ void lab2_led_task1(void *task_parameter) {
     gpiox__set_low(*led_num);
     vTaskDelay(500);
   }
-}*/
+}
+#endif
 
 /// lab 2 part3
-/*void lab2_led_task(void *task_parameter) {
+#if 0
+void lab2_led_task(void *task_parameter) {
   // LPC_IOCON->P2_3 &= ~(7 << 0);
   const port_pin_s *led_num = (port_pin_s *)(task_parameter);
   gpiox__set_as_output(*led_num);
@@ -149,10 +158,12 @@ void switch_task(void *task_parameter) {
     // Task should always sleep otherwise they will use 100% CPU
     // This task sleep also helps avoid spurious semaphore give during switch debeounce
   }
-}*/
+}
+#endif
 
 /// lab 3 part 0
-/*void gpio_interrupt(void) {
+#if 0
+void gpio_interrupt(void) {
   // a) Clear Port0/2 interrupt using CLR0 or CLR2 registers
   LPC_GPIOINT->IO0IntClr = (1 << 29);    // clr the INT register for the switch's Port/Pin
                                          // (the switch that trigger interrupt)
@@ -167,10 +178,12 @@ void switch_task(void *task_parameter) {
   gpiox__set_low(test_led1);
   delay__ms(150);
   fprintf(stderr, "HEY THERE!\n");
-}*/
+}
+#endif
 
 /// lab 3 part 1
-/*void gpio_interrupt2(void) {
+#if 0
+void gpio_interrupt2(void) {
   fprintf(stderr, "Calling ISR...");
   xSemaphoreGiveFromISR(switch_pressed_signal, NULL);
   LPC_GPIOINT->IO0IntClr = (1 << 30); // clr the INT register for the switch's Port/Pin
@@ -190,10 +203,12 @@ void sleep_on_sem_task(void *p) {
     }
     // Use xSemaphoreTake with forever delay and blink an LED when you get the signal
   }
-}*/
+}
+#endif
 
 /// lab 3 part 2
-/*void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); }
+#if 0
+void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); }
 void gpio_interrupt_part2_1(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL); }
 void pin30_isr(void *p) {
   const port_pin_s *sem_led = (port_pin_s *)(p);
@@ -244,10 +259,12 @@ void main_func(void *p) {
     gpiox__set_low(*sem_led);
     delay__ms(250);
   }
-}*/
+}
+#endif
 
 /// lab 4 part 0
-/* void pwm_task(void *p) {
+#if 0
+ void pwm_task(void *p) {
   pwm1__init_single_edge(1000);
 
   // Locate a GPIO pin that a PWM channel will control
@@ -270,11 +287,12 @@ void main_func(void *p) {
     vTaskDelay(100);
   }
 }
-*/
+#endif
 
 /// lab 4 part 1
-/*void pin_configure_adc_channel_as_io_pin() {
-  LPC_IOCON->P1_31 &= (4 << 0); // reset IOCON mux
+#if 0
+void pin_configure_adc_channel_as_io_pin() {
+  LPC_IOCON->P1_31 &= ~(7 << 0); // reset IOCON mux
   LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
                                 // gpio__construct_with_function(GPIO__PORT_1, 31, 1); ///LPC_IOCON->P1_31 &= ~(1 << 7);
 }
@@ -300,13 +318,15 @@ void adc_task(void *p) {
     fprintf(stderr, "ADC value is: %d， ADC voltage is: %.2f v\n", adc_value, adc_voltage);
     vTaskDelay(500);
   }
-}*/
+}
+#endif
 
 /// lab 4 part 2
+#if 1
 // This is the queue handle we will need for the xQueue Send/Receive API
-static QueueHandle_t adc_to_pwm_task_queue;
+static QueueHandle_t adc_to_pwm_task_queue; //important
 void pin_configure_adc_channel_as_io_pin() {
-  LPC_IOCON->P1_31 &= (4 << 0); // reset IOCON mux
+  LPC_IOCON->P1_31 &= ~(7 << 0); // reset IOCON mux
   LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
                                 // gpio__construct_with_function(GPIO__PORT_1, 31, 1); ///LPC_IOCON->P1_31 &= ~(1 << 7);
 }
@@ -392,15 +412,17 @@ void pwm_task(void *p) {
     // vTaskDelay(500);
   }
 }
-
+#endif
 int main(void) {
   /// lab 2 part 0, 1
-  /*xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
+  #if 0
+  xTaskCreate(lab2_led_task, "LED", 1024 / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
-  //return 0;*/
+  #endif
 
   /// lab 2 part 2
-  /*// This is static such that these variables will be allocated in RAM and not go out of scope
+  #if 0
+  // This is static such that these variables will be allocated in RAM and not go out of scope
   static port_pin_s led0 = {2, 3};
   static port_pin_s led1 = {1, 26};
   xTaskCreate(lab2_led_task0, "LED0", 1024 / sizeof(void *), &led0, 1, NULL); // &led0 is a task parameter going to
@@ -408,10 +430,12 @@ int main(void) {
   xTaskCreate(lab2_led_task1, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
   // vTaskDelay(1500);
   vTaskStartScheduler();
-  // return 0;*/
+  // return 0;
+  #endif
 
   /// lab 2 part 3
-  /*switch_press_indication = xSemaphoreCreateBinary();
+  #if 0
+  switch_press_indication = xSemaphoreCreateBinary();
   static port_pin_s test_switch = {0, 30}; // SW
   static port_pin_s test_led = {1, 24};    // LED
   // printf("level: %d", gpiox__get_level(test_switch))
@@ -420,10 +444,11 @@ int main(void) {
   xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
   // xTaskCreate(lab2_led_task, "test_led", configMINIMAL_STACK_SIZE, (void *)&test_led, 1, NULL);
   vTaskStartScheduler();
-  return 0;*/
+  return 0;
+  #endif
 
   /// lab 3 part 0
-  /*
+  #if 0
   /// Read Table 95 in the LPC user manual and setup an interrupt on a switch connected to Port0 or Port2
   /// a) For example, choose SW2 (P0_30) pin on SJ2 board and configure as input
   ///Warning: P0.30, and P0.31 require pull-down resistors
@@ -450,10 +475,12 @@ int main(void) {
     delay__ms(500);
   }
   // vTaskStartScheduler();
-  // return 0;*/
+  // return 0;
+  #endif
 
   /// lab 3 part 1
-  /*switch_pressed_signal = xSemaphoreCreateBinary(); // Create your binary semaphore
+  #if 0
+  switch_pressed_signal = xSemaphoreCreateBinary(); // Create your binary semaphore
   static port_pin_s test_switch2 = {0, 30};
   static port_pin_s test_led2 = {1, 24};
   gpiox__set_as_input(test_switch2);
@@ -462,15 +489,17 @@ int main(void) {
   NVIC_EnableIRQ(GPIO_IRQn); // Enable interrupt gate for the GPIO
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt2);
   xTaskCreate(sleep_on_sem_task, "sleep_sem", (512U * 4) / sizeof(void *), &test_led2, 1, NULL);
-  vTaskStartScheduler();*/
+  vTaskStartScheduler();
+  #endif
 
   /// lab 3 part 2
+  #if 0
   /* SW0: P1_19; LED0: P2_3;
    * SW1: P1_15; LED1: P1_26;
    * SW2: P0_30; LED2: P1_24;
    * SW3: P0_29; LED3: P1_18;
    */
-  /*switch_pressed_signal_hw3_part2_30 = xSemaphoreCreateBinary();
+  switch_pressed_signal_hw3_part2_30 = xSemaphoreCreateBinary();
   switch_pressed_signal_hw3_part2_31 = xSemaphoreCreateBinary();
   static port_pin_s part2_test_switch_2 = {0, 30};
   gpiox__set_as_input(part2_test_switch_2);
@@ -494,21 +523,28 @@ int main(void) {
   xTaskCreate(pin31_isr, "Interrupt 2", (512U * 4) / sizeof(void *), &part2_test_led_1, 2, NULL);
   xTaskCreate(main_func, "main function", (512U * 4) / sizeof(void *), &test_led_main, 1, NULL);
   vTaskStartScheduler();
-  return 0;*/
+  return 0;
+  #endif
 
   /// lab 4 part 0
-  /*xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  vTaskStartScheduler();*/
+  #if 0
+  xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
+  #endif
 
   /// lab 4 part 1
-  /*xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  vTaskStartScheduler();*/
+  #if 0
+  xTaskCreate(adc_task, "adc_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
+  #endif
 
   /// lab 4 part 2
+  #if 1
   // Queue will only hold 1 integer
-  adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int));
+  adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int));//important to do this initailize step
 
   xTaskCreate(adc_task, "adc_task_sending_to_pwm", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
+  #endif
 }
