@@ -423,32 +423,6 @@ void pwm_task(void *p) {
 /// lab 5 part 1
 #if 1
 
-// TODO: Implement Adesto flash memory CS signal as a GPIO driver
-port_pin_s cs_pin = {1, 10};
-void adesto_cs(void) {
-  gpiox__set_as_output(cs_pin);
-  gpiox__set_low(cs_pin); // activate flash
-}
-void adesto_ds(void) {
-  gpiox__set_high(cs_pin); // set CS to high to deactivate flash
-}
-// TODO: Implement the code to read Adesto flash memory signature
-// TODO: Create struct of type 'adesto_flash_id_s' and return it
-adesto_flash_id_s adesto_read_signature(void) {
-  adesto_flash_id_s data = {0};
-  adesto_cs();
-  // Send opcode and read bytes
-  ssp2__lab_exchange_byte(0x9F); // OP code for reading Manufacturer and Device ID
-  data.manufacturer_id = ssp2__lab_exchange_byte(0xFF);
-  data.device_id_1 = ssp2__lab_exchange_byte(0xFF);
-  data.device_id_2 = ssp2__lab_exchange_byte(0xFF);
-  data.extended_device_id = ssp2__lab_exchange_byte(0xFF);
-  // ssp2__lab_exchange_byte(0xFF);
-  // TODO: Populate members of the 'adesto_flash_id_s' struct
-  adesto_ds();
-  return data;
-}
-
 void spi_task(void *p) {
   const uint32_t spi_clock_mhz = 24;
   ssp2__lab_init(spi_clock_mhz);
@@ -471,6 +445,22 @@ void spi_task(void *p) {
     vTaskDelay(1000);
   }
 }
+#endif
+
+/// lab 5 part 2
+#if 0
+void spi_id_verification_task(void *p) {
+  while (1) {
+    const adesto_flash_id_s id = ssp2__adesto_read_signature();
+    
+    // When we read a manufacturer ID we do not expect, we will kill this task
+    if (id.manufacturer_id != 0x1F) {
+      fprintf(stderr, "Manufacturer ID read failure\n");
+      vTaskSuspend(NULL); // Kill this task
+    }
+  }
+}
+
 #endif
 
 int main(void) {
@@ -617,5 +607,17 @@ int main(void) {
 #if 1
   xTaskCreate(spi_task, "spi_id_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
+#endif
+
+/// lab 5 part 2
+#if 0
+  // TODO: Initialize your SPI, its pins, Adesto flash CS GPIO etc...
+
+  // Create two tasks that will continously read signature
+  xTaskCreate(spi_id_verification_task, ...);
+  xTaskCreate(spi_id_verification_task, ...);
+
+  vTaskStartScheduler();
+
 #endif
 }

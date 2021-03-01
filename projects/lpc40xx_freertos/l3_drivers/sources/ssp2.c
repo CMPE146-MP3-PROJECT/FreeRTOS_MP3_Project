@@ -50,6 +50,31 @@ static ssp_dma_error_e ssp2__dma_transfer_block(unsigned char *buffer_pointer, u
  *                      P U B L I C    F U N C T I O N S
  *
  ******************************************************************************/
+// TODO: Implement Adesto flash memory CS signal as a GPIO driver
+port_pin_s cs_pin = {1, 10};
+void adesto_cs(void) {
+  gpiox__set_as_output(cs_pin);
+  gpiox__set_low(cs_pin); // activate flash
+}
+void adesto_ds(void) {
+  gpiox__set_high(cs_pin); // set CS to high to deactivate flash
+}
+// TODO: Implement the code to read Adesto flash memory signature
+// TODO: Create struct of type 'adesto_flash_id_s' and return it
+adesto_flash_id_s adesto_read_signature(void) {
+  adesto_flash_id_s data = {0};
+  adesto_cs();
+  // Send opcode and read bytes
+  ssp2__lab_exchange_byte(0x9F); // OP code for reading Manufacturer and Device ID
+  data.manufacturer_id = ssp2__lab_exchange_byte(0xFF);
+  data.device_id_1 = ssp2__lab_exchange_byte(0xFF);
+  data.device_id_2 = ssp2__lab_exchange_byte(0xFF);
+  data.extended_device_id = ssp2__lab_exchange_byte(0xFF);
+  // ssp2__lab_exchange_byte(0xFF);
+  // TODO: Populate members of the 'adesto_flash_id_s' struct
+  adesto_ds();
+  return data;
+}
 
 void ssp2__lab_init(uint32_t max_clock_mhz) {
   // Refer to LPC User manual and setup the register bits correctly
