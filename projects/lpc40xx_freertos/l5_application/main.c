@@ -421,7 +421,7 @@ void pwm_task(void *p) {
 #endif
 
 /// lab 5 part 1
-#if 1
+#if 0
 
 void spi_task(void *p) {
   const uint32_t spi_clock_mhz = 24;
@@ -448,18 +448,29 @@ void spi_task(void *p) {
 #endif
 
 /// lab 5 part 2
-#if 0
+#if 1
+xSemaphoreHandle spi_id_mutex_handler;
+
 void spi_id_verification_task(void *p) {
   while (1) {
-    const adesto_flash_id_s id = ssp2__adesto_read_signature();
-    
-    // When we read a manufacturer ID we do not expect, we will kill this task
-    if (id.manufacturer_id != 0x1F) {
-      fprintf(stderr, "Manufacturer ID read failure\n");
-      vTaskSuspend(NULL); // Kill this task
+    if (xSemaphoreTake(spi_id_mutex_handler, 1000)) {
+      const adesto_flash_id_s id = adesto_read_signature();
+
+      // When we read a manufacturer ID we do not expect, we will kill this task
+      if (id.manufacturer_id != 0x1F) {
+        fprintf(stderr, "Manufacturer ID read failure\n");
+        vTaskSuspend(NULL); // Kill this task
+      } else {
+        fprintf(stderr, "manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
+                id.manufacturer_id, id.device_id_1, id.device_id_2, id.extended_device_id);
+        // vTaskDelay(1000);
+      }
     }
+    xSemaphoreGive(spi_id_mutex_handler);
   }
 }
+
+// void spi_id_verification_task_2(void *p) { xSemaphoreGive(spi_id_mutex_handler); }
 
 #endif
 
@@ -604,18 +615,20 @@ int main(void) {
 #endif
 
 /// lab 5 part 1
-#if 1
+#if 0
   xTaskCreate(spi_task, "spi_id_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
 #endif
 
 /// lab 5 part 2
-#if 0
+#if 1
   // TODO: Initialize your SPI, its pins, Adesto flash CS GPIO etc...
-
+  spi_id_mutex_handler = xSemaphoreCreateMutex();
+  const uint32_t spi_clock_mhz = 24;
+  ssp2__lab_init(spi_clock_mhz);
   // Create two tasks that will continously read signature
-  xTaskCreate(spi_id_verification_task, ...);
-  xTaskCreate(spi_id_verification_task, ...);
+  xTaskCreate(spi_id_verification_task, "spi_id_guard1", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  // xTaskCreate(spi_id_verification_task_2, "spi_id_guard2", (512U * 4) / sizeof(void *), NULL, 1, NULL);
 
   vTaskStartScheduler();
 
