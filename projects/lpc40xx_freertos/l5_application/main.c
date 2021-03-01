@@ -470,7 +470,8 @@ void spi_id_verification_task(void *p) {
   }
 }
 
-/*void spi_id_verification_task_2(void *p) {
+/*
+void spi_id_verification_task_2(void *p) {
   while (1) {
     if (xSemaphoreTake(spi_id_mutex_handler, 1000)) {
       const adesto_flash_id_s id = adesto_read_signature();
@@ -487,7 +488,8 @@ void spi_id_verification_task(void *p) {
       xSemaphoreGive(spi_id_mutex_handler);
     }
   }
-}*/
+}
+*/
 
 // void spi_id_verification_task_2(void *p) { xSemaphoreGive(spi_id_mutex_handler); }
 
