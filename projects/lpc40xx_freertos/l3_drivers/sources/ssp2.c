@@ -7,6 +7,9 @@
 #include "lpc40xx.h"
 #include "lpc_peripherals.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 /**
  * These are the DMA request numbers that the hardware maps
  * See LPC40xx user manual, chapter: General Purpose DMA controller, Table 696: DMA connections
@@ -47,6 +50,36 @@ static ssp_dma_error_e ssp2__dma_transfer_block(unsigned char *buffer_pointer, u
  *                      P U B L I C    F U N C T I O N S
  *
  ******************************************************************************/
+
+void ssp2__lab_init(uint32_t max_clock_mhz) {
+  // Refer to LPC User manual and setup the register bits correctly
+  // a) Power on Peripheral
+  LPC_SC->PCONP |= (1 << 20); // power on SSP2
+  // LPC_SC->PCLKSEL = 4; //reset Peripheral Clock Selection register
+  // LPC_SC->PCLKSEL |= (0b10 < 0); // set Peripheral Clock /2 by default
+  // b) Setup control registers CR0 and CR1
+  LPC_SSP2->CR0 |= (7 << 0); // select data size for SSP2 as 8 bits
+  LPC_SSP2->CR1 |= (1 << 1); // enable SSP controller for SSP2
+  // c) Setup prescalar register to be <= max_clock_mhz
+  const uint32_t cur_cpu_clk_mhz = UINT32_C(96) * 1000 * 1000;
+  uint8_t devider_prescalar = 2;
+  while (max_clock_mhz < (cur_cpu_clk_mhz / devider_prescalar) && devider_prescalar <= 254) {
+    devider_prescalar += 2;
+  }
+  LPC_SSP2->CPSR = devider_prescalar;
+}
+
+uint8_t ssp2__lab_exchange_byte(uint8_t data_out) {
+  // if (LPC_SSP2->SR & (1 << 1)) { // test if Transmit FIFO is Full
+  LPC_SSP2->DR = data_out;
+  while (!(LPC_SSP2->SR & (1 << 2))) { // when Rx FIFO is empty, wait
+    ;                                  // Wait until SSP is busy
+  }
+  return (uint8_t)(LPC_SSP2->DR & 0xFF);
+  //} else {
+  // puts("cannot wirte to DR, because Transmit FIFO is not empty");
+  //}
+} /// Configure the Data register(DR) to send and receive data by checking the SPI peripheral status register
 
 void ssp2__initialize(uint32_t max_clock_khz) {
   lpc_peripheral__turn_on_power_to(LPC_PERIPHERAL__SSP2);

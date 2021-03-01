@@ -1,7 +1,16 @@
 #pragma once
 
+#include "gpio_lab.h"
 #include <stdint.h>
 #include <stdlib.h>
+
+// TODO: Study the Adesto flash 'Manufacturer and Device ID' section
+typedef struct {
+  uint8_t manufacturer_id;
+  uint8_t device_id_1;
+  uint8_t device_id_2;
+  uint8_t extended_device_id;
+} adesto_flash_id_s;
 
 /**
  * This configures what DMA channels the SSP2 driver utilizes
@@ -30,3 +39,12 @@ uint8_t ssp2__exchange_byte(uint8_t byte_to_transmit);
 void ssp2__dma_write_block(const unsigned char *output_block, size_t number_of_bytes);
 void ssp2__dma_read_block(unsigned char *input_block, size_t number_of_bytes);
 /** @} */
+void ssp2__lab_init(uint32_t max_clock_mhz);
+
+uint8_t ssp2__lab_exchange_byte(uint8_t data_out);
+
+// adesto_flash_id_s adesto_read_signature(void);
+
+// void adesto_cs(void);
+
+// void adesto_ds(void);

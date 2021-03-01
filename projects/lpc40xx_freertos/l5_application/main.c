@@ -14,6 +14,7 @@
 #include "pwm1.h"
 #include "queue.h"
 #include "sj2_cli.h"
+#include "ssp2.h"
 #include "task.h"
 
 /// 'static' to make these functions 'private' to this file
@@ -322,7 +323,7 @@ void adc_task(void *p) {
 #endif
 
 /// lab 4 part 2
-#if 1
+#if 0
 // This is the queue handle we will need for the xQueue Send/Receive API
 static QueueHandle_t adc_to_pwm_task_queue; // important
 void pin_configure_adc_channel_as_io_pin() {
@@ -410,6 +411,64 @@ void pwm_task(void *p) {
     }
     // We do not need task delay because our queue API will put task to sleep when there is no data in the queue
     // vTaskDelay(500);
+  }
+}
+#endif
+
+/// lab 5 part 0
+#if 0
+// function writen in SSP2.C and SSP2.h
+#endif
+
+/// lab 5 part 1
+#if 1
+
+// TODO: Implement Adesto flash memory CS signal as a GPIO driver
+port_pin_s cs_pin = {1, 10};
+void adesto_cs(void) {
+  gpiox__set_as_output(cs_pin);
+  gpiox__set_low(cs_pin); // activate flash
+}
+void adesto_ds(void) {
+  gpiox__set_high(cs_pin); // set CS to high to deactivate flash
+}
+// TODO: Implement the code to read Adesto flash memory signature
+// TODO: Create struct of type 'adesto_flash_id_s' and return it
+adesto_flash_id_s adesto_read_signature(void) {
+  adesto_flash_id_s data = {0};
+  adesto_cs();
+  // Send opcode and read bytes
+  ssp2__lab_exchange_byte(0x9F); // OP code for reading Manufacturer and Device ID
+  data.manufacturer_id = ssp2__lab_exchange_byte(0xFF);
+  data.device_id_1 = ssp2__lab_exchange_byte(0xFF);
+  data.device_id_2 = ssp2__lab_exchange_byte(0xFF);
+  data.extended_device_id = ssp2__lab_exchange_byte(0xFF);
+  // ssp2__lab_exchange_byte(0xFF);
+  // TODO: Populate members of the 'adesto_flash_id_s' struct
+  adesto_ds();
+  return data;
+}
+
+void spi_task(void *p) {
+  const uint32_t spi_clock_mhz = 24;
+  ssp2__lab_init(spi_clock_mhz);
+
+  // From the LPC schematics pdf, find the pin numbers connected to flash memory
+  // Read table 84 from LPC User Manual and configure PIN functions for SPI2 pins
+  // You can use gpio__construct_with_function() API from gpio.h
+  gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCTION_4); // enable SSP2_SCK
+  gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCTION_4); // enable SSP2_MOSI
+  gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCTION_4); // enable SSP2_MISO
+  // Note: Configure only SCK2, MOSI2, MISO2.
+  // CS will be a GPIO output pin(configure and setup direction)
+  // todo_configure_your_ssp2_pin_functions();
+
+  while (1) {
+    adesto_flash_id_s id = adesto_read_signature();
+    // TODO: printf the members of the 'adesto_flash_id_s' struct
+    fprintf(stderr, "manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n", id.manufacturer_id,
+            id.device_id_1, id.device_id_2, id.extended_device_id);
+    vTaskDelay(1000);
   }
 }
 #endif
@@ -540,12 +599,23 @@ int main(void) {
 #endif
 
 /// lab 4 part 2
-#if 1
+#if 0
   // Queue will only hold 1 integer
   adc_to_pwm_task_queue = xQueueCreate(1, sizeof(int)); // important to do this initailize step
 
   xTaskCreate(adc_task, "adc_task_sending_to_pwm", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(pwm_task, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
+#endif
+
+/// lab 5 part 0
+#if 0
+// function writen in SSP2.C and SSP2.h
+#endif
+
+/// lab 5 part 1
+#if 1
+  xTaskCreate(spi_task, "spi_id_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
 #endif
 }
