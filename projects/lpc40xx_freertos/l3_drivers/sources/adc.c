@@ -56,6 +56,7 @@ uint16_t adc__get_adc_value(adc_channel_e channel_num) {
  * set the relevant bits in Control Register (CR) to enable burst mode.
  */
 void adc__enable_burst_mode(bool mode) {
+  LPC_ADC->CR &= ~((1 << 24) | (1 << 25) | (1 << 26)); // start conviersion
   if (mode == 1) {
     LPC_ADC->CR |= (1 << 16);
   } else {
@@ -74,6 +75,7 @@ void adc__enable_burst_mode(bool mode) {
 uint16_t adc__get_channel_reading_with_burst_mode(uint8_t channel_number) {
   uint16_t reading = 0;
   const uint16_t twelve_bits = 0x0FFF;
+  const uint32_t start_conversion_mask = (0 << 24); // 3bits - B26:B25:B24
   if ((ADC__CHANNEL_2 == channel_number) || (ADC__CHANNEL_4 == channel_number) || (ADC__CHANNEL_5 == channel_number)) {
     reading = (LPC_ADC->DR[channel_number] >> 4) & twelve_bits; // the result is stored from bit4 to bit 15
   }

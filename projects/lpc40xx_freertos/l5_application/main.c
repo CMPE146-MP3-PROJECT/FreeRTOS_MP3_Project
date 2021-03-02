@@ -293,9 +293,10 @@ void main_func(void *p) {
 /// lab 4 part 1
 #if 0
 void pin_configure_adc_channel_as_io_pin() {
+  LPC_IOCON->P1_31 &= ~(1 << 7); // set pin to Analog mode
   LPC_IOCON->P1_31 &= ~(7 << 0); // reset IOCON mux
-  LPC_IOCON->P1_31 &= (3 << 0); // route this pin as ADC channel 5
-                                // gpio__construct_with_function(GPIO__PORT_1, 31, 1); ///LPC_IOCON->P1_31 &= ~(1 << 7);
+  LPC_IOCON->P1_31 &= (3 << 0);  // route this pin as ADC channel 5
+  // gpio__construct_with_function(GPIO__PORT_1, 31, GPIO__FUNCTION_3); /// LPC_IOCON->P1_31 &= ~(1 << 7);
 }
 void adc_task(void *p) {
   adc__initialize();
@@ -327,16 +328,17 @@ void adc_task(void *p) {
 // This is the queue handle we will need for the xQueue Send/Receive API
 static QueueHandle_t adc_to_pwm_task_queue; // important
 void pin_configure_adc_channel_as_io_pin() {
+  LPC_IOCON->P1_31 &= ~(1 << 7); // set pin to Analog mode
   LPC_IOCON->P1_31 &= ~(7 << 0); // reset IOCON mux
   LPC_IOCON->P1_31 &= (3 << 0);  // route this pin as ADC channel 5
-                                // gpio__construct_with_function(GPIO__PORT_1, 31, 1); ///LPC_IOCON->P1_31 &= ~(1 << 7);
+  // gpio__construct_with_function(GPIO__PORT_1, 31, GPIO__FUNCTION_3); /// LPC_IOCON->P1_31 &= ~(1 << 7);
 }
 void adc_task(void *p) {
   // NOTE: Reuse the code from Part 1
   adc__initialize();
   adc__enable_burst_mode(1);
-  adc__set_active_channel(ADC__CHANNEL_5);
   pin_configure_adc_channel_as_io_pin();
+  adc__set_active_channel(ADC__CHANNEL_5);
   int adc_reading = 0; // Note that this 'adc_reading' is not the same variable as the one from adc_task
   while (1) {
     // Implement code to send potentiometer value on the queue
@@ -352,13 +354,16 @@ void pwm_task(void *p) {
   // NOTE: Reuse the code from Part 0
   pwm1__init_single_edge(1000);
   gpio__construct_with_function(GPIO__PORT_2, 0, 1);
+  LPC_IOCON->P2_0 &= ~(1 << 7);
   pwm1__set_duty_cycle(PWM1__2_0, 10);
   // uint8_t percent = 0;
   int adc_reading = 0;
 
   /// extra credit light up RGB LED
   gpio__construct_with_function(GPIO__PORT_2, 1, 1); // configure LPC_P2_1 to be PWN
+  LPC_IOCON->P2_1 &= ~(1 << 7);                      // set pin to Analog mode
   gpio__construct_with_function(GPIO__PORT_2, 2, 1); // configure LPC_P2_2 to be PWN
+  LPC_IOCON->P2_2 &= ~(1 << 7);                      // set pin to Analog mode
   pwm1__set_duty_cycle(PWM1__2_1, 10);
   pwm1__set_duty_cycle(PWM1__2_2, 10); // configure duty cycle
   static double red = 0, green = 0, blue = 0;
@@ -399,8 +404,8 @@ void pwm_task(void *p) {
                  255, 255, 255, 255, 255, 240, 220, 200, 180, 160, 140, 120, 100, 80,  60,  40,  20,
                  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
       red = (R[duty] / 255) * 100;
-      red = (G[duty] / 255) * 100;
-      red = (B[duty] / 255) * 100;
+      green = (G[duty] / 255) * 100;
+      blue = (B[duty] / 255) * 100;
       fprintf(stderr, " duty number is: %.2d\n", duty);*/
       fprintf(stderr, " current duty cycle is: %.2f%%, R:%.2f, G:%.2f, B:%.2f\n", percent, red, green, blue);
       pwm1__set_duty_cycle(PWM1__2_0, red);
@@ -424,7 +429,7 @@ void pwm_task(void *p) {
 #if 0
 
 void spi_task(void *p) {
-  const uint32_t spi_clock_mhz = 24;
+  const uint32_t spi_clock_mhz = 12;
   ssp2__lab_init(spi_clock_mhz);
 
   // From the LPC schematics pdf, find the pin numbers connected to flash memory

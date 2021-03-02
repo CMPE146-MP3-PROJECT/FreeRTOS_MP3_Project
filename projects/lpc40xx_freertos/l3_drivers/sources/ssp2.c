@@ -52,12 +52,16 @@ static ssp_dma_error_e ssp2__dma_transfer_block(unsigned char *buffer_pointer, u
  ******************************************************************************/
 // TODO: Implement Adesto flash memory CS signal as a GPIO driver
 port_pin_s cs_pin = {1, 10};
+port_pin_s cs_pin_mirror = {0, 6};
 void adesto_cs(void) {
   gpiox__set_as_output(cs_pin);
+  gpiox__set_as_output(cs_pin_mirror);
   gpiox__set_low(cs_pin); // activate flash
+  gpiox__set_low(cs_pin_mirror);
 }
 void adesto_ds(void) {
   gpiox__set_high(cs_pin); // set CS to high to deactivate flash
+  gpiox__set_high(cs_pin_mirror);
 }
 // TODO: Implement the code to read Adesto flash memory signature
 // TODO: Create struct of type 'adesto_flash_id_s' and return it
