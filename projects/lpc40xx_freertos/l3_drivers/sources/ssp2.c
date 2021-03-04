@@ -101,8 +101,9 @@ void ssp2__lab_init(uint32_t max_clock_mhz) {
 uint8_t ssp2__lab_exchange_byte(uint8_t data_out) {
   // if (LPC_SSP2->SR & (1 << 1)) { // test if Transmit FIFO is Full
   LPC_SSP2->DR = data_out;
-  while (!(LPC_SSP2->SR & (1 << 2))) { // when Rx FIFO is empty, wait
-    ;                                  // Wait until SSP is busy
+  while (LPC_SSP2->SR & (1 << 4)) {
+    // while (!(LPC_SSP2->SR & (1 << 2))) { // when Rx FIFO is empty, wait
+    ; // Wait until SSP is busy
   }
   return (uint8_t)(LPC_SSP2->DR & 0xFF);
   //} else {
@@ -110,6 +111,75 @@ uint8_t ssp2__lab_exchange_byte(uint8_t data_out) {
   //}
 } /// Configure the Data register(DR) to send and receive data by checking the SPI peripheral status register
 
+/**
+ * Adesto flash asks to send 24-bit address
+ * We can use our usual uint32_t to store the address
+ * and then transmit this address over the SPI driver
+ * one byte at a time
+ */
+void adesto_flash_send_address(uint32_t address) {
+  ssp2__lab_exchange_byte((address >> 16) & 0xFF);
+  ssp2__lab_exchange_byte((address >> 8) & 0xFF);
+  ssp2__lab_exchange_byte((address >> 0) & 0xFF);
+}
+
+void adesto_write_enable(void) {
+  adesto_cs();
+  ssp2__lab_exchange_byte(0x06); // write enable Protection Commands from datasheet pg.6
+  adesto_ds();
+}
+
+void adesto_write_disable(void) {
+  adesto_cs();
+  ssp2__lab_exchange_byte(0x04); // write disable Protection Commands from datasheet pg.6
+  adesto_ds();
+}
+
+uint8_t adesto_read_arrary(uint32_t address) {
+  // adesto_cs();
+  ssp2__lab_exchange_byte(0x0B); // read array command word
+  ssp2__lab_exchange_byte((address >> 16) & 0xFF);
+  ssp2__lab_exchange_byte((address >> 8) & 0xFF);
+  ssp2__lab_exchange_byte((address >> 0) & 0xFF); // no data out, inputing 24 bits address
+  ssp2__lab_exchange_byte(0xFF);
+  // vTaskDelay(1);
+  // uint8_t data_output = ssp2__lab_exchange_byte(0xFF); // 8 bit don't care and then data out
+  // adesto_ds();
+  // return data_output;
+}
+
+void flash_erase_page(uint32_t address) {
+  adesto_cs();
+  ssp2__lab_exchange_byte(0x81); // page erase command word
+  ssp2__lab_exchange_byte((address >> 16) & 0xFF);
+  ssp2__lab_exchange_byte((address >> 8) & 0xFF);
+  ssp2__lab_exchange_byte((address >> 0) & 0xFF); // input 24 bits address, figure 8-3
+  adesto_ds();
+}
+
+void write_to_flash_8bitdata(uint32_t address, uint8_t data_in) {
+  adesto_cs();
+  ssp2__lab_exchange_byte(0x02);                   // write page program
+  ssp2__lab_exchange_byte((address >> 16) & 0xFF); // High address
+  ssp2__lab_exchange_byte((address >> 8) & 0xFF);  // middle address
+  ssp2__lab_exchange_byte((address >> 0) & 0xFF);  // low address
+  for (int i = 1; i < 10; i++) {
+    ssp2__lab_exchange_byte(data_in); // input data
+  }
+  adesto_ds();
+}
+
+uint8_t adesto_read_status() {
+  int8_t status;
+  adesto_cs();                            // chip sel to flash
+  ssp2__lab_exchange_byte(0x05);          // send opcode, wait state before geting right data
+  status = ssp2__lab_exchange_byte(0xFF); // read manufacture_id
+  ssp2__lab_exchange_byte(0xFF);
+
+  adesto_ds(); // deselect the flash
+
+  return status;
+}
 void ssp2__initialize(uint32_t max_clock_khz) {
   lpc_peripheral__turn_on_power_to(LPC_PERIPHERAL__SSP2);
 

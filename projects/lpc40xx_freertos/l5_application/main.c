@@ -453,7 +453,7 @@ void spi_task(void *p) {
 #endif
 
 /// lab 5 part 2
-#if 1
+#if 0
 xSemaphoreHandle spi_id_mutex_handler;
 
 void spi_id_verification_task(void *p) {
@@ -498,6 +498,62 @@ void spi_id_verification_task_2(void *p) {
 
 // void spi_id_verification_task_2(void *p) { xSemaphoreGive(spi_id_mutex_handler); }
 
+#endif
+
+/// lab 5 part 3 (extra credit)
+#if 1
+void spi_flash_read_page(void) {
+  const uint32_t spi_clock_mhz = 12;
+  ssp2__lab_init(spi_clock_mhz);
+  gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCTION_4); // enable SSP2_SCK
+  gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCTION_4); // enable SSP2_MOSI
+  gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCTION_4); // enable SSP2_MISO
+
+  uint32_t data_address = 0x007E00;
+  uint32_t input_data = 0xAA;
+
+  while (1) {
+    const adesto_flash_id_s id = adesto_read_signature();
+
+    // When we read a manufacturer ID we do not expect, we will kill this task
+    if (id.manufacturer_id != 0x1F) {
+      fprintf(stderr, "Manufacturer ID read failure\n");
+      vTaskSuspend(NULL); // Kill this task
+    } else {
+      fprintf(stderr, "manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
+              id.manufacturer_id, id.device_id_1, id.device_id_2, id.extended_device_id);
+      // adesto_cs();
+      flash_erase_page(data_address);
+      vTaskDelay(1);
+
+      // adesto_cs();
+      adesto_write_enable();
+
+      uint8_t status;
+      status = adesto_read_status();
+      fprintf(stderr, "device status is: %p \n", status);
+
+      write_to_flash_8bitdata(data_address, input_data);
+      // vTaskDelay(1);
+      // ssp2__lab_exchange_byte(input_data);
+      adesto_write_disable();
+      // adesto_ds();
+      fprintf(stderr, "data write to location 0x%X is: %p\n", data_address, input_data);
+
+      adesto_cs();
+      adesto_read_arrary(data_address);
+      // vTaskDelay(1);
+      uint8_t array_read_1 = ssp2__lab_exchange_byte(0xFF);
+      uint8_t array_read_2 = ssp2__lab_exchange_byte(0xFF);
+      adesto_ds();
+      fprintf(stderr, "data read from location 0x%X is: %p, %p\n", data_address, array_read_1, array_read_2);
+      // fprintf(stderr, "data read from location is: %p\n", array_read);
+      vTaskDelay(1000);
+    }
+  }
+}
+
+//}
 #endif
 
 int main(void) {
@@ -647,7 +703,7 @@ int main(void) {
 #endif
 
 /// lab 5 part 2
-#if 1
+#if 0
   // TODO: Initialize your SPI, its pins, Adesto flash CS GPIO etc...
   spi_id_mutex_handler = xSemaphoreCreateMutex();
   const uint32_t spi_clock_mhz_part2 = 24;
@@ -658,5 +714,11 @@ int main(void) {
 
   vTaskStartScheduler();
 
+#endif
+
+/// lab 5 part 3 (extra credit)
+#if 1
+  xTaskCreate(spi_flash_read_page, "spi_id_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
 #endif
 }

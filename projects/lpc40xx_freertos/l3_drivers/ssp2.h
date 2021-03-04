@@ -48,3 +48,17 @@ adesto_flash_id_s adesto_read_signature(void);
 void adesto_cs(void);
 
 void adesto_ds(void);
+
+void adesto_flash_send_address(uint32_t address);
+
+void adesto_write_enable(void);
+
+void adesto_write_disable(void);
+
+uint8_t adesto_read_arrary(uint32_t address);
+
+void flash_erase_page(uint32_t address);
+
+void write_to_flash_8bitdata(uint32_t address, uint8_t data_in);
+
+uint8_t adesto_read_status();
