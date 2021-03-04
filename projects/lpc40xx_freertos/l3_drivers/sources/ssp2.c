@@ -135,7 +135,7 @@ void adesto_write_disable(void) {
   adesto_ds();
 }
 
-uint8_t adesto_read_arrary(uint32_t address) {
+uint8_t adesto_read_arrary_address_input(uint32_t address) {
   // adesto_cs();
   ssp2__lab_exchange_byte(0x0B); // read array command word
   ssp2__lab_exchange_byte((address >> 16) & 0xFF);
@@ -157,13 +157,13 @@ void flash_erase_page(uint32_t address) {
   adesto_ds();
 }
 
-void write_to_flash_8bitdata(uint32_t address, uint8_t data_in) {
+void write_to_flash_8bitdata(uint32_t address, uint8_t data_in, int times) {
   adesto_cs();
   ssp2__lab_exchange_byte(0x02);                   // write page program
   ssp2__lab_exchange_byte((address >> 16) & 0xFF); // High address
   ssp2__lab_exchange_byte((address >> 8) & 0xFF);  // middle address
   ssp2__lab_exchange_byte((address >> 0) & 0xFF);  // low address
-  for (int i = 1; i < 10; i++) {
+  for (int i = 0; i < times; i++) {
     ssp2__lab_exchange_byte(data_in); // input data
   }
   adesto_ds();

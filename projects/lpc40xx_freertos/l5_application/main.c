@@ -511,6 +511,7 @@ void spi_flash_read_page(void) {
 
   uint32_t data_address = 0x007E00;
   uint32_t input_data = 0xAA;
+  int write_times = 10;
 
   while (1) {
     const adesto_flash_id_s id = adesto_read_signature();
@@ -531,22 +532,29 @@ void spi_flash_read_page(void) {
 
       uint8_t status;
       status = adesto_read_status();
-      fprintf(stderr, "device status is: %p \n", status);
+      fprintf(stderr, "device status is: 0x%X \n", status);
 
-      write_to_flash_8bitdata(data_address, input_data);
+      write_to_flash_8bitdata(data_address, input_data, write_times);
       // vTaskDelay(1);
       // ssp2__lab_exchange_byte(input_data);
       adesto_write_disable();
       // adesto_ds();
-      fprintf(stderr, "data write to location 0x%X is: %p\n", data_address, input_data);
+      fprintf(stderr, "data write start from location 0x%X is: 0x%X, for %d times\n", data_address, input_data,
+              write_times);
 
+      // start to read the flash
       adesto_cs();
-      adesto_read_arrary(data_address);
+      adesto_read_arrary_address_input(data_address);
       // vTaskDelay(1);
-      uint8_t array_read_1 = ssp2__lab_exchange_byte(0xFF);
-      uint8_t array_read_2 = ssp2__lab_exchange_byte(0xFF);
+      uint8_t result_arrary[10];
+      for (int i = 0; i < 10; i++) {
+        result_arrary[i] = ssp2__lab_exchange_byte(0xFF);
+      }
       adesto_ds();
-      fprintf(stderr, "data read from location 0x%X is: %p, %p\n", data_address, array_read_1, array_read_2);
+      fprintf(stderr, "data read from location 0x%X is: 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X\n",
+              data_address, result_arrary[0], result_arrary[1], result_arrary[2], result_arrary[3], result_arrary[4],
+              result_arrary[5], result_arrary[6], result_arrary[7], result_arrary[8], result_arrary[9]);
+      fprintf(stderr, " \n");
       // fprintf(stderr, "data read from location is: %p\n", array_read);
       vTaskDelay(1000);
     }
