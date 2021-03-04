@@ -27,8 +27,6 @@
 // static const uint32_t pin26 = (1 << 26); // 0x02000000? LED1后面写了: P2_3; LED2后面写了: P1_26
 static SemaphoreHandle_t switch_press_indication;
 static SemaphoreHandle_t switch_pressed_signal;
-static SemaphoreHandle_t switch_pressed_signal_hw3_part2_30;
-static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
 
 /// lab 2 part 0
 #if 0
@@ -209,6 +207,8 @@ void sleep_on_sem_task(void *p) {
 
 /// lab 3 part 2
 #if 0
+static SemaphoreHandle_t switch_pressed_signal_hw3_part2_30;
+static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
 void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); }
 void gpio_interrupt_part2_1(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL); }
 void pin30_isr(void *p) {
@@ -546,7 +546,7 @@ void spi_flash_read_page(void) {
       adesto_cs();
       adesto_read_arrary_address_input(data_address);
       // vTaskDelay(1);
-      uint8_t result_arrary[10];
+      int result_arrary[10];
       for (int i = 0; i < 10; i++) {
         result_arrary[i] = ssp2__lab_exchange_byte(0xFF);
       }
