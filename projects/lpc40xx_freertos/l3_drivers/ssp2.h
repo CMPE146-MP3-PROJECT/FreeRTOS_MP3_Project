@@ -55,9 +55,10 @@ void adesto_write_enable(void);
 
 void adesto_write_disable(void);
 
-uint8_t adesto_read_arrary_address_input(uint32_t address);
+uint8_t *adesto_read_arrary_address_input(uint32_t address);
 
 void flash_erase_page(uint32_t address);
+void flash_erase_chip(void);
 
 void write_to_flash_8bitdata(uint32_t address, uint8_t data_in, int times);
 

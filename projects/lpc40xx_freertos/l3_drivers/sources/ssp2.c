@@ -1,5 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "ssp2.h"
 
@@ -135,17 +137,19 @@ void adesto_write_disable(void) {
   adesto_ds();
 }
 
-uint8_t adesto_read_arrary_address_input(uint32_t address) {
-  // adesto_cs();
+uint8_t *adesto_read_arrary_address_input(uint32_t address) {
+  adesto_cs();
   ssp2__lab_exchange_byte(0x0B); // read array command word
   ssp2__lab_exchange_byte((address >> 16) & 0xFF);
   ssp2__lab_exchange_byte((address >> 8) & 0xFF);
   ssp2__lab_exchange_byte((address >> 0) & 0xFF); // no data out, inputing 24 bits address
   ssp2__lab_exchange_byte(0xFF);
-  // vTaskDelay(1);
-  // uint8_t data_output = ssp2__lab_exchange_byte(0xFF); // 8 bit don't care and then data out
-  // adesto_ds();
-  // return data_output;
+  uint8_t *result_arrary = malloc(10);
+  for (int i = 0; i < 10; i++) {
+    result_arrary[i] = ssp2__lab_exchange_byte(0xFF);
+  }
+  adesto_ds();
+  return result_arrary;
 }
 
 void flash_erase_page(uint32_t address) {
@@ -155,6 +159,14 @@ void flash_erase_page(uint32_t address) {
   ssp2__lab_exchange_byte((address >> 8) & 0xFF);
   ssp2__lab_exchange_byte((address >> 0) & 0xFF); // input 24 bits address, figure 8-3
   adesto_ds();
+  vTaskDelay(27);
+}
+
+void flash_erase_chip(void) {
+  adesto_cs();
+  ssp2__lab_exchange_byte(0x60);
+  adesto_ds();
+  vTaskDelay(352); // maximum delaytime for Tpe (page erase)
 }
 
 void write_to_flash_8bitdata(uint32_t address, uint8_t data_in, int times) {
@@ -167,6 +179,7 @@ void write_to_flash_8bitdata(uint32_t address, uint8_t data_in, int times) {
     ssp2__lab_exchange_byte(data_in); // input data
   }
   adesto_ds();
+  vTaskDelay(1);
 }
 
 uint8_t adesto_read_status() {

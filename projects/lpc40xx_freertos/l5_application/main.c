@@ -509,11 +509,12 @@ void spi_flash_read_page(void) {
   gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCTION_4); // enable SSP2_MOSI
   gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCTION_4); // enable SSP2_MISO
 
-  uint32_t data_address = 0x007E00;
-  uint32_t input_data = 0xAA;
+  uint32_t data_address = 0x005C00;
+  uint32_t input_data = 0x88;
   int write_times = 10;
 
   while (1) {
+    // delay__ms(10);
     const adesto_flash_id_s id = adesto_read_signature();
 
     // When we read a manufacturer ID we do not expect, we will kill this task
@@ -524,12 +525,13 @@ void spi_flash_read_page(void) {
       fprintf(stderr, "manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
               id.manufacturer_id, id.device_id_1, id.device_id_2, id.extended_device_id);
       // adesto_cs();
-      flash_erase_page(data_address);
-      vTaskDelay(1);
 
       // adesto_cs();
       adesto_write_enable();
+      vTaskDelay(1);
 
+      // flash_erase_chip();
+      // flash_erase_page(data_address);
       uint8_t status;
       status = adesto_read_status();
       fprintf(stderr, "device status is: 0x%X \n", status);
@@ -538,19 +540,19 @@ void spi_flash_read_page(void) {
       // vTaskDelay(1);
       // ssp2__lab_exchange_byte(input_data);
       adesto_write_disable();
-      // adesto_ds();
+      vTaskDelay(1);
       fprintf(stderr, "data write start from location 0x%X is: 0x%X, for %d times\n", data_address, input_data,
               write_times);
 
+      uint8_t status_0;
+      status_0 = adesto_read_status();
+      fprintf(stderr, "device status is: 0x%X \n", status_0);
+
       // start to read the flash
-      adesto_cs();
-      adesto_read_arrary_address_input(data_address);
+      // adesto_cs();
+      uint8_t *result_arrary = adesto_read_arrary_address_input(data_address);
       // vTaskDelay(1);
-      int result_arrary[10];
-      for (int i = 0; i < 10; i++) {
-        result_arrary[i] = ssp2__lab_exchange_byte(0xFF);
-      }
-      adesto_ds();
+      // adesto_ds();
       fprintf(stderr, "data read from location 0x%X is: 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X\n",
               data_address, result_arrary[0], result_arrary[1], result_arrary[2], result_arrary[3], result_arrary[4],
               result_arrary[5], result_arrary[6], result_arrary[7], result_arrary[8], result_arrary[9]);
