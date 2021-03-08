@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gpio.h"
 #include "gpio_lab.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -40,6 +41,8 @@ void ssp2__dma_write_block(const unsigned char *output_block, size_t number_of_b
 void ssp2__dma_read_block(unsigned char *input_block, size_t number_of_bytes);
 /** @} */
 void ssp2__lab_init(uint32_t max_clock_mhz);
+
+void ssp2__init_spi_pins(void);
 
 uint8_t ssp2__lab_exchange_byte(uint8_t data_out);
 

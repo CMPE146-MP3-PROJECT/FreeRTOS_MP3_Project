@@ -435,9 +435,7 @@ void spi_task(void *p) {
   // From the LPC schematics pdf, find the pin numbers connected to flash memory
   // Read table 84 from LPC User Manual and configure PIN functions for SPI2 pins
   // You can use gpio__construct_with_function() API from gpio.h
-  gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCTION_4); // enable SSP2_SCK
-  gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCTION_4); // enable SSP2_MOSI
-  gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCTION_4); // enable SSP2_MISO
+  ssp2__init_spi_pins();
   // Note: Configure only SCK2, MOSI2, MISO2.
   // CS will be a GPIO output pin(configure and setup direction)
   // todo_configure_your_ssp2_pin_functions();
@@ -463,7 +461,7 @@ void spi_id_verification_task(void *p) {
 
       // When we read a manufacturer ID we do not expect, we will kill this task
       if (id.manufacturer_id != 0x1F) {
-        fprintf(stderr, "Manufacturer ID read failure\n");
+        fprintf(stderr, "Manufacturer ID read failure :( \n");
         vTaskSuspend(NULL); // Kill this task
       } else {
         fprintf(stderr, "guard active: manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
@@ -502,15 +500,14 @@ void spi_id_verification_task_2(void *p) {
 
 /// lab 5 part 3 (extra credit)
 #if 1
+
 void spi_flash_read_page(void) {
   const uint32_t spi_clock_mhz = 12;
   ssp2__lab_init(spi_clock_mhz);
-  gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCTION_4); // enable SSP2_SCK
-  gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCTION_4); // enable SSP2_MOSI
-  gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCTION_4); // enable SSP2_MISO
+  ssp2__init_spi_pins();
 
   uint32_t data_address = 0x005C00;
-  uint32_t input_data = 0x88;
+  uint8_t input_data = 0xBB;
   int write_times = 10;
 
   while (1) {
@@ -531,7 +528,11 @@ void spi_flash_read_page(void) {
       vTaskDelay(1);
 
       // flash_erase_chip();
-      // flash_erase_page(data_address);
+      flash_erase_page(data_address);
+
+      adesto_write_enable();
+      vTaskDelay(1);
+
       uint8_t status;
       status = adesto_read_status();
       fprintf(stderr, "device status is: 0x%X \n", status);
@@ -553,7 +554,8 @@ void spi_flash_read_page(void) {
       uint8_t *result_arrary = adesto_read_arrary_address_input(data_address);
       // vTaskDelay(1);
       // adesto_ds();
-      fprintf(stderr, "data read from location 0x%X is: 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X\n",
+      fprintf(stderr,
+              "data read start from location 0x%X is: 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X\n",
               data_address, result_arrary[0], result_arrary[1], result_arrary[2], result_arrary[3], result_arrary[4],
               result_arrary[5], result_arrary[6], result_arrary[7], result_arrary[8], result_arrary[9]);
       fprintf(stderr, " \n");

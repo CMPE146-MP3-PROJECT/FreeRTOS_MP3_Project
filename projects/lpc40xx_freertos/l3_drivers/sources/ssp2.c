@@ -78,9 +78,21 @@ adesto_flash_id_s adesto_read_signature(void) {
   data.extended_device_id = ssp2__lab_exchange_byte(0xFF);
   // ssp2__lab_exchange_byte(0xFF);
   // TODO: Populate members of the 'adesto_flash_id_s' struct
+  // vTaskDelay(10);
   adesto_ds();
   return data;
 }
+
+/*
+adesto_flash_id_s adesto_read_signature(void) {
+  adesto_cs();
+  ssp2__lab_exchange_byte(0x9F)；
+  ssp2__lab_exchange_byte(0xFF);
+  ssp2__lab_exchange_byte(0xFF);
+  ssp2__lab_exchange_byte(0xFF);
+  ssp2__lab_exchange_byte(0xFF);
+  adesto_ds();
+}*/
 
 void ssp2__lab_init(uint32_t max_clock_mhz) {
   // Refer to LPC User manual and setup the register bits correctly
@@ -100,9 +112,20 @@ void ssp2__lab_init(uint32_t max_clock_mhz) {
   LPC_SSP2->CPSR = devider_prescalar;
 }
 
+void ssp2__init_spi_pins(void) {
+  gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCITON_0_IO_PIN);
+  gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCTION_4); // enable SSP2_SCK
+
+  gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCITON_0_IO_PIN);
+  gpio__construct_with_function(GPIO__PORT_1, 1, GPIO__FUNCTION_4); // enable SSP2_MOSI
+
+  gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCITON_0_IO_PIN);
+  gpio__construct_with_function(GPIO__PORT_1, 4, GPIO__FUNCTION_4); // enable SSP2_MISO
+}
+
 uint8_t ssp2__lab_exchange_byte(uint8_t data_out) {
   // if (LPC_SSP2->SR & (1 << 1)) { // test if Transmit FIFO is Full
-  LPC_SSP2->DR = data_out;
+  LPC_SSP2->DR = data_out; // 给DR写数据
   while (LPC_SSP2->SR & (1 << 4)) {
     // while (!(LPC_SSP2->SR & (1 << 2))) { // when Rx FIFO is empty, wait
     ; // Wait until SSP is busy
