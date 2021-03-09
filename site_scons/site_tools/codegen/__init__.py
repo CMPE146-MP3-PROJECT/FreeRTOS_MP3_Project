@@ -48,7 +48,7 @@ def database_code_generator_method(env, source, target, node_name=None):
 
         command = [
             "python",
-            DBC_TO_C_PY.abspath,
+            "\"{}\"".format(DBC_TO_C_PY),
             "--dbc=$SOURCE",
             "--output=$TARGET",
         ]
