@@ -8,6 +8,10 @@
         "portable.h": "c",
         "stdint.h": "c",
         "lpc40xx.h": "c",
-        "lpc_peripherals.h": "c"
+        "lpc_peripherals.h": "c",
+        "uart_lab.h": "c",
+        "cstdio": "c",
+        "*.def": "c",
+        "charconv": "c"
     }
 }

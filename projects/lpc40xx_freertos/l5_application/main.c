@@ -16,7 +16,7 @@
 #include "sj2_cli.h"
 #include "ssp2.h"
 #include "task.h"
-
+#include "uart_lab.h"
 /// 'static' to make these functions 'private' to this file
 // static void create_blinky_tasks(void);
 // static void create_uart_task(void);
@@ -464,7 +464,7 @@ void spi_id_verification_task(void *p) {
         fprintf(stderr, "Manufacturer ID read failure :( \n");
         vTaskSuspend(NULL); // Kill this task
       } else {
-        fprintf(stderr, "guard active: manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
+        fprintf(stderr, "task 1 active: manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
                 id.manufacturer_id, id.device_id_1, id.device_id_2, id.extended_device_id);
         // vTaskDelay(1000);
       }
@@ -473,7 +473,6 @@ void spi_id_verification_task(void *p) {
   }
 }
 
-/*
 void spi_id_verification_task_2(void *p) {
   while (1) {
     if (xSemaphoreTake(spi_id_mutex_handler, 1000)) {
@@ -484,7 +483,7 @@ void spi_id_verification_task_2(void *p) {
         fprintf(stderr, "Manufacturer ID read failure\n");
         vTaskSuspend(NULL); // Kill this task
       } else {
-        fprintf(stderr, "guard 2 active: manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
+        fprintf(stderr, "task 2 active: manufacturer_id: %p, device_id1: %p, device_id2: %p, external_device_id: %p\n",
                 id.manufacturer_id, id.device_id_1, id.device_id_2, id.extended_device_id);
         // vTaskDelay(1000);
       }
@@ -492,14 +491,13 @@ void spi_id_verification_task_2(void *p) {
     }
   }
 }
-*/
 
 // void spi_id_verification_task_2(void *p) { xSemaphoreGive(spi_id_mutex_handler); }
 
 #endif
 
 /// lab 5 part 3 (extra credit)
-#if 1
+#if 0
 
 void spi_flash_read_page(void) {
   const uint32_t spi_clock_mhz = 12;
@@ -507,7 +505,7 @@ void spi_flash_read_page(void) {
   ssp2__init_spi_pins();
 
   uint32_t data_address = 0x005C00;
-  uint8_t input_data = 0xBB;
+  uint8_t input_data = 0xC1;
   int write_times = 10;
 
   while (1) {
@@ -566,6 +564,30 @@ void spi_flash_read_page(void) {
 }
 
 //}
+#endif
+
+/// lab 6 part 1
+#if 1
+void uart_read_task(void *p) {
+  while (1) {
+    // TODO: Use uart_lab__polled_get() function and printf the received value
+    char data_read_from_poll = 'a';
+    vTaskDelay(100);
+    uint8_t as;
+    uart_lab__polled_get(UART_3, &data_read_from_poll);
+    fprintf(stderr, "data read from UART poll is: %c \n", data_read_from_poll);
+    vTaskDelay(500);
+  }
+}
+
+void uart_write_task(void *p) {
+  while (1) {
+    // TODO: Use uart_lab__polled_put() function and send a value
+    char data_write_to_poll = 'D';
+    uart_lab__polled_put(UART_2, data_write_to_poll);
+    vTaskDelay(500);
+  }
+}
 #endif
 
 int main(void) {
@@ -722,15 +744,37 @@ int main(void) {
   ssp2__lab_init(spi_clock_mhz_part2);
   // Create two tasks that will continously read signature
   xTaskCreate(spi_id_verification_task, "spi_id_guard1", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  xTaskCreate(spi_id_verification_task, "spi_id_guard2", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(spi_id_verification_task_2, "spi_id_guard2", (512U * 4) / sizeof(void *), NULL, 1, NULL);
 
   vTaskStartScheduler();
 
 #endif
 
 /// lab 5 part 3 (extra credit)
-#if 1
+#if 0
   xTaskCreate(spi_flash_read_page, "spi_id_task", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
+#endif
+
+/// lab 6 part 1
+#if 1
+  // TODO: Use uart_lab__init() function and initialize UART2 or UART3 (your choice)
+  // TODO: Pin Configure IO pins to perform UART2/UART3 function
+  fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
+  const uint32_t peripheral_clock = clock__get_peripheral_clock_hz;
+  uart_lab__init(UART_2, peripheral_clock, 9600);
+  uart_lab__init(UART_3, peripheral_clock, 9600);
+  fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
+
+  gpio__construct_with_function(GPIO__PORT_0, 10, GPIO__FUNCTION_1); // U2_TXD
+  // gpio__construct_with_function(GPIO__PORT_0, 11, GPIO__FUNCTION_1); // U2_RXD
+
+  // gpio__construct_with_function(GPIO__PORT_0, 0, GPIO__FUNCTION_2); // U3_TXD
+  gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCTION_2); // U3_RXD
+
+  xTaskCreate(uart_read_task, "uart_read", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(uart_write_task, "uart_write", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+
   vTaskStartScheduler();
 #endif
 }
