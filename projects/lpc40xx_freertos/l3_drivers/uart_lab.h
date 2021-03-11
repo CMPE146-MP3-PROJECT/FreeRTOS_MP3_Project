@@ -4,6 +4,7 @@
 #include "gpio.h"
 #include "gpio_lab.h"
 #include "lpc40xx.h"
+#include "lpc_peripherals.h"
 #include "queue.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -19,10 +20,10 @@ void uart_lab__init(uart_number_e uart, uint32_t peripheral_clock, uint32_t baud
 bool uart_lab__polled_get(uart_number_e uart, char *input_byte);
 
 bool uart_lab__polled_put(uart_number_e uart, char output_byte);
-/*
-static void your_receive_interrupt(void);
+
+static void richie_receive_interrupt_u2(void);
+static void richie_receive_interrupt_u3(void);
 
 void uart__enable_receive_interrupt(uart_number_e uart_number);
 
 bool uart_lab__get_char_from_queue(char *input_byte, uint32_t timeout);
-*/

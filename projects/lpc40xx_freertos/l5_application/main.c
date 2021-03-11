@@ -574,7 +574,7 @@ void uart_read_task(void *p) {
     char data_read_from_poll = 'a';
     vTaskDelay(100);
     uint8_t as;
-    uart_lab__polled_get(UART_3, &data_read_from_poll);
+    uart_lab__polled_get(UART_2, &data_read_from_poll);
     fprintf(stderr, "data read from UART poll is: %c \n", data_read_from_poll);
     vTaskDelay(500);
   }
@@ -583,9 +583,23 @@ void uart_read_task(void *p) {
 void uart_write_task(void *p) {
   while (1) {
     // TODO: Use uart_lab__polled_put() function and send a value
-    char data_write_to_poll = 'D';
-    uart_lab__polled_put(UART_2, data_write_to_poll);
-    vTaskDelay(500);
+    char data_write_to_poll = 'Q';
+    vTaskDelay(1000);
+    uart_lab__polled_put(UART_3, data_write_to_poll);
+    // vTaskDelay(500);
+  }
+}
+#endif
+
+/// lab 6 part 2
+#if 1
+void uart_interrupt_task(void *p) {
+  const char data_get_from_uart_queue;
+  while (1) {
+    if (uart_lab__get_char_from_queue(&data_get_from_uart_queue, 500)) {
+      fprintf(stderr, "data: %c\n", data_get_from_uart_queue);
+    } else
+      fprintf(stderr, "no data in the queue\n");
   }
 }
 #endif
@@ -757,7 +771,7 @@ int main(void) {
 #endif
 
 /// lab 6 part 1
-#if 1
+#if 0
   // TODO: Use uart_lab__init() function and initialize UART2 or UART3 (your choice)
   // TODO: Pin Configure IO pins to perform UART2/UART3 function
   fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
@@ -773,6 +787,29 @@ int main(void) {
   gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCTION_2); // U3_RXD
 
   xTaskCreate(uart_read_task, "uart_read", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(uart_write_task, "uart_write", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+
+  vTaskStartScheduler();
+#endif
+
+/// lab 6 part 2
+#if 1
+  // fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
+  const uint32_t peripheral_clock = clock__get_peripheral_clock_hz;
+  uart_lab__init(UART_2, peripheral_clock, 9600);
+  uart_lab__init(UART_3, peripheral_clock, 9600);
+  fprintf(stderr, "core clk:%ld  peripheral clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
+
+  // gpio__construct_with_function(GPIO__PORT_0, 10, GPIO__FUNCTION_1); // U2_TXD
+  gpio__construct_with_function(GPIO__PORT_0, 11, GPIO__FUNCTION_1); // U2_RXD
+
+  gpio__construct_with_function(GPIO__PORT_0, 0, GPIO__FUNCTION_2); // U3_TXD
+  // gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCTION_2); // U3_RXD
+
+  uart__enable_receive_interrupt(UART_2);
+  // uart__enable_receive_interrupt(UART_3);
+
+  xTaskCreate(uart_interrupt_task, "uart_read_interrupt", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(uart_write_task, "uart_write", (512U * 4) / sizeof(void *), NULL, 1, NULL);
 
   vTaskStartScheduler();

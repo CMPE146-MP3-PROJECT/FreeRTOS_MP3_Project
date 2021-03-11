@@ -73,42 +73,73 @@ bool uart_lab__polled_put(uart_number_e uart, char output_byte) {
   }
   return poll_status;
 }
-/*
 /// part 2 UART interrupt
 // TODO: Implement the header file for exposing public functions (non static)
 
 // The idea is that you will use interrupts to input data to FreeRTOS queue
 // Then, instead of polling, your tasks can sleep on data that we can read from the queue
 // Private queue handle of our uart_lab.c
-static QueueHandle_t your_uart_rx_queue;
+static QueueHandle_t richie_uart_rx_queue;
 
 // Private function of our uart_lab.c
-static void your_receive_interrupt(void) {
+static void richie_receive_interrupt_u2(void) {
   // TODO: Read the IIR register to figure out why you got interrupted
 
   // TODO: Based on IIR status, read the LSR register to confirm if there is data to be read
-
+  while (LPC_UART2->IIR & (1 << 0)) {
+    ; // wait when not interrupt is pending
+  }
   // TODO: Based on LSR status, read the RBR register and input the data to the RX Queue
-  const char byte = UART->RBR;
-  xQueueSendFromISR(your_uart_rx_queue, &byte, NULL);
+  while (LPC_UART2->IIR & (1 << 2)) { // when Receive Data Available (RDA = 1).
+    if (LPC_UART2->LSR & (1 << 0)) {  // and The UARTn receiver FIFO is not empty
+      const char byte = LPC_UART2->RBR & 0xff;
+      xQueueSendFromISR(richie_uart_rx_queue, &byte, NULL);
+    } else {
+      fprintf(stderr, "data not ready");
+    }
+  }
+}
+
+static void richie_receive_interrupt_u3(void) {
+  // TODO: Read the IIR register to figure out why you got interrupted
+
+  // TODO: Based on IIR status, read the LSR register to confirm if there is data to be read
+  while (LPC_UART3->IIR & (1 << 0)) {
+    ; // wait when not interrupt is pending
+  }
+  // TODO: Based on LSR status, read the RBR register and input the data to the RX Queue
+  while (LPC_UART3->IIR & (1 << 2)) { // when Receive Data Available (RDA = 1).
+    if (LPC_UART3->LSR & (1 << 0)) {  // and The UARTn receiver FIFO is not empty
+      const char byte = LPC_UART3->RBR & 0xff;
+      xQueueSendFromISR(richie_uart_rx_queue, &byte, NULL);
+    } else {
+      fprintf(stderr, "data not ready");
+    }
+  }
 }
 
 // Public function to enable UART interrupt
 // TODO Declare this at the header file
 void uart__enable_receive_interrupt(uart_number_e uart_number) {
   // TODO: Use lpc_peripherals.h to attach your interrupt
-  lpc_peripheral__enable_interrupt(..., your_receive_interrupt);
-
+  // NVIC_EnableIRQ(UART2_IRQn);
+  // NVIC_EnableIRQ(UART3_IRQn);
+  if (uart_number == UART_2) {
+    // NVIC_EnableIRQ(UART2_IRQn);
+    lpc_peripheral__enable_interrupt(LPC_PERIPHERAL__UART2, richie_receive_interrupt_u2, "unused");
+    LPC_UART2->IER |= (1 << 0); // set bit 0 to enable RBR interrupt
+  } else if (uart_number == UART_3) {
+    // NVIC_EnableIRQ(UART3_IRQn);
+    lpc_peripheral__enable_interrupt(LPC_PERIPHERAL__UART3, richie_receive_interrupt_u3, "unused");
+    LPC_UART3->IER |= (1 << 0); // set bit 0 to enable RBR interrupt
+  }
   // TODO: Enable UART receive interrupt by reading the LPC User manual
   // Hint: Read about the IER register
-
-  // TODO: Create your RX queue
-  your_uart_rx_queue = xQueueCreate(...);
+  richie_uart_rx_queue = xQueueCreate(3, sizeof(char));
 }
 
 // Public function to get a char from the queue (this function should work without modification)
 // TODO: Declare this at the header file
 bool uart_lab__get_char_from_queue(char *input_byte, uint32_t timeout) {
-  return xQueueReceive(your_uart_rx_queue, input_byte, timeout);
+  return xQueueReceive(richie_uart_rx_queue, input_byte, timeout);
 }
-*/
