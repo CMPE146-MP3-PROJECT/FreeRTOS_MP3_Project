@@ -86,10 +86,22 @@ void gpiox__trigger_level(port_pin_s gpio_pin, int posedge_or_negedge) {
 }
 
 bool get_pin_INT_status(port_pin_s pin_num, int rising_or_falling) {
-  if (rising_or_falling == 0) {
-    return (LPC_GPIOINT->IO0IntStatF & (1 << pin_num.pin));
-  } else {
-    return (LPC_GPIOINT->IO0IntStatR & (1 << pin_num.pin));
+  switch (pin_num.port) {
+  case 0:
+    if (rising_or_falling == 0) {
+      return (LPC_GPIOINT->IO0IntStatF & (1 << pin_num.pin));
+    } else {
+      return (LPC_GPIOINT->IO0IntStatR & (1 << pin_num.pin));
+    }
+    break;
+
+  case 2:
+    if (rising_or_falling == 0) {
+      return (LPC_GPIOINT->IO2IntStatF & (1 << pin_num.pin));
+    } else {
+      return (LPC_GPIOINT->IO2IntStatR & (1 << pin_num.pin));
+    }
+    break;
   }
 }
 

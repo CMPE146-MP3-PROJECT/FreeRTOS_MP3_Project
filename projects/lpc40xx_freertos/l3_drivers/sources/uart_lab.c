@@ -2,32 +2,42 @@
 //#include "lpc40xx.h"
 //#include "lpc_peripherals.h"
 
-void uart_lab__init(uart_number_e uart, uint32_t peripheral_clock, uint32_t baud_rate) {
+void uart_lab__init(uart_number_e uart, uint32_t peripheral_clock,
+                    uint32_t baud_rate) { // Baud = PCLK / 16 * (divider_16_bit)
   // Refer to LPC User manual and setup the register bits correctly
   // The first page of the UART chapter has good instructions
   // a) Power on Peripheral
   // b) Setup DLL, DLM, FDR, LCR registers
-  const uint16_t divider_16_bit = peripheral_clock / (16 * baud_rate);
+  const float roundup_offset = 0.5;
+  const uint16_t divider_16_bit = (peripheral_clock / (16 * baud_rate));
+  const uint8_t DLAB_latch = (1 << 7);
+  const uint32_t MULVAL_reset_value = (1 << 4);
+  const uint32_t DIVADDVAL_reset_value = (0 << 0);
+  // fprintf(stderr, "divider: %d \n", divider_16_bit);
   if (uart == UART_2) {
     LPC_SC->PCONP |= (1 << 24); // UART 2 power enable
 
-    LPC_UART2->LCR |= (1 << 7); // enable divisor latch
+    fprintf(stderr, " UART2 Baud Divisor: %i \n", divider_16_bit);
+    LPC_UART2->LCR = DLAB_latch; // enable divisor latch
     LPC_UART2->DLM = (divider_16_bit >> 8) & 0xFF;
-    LPC_UART2->DLL = (divider_16_bit >> 0) & 0xFF; // setup baud rate for UART2
-    LPC_UART2->LCR &= ~(1 << 7);                   // disable divisor latch
+    LPC_UART2->DLL = (divider_16_bit >> 0) & 0xFF;               // setup baud rate for UART2
+    LPC_UART2->FDR = MULVAL_reset_value | DIVADDVAL_reset_value; // reset MULVAL and DIVADDVAL
+    LPC_UART2->LCR &= ~DLAB_latch;                               // disable divisor latch
 
-    LPC_UART2->FDR |= (1 << 4);              // reset MULVAL
-    LPC_UART2->LCR |= ((3 << 0) | (0 << 2)); // 8-bit character length
+    // LPC_UART2->LCR |= ((3 << 0) | (0 << 2)); // 8-bit character length + 2 stop bits
+    LPC_UART2->LCR = (3 << 0); // 8-bit character length
   } else if (uart == UART_3) {
     LPC_SC->PCONP |= (1 << 25); // UART 3 power enable
 
-    LPC_UART3->LCR |= (1 << 7); // enable divisor latch
+    fprintf(stderr, " UART3 Baud Divisor: %i \n", divider_16_bit);
+    LPC_UART3->LCR = DLAB_latch; // enable divisor latch
     LPC_UART3->DLM = (divider_16_bit >> 8) & 0xFF;
-    LPC_UART3->DLL = (divider_16_bit >> 0) & 0xFF; // setup baud rate for UART2
-    LPC_UART3->LCR &= ~(1 << 7);                   // disable divisor latch
+    LPC_UART3->DLL = (divider_16_bit >> 0) & 0xFF;               // setup baud rate for UART3
+    LPC_UART3->FDR = MULVAL_reset_value | DIVADDVAL_reset_value; // reset MULVAL and DIVADDVAL
+    LPC_UART3->LCR &= ~DLAB_latch;                               // disable divisor latch
 
-    LPC_UART3->FDR |= (1 << 4);              // reset MULVAL
-    LPC_UART3->LCR |= ((3 << 0) | (0 << 2)); // 8-bit character length
+    // LPC_UART3->LCR |= ((3 << 0) | (0 << 2)); // 8-bit character length + 2 stop bits
+    LPC_UART3->LCR = (3 << 0); // 8-bit character length
   }
 }
 
@@ -60,14 +70,14 @@ bool uart_lab__polled_put(uart_number_e uart, char output_byte) {
     while (!(LPC_UART2->LSR & (1 << 5))) {
       ; // wait if UnTHR contains valid data.
     }
-    LPC_UART2->LCR &= ~(1 << 7); /// disable divisor latch before UARTn Transmit
+    LPC_UART2->LCR &= ~(1 << 7); /// disable divisor latch before UARTn Transmit JUST IN CASE
     LPC_UART2->THR = output_byte;
     poll_status = true;
   } else if (uart == UART_3) {
     while (!(LPC_UART3->LSR & (1 << 5))) {
       ; // wait if UnTHR contains valid data.
     }
-    LPC_UART3->LCR &= ~(1 << 7); /// disable divisor latch before UARTn Transmit
+    LPC_UART3->LCR &= ~(1 << 7); /// disable divisor latch before UARTn Transmit JUST IN CASE
     LPC_UART3->THR = output_byte;
     poll_status = true;
   }
@@ -135,11 +145,12 @@ void uart__enable_receive_interrupt(uart_number_e uart_number) {
   }
   // TODO: Enable UART receive interrupt by reading the LPC User manual
   // Hint: Read about the IER register
-  richie_uart_rx_queue = xQueueCreate(3, sizeof(char));
+  richie_uart_rx_queue = xQueueCreate(16, sizeof(char));
 }
 
 // Public function to get a char from the queue (this function should work without modification)
 // TODO: Declare this at the header file
 bool uart_lab__get_char_from_queue(char *input_byte, uint32_t timeout) {
+  // vTaskDelay(50);
   return xQueueReceive(richie_uart_rx_queue, input_byte, timeout);
 }

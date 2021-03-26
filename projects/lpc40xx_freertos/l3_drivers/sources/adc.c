@@ -56,7 +56,7 @@ uint16_t adc__get_adc_value(adc_channel_e channel_num) {
  * set the relevant bits in Control Register (CR) to enable burst mode.
  */
 void adc__enable_burst_mode(bool mode) {
-  LPC_ADC->CR &= ~((1 << 24) | (1 << 25) | (1 << 26)); // start conviersion
+  LPC_ADC->CR &= ~((1 << 24) | (1 << 25) | (1 << 26)); // don't start conviersion
   if (mode == 1) {
     LPC_ADC->CR |= (1 << 16);
   } else {

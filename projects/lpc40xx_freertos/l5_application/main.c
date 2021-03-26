@@ -16,6 +16,7 @@
 #include "sj2_cli.h"
 #include "ssp2.h"
 #include "task.h"
+#include "uart.h"
 #include "uart_lab.h"
 /// 'static' to make these functions 'private' to this file
 // static void create_blinky_tasks(void);
@@ -122,7 +123,7 @@ void lab2_led_task1(void *task_parameter) {
 #endif
 
 /// lab 2 part3
-#if 0
+#if 1
 void lab2_led_task(void *task_parameter) {
   // LPC_IOCON->P2_3 &= ~(7 << 0);
   const port_pin_s *led_num = (port_pin_s *)(task_parameter);
@@ -181,7 +182,7 @@ void gpio_interrupt(void) {
 #endif
 
 /// lab 3 part 1
-#if 0
+#if 1
 void gpio_interrupt2(void) {
   fprintf(stderr, "Calling ISR...");
   xSemaphoreGiveFromISR(switch_pressed_signal, NULL);
@@ -206,11 +207,12 @@ void sleep_on_sem_task(void *p) {
 #endif
 
 /// lab 3 part 2
-#if 0
+#if 1
 static SemaphoreHandle_t switch_pressed_signal_hw3_part2_30;
 static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
-void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); }
-void gpio_interrupt_part2_1(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL); }
+void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); } // ISR 1
+void gpio_interrupt_part2_1(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_31, NULL); } // ISR 2
+
 void pin30_isr(void *p) {
   const port_pin_s *sem_led = (port_pin_s *)(p);
   gpiox__set_as_output(*sem_led);
@@ -324,7 +326,7 @@ void adc_task(void *p) {
 #endif
 
 /// lab 4 part 2
-#if 0
+#if 1
 // This is the queue handle we will need for the xQueue Send/Receive API
 static QueueHandle_t adc_to_pwm_task_queue; // important
 void pin_configure_adc_channel_as_io_pin() {
@@ -451,7 +453,7 @@ void spi_task(void *p) {
 #endif
 
 /// lab 5 part 2
-#if 0
+#if 1
 xSemaphoreHandle spi_id_mutex_handler;
 
 void spi_id_verification_task(void *p) {
@@ -574,7 +576,7 @@ void uart_read_task(void *p) {
     char data_read_from_poll = 'a';
     vTaskDelay(100);
     uint8_t as;
-    uart_lab__polled_get(UART_2, &data_read_from_poll);
+    uart_lab__polled_get(UART_3, &data_read_from_poll);
     fprintf(stderr, "data read from UART poll is: %c \n", data_read_from_poll);
     vTaskDelay(500);
   }
@@ -583,7 +585,7 @@ void uart_read_task(void *p) {
 void uart_write_task(void *p) {
   while (1) {
     // TODO: Use uart_lab__polled_put() function and send a value
-    char data_write_to_poll = 'Q';
+    char data_write_to_poll = '$';
     vTaskDelay(1000);
     uart_lab__polled_put(UART_3, data_write_to_poll);
     // vTaskDelay(500);
@@ -592,7 +594,7 @@ void uart_write_task(void *p) {
 #endif
 
 /// lab 6 part 2
-#if 1
+#if 0
 void uart_interrupt_task(void *p) {
   const char data_get_from_uart_queue;
   while (1) {
@@ -600,6 +602,141 @@ void uart_interrupt_task(void *p) {
       fprintf(stderr, "data: %c\n", data_get_from_uart_queue);
     } else
       fprintf(stderr, "no data in the queue\n");
+  }
+}
+#endif
+
+/// lab 6 part 3
+#if 0
+xSemaphoreHandle uart_TR_handler;
+// This task is done for you, but you should understand what this code is doing
+void board_1_sender_task(void *p) {
+
+  char number_as_string[16] = {0};
+
+  while (true) {
+    // if (xSemaphoreTake(uart_TR_handler, 99999)) {
+    const int number = rand();
+    sprintf(number_as_string, "%i", number);
+
+    // Send one char at a time to the other board including terminating NULL char
+    for (int i = 0; i <= strlen(number_as_string); i++) {
+      uart_lab__polled_put(UART_3, number_as_string[i]);
+      printf("Sent: %c\n", number_as_string[i]);
+    }
+    // vTaskDelay(1000);
+    printf("Sent: %i over UART to the other board\n", number);
+    vTaskDelay(3000);
+    // xSemaphoreGive(uart_TR_handler);
+    //}
+  }
+}
+
+void board_2_receiver_task(void *p) {
+  char number_as_string[16] = {0};
+  int counter = 0;
+  while (true) {
+    // if (xSemaphoreTake(uart_TR_handler, 99999)) {
+    char byte = 0;
+    // vTaskDelay(50);
+    uart_lab__get_char_from_queue(&byte, 9999);
+    vTaskDelay(50);
+    printf("Received: %c\n", byte);
+
+    // This is the last char, so print the number
+    if ('\0' == byte) {
+      number_as_string[counter] = '\0';
+      counter = 0;
+      printf("Received this number from the other board: %s\n \n", number_as_string);
+    }
+    // We have not yet received the NULL '\0' char, so buffer the data
+    else {
+      number_as_string[counter] = byte;
+      if (counter < 16) {
+        counter++;
+      } else {
+        printf("reaching FIFO size limit \n");
+      }
+      // Hint: Use counter as an index, and increment it as long as we do not reach max value of 16
+    }
+    vTaskDelay(50);
+    // xSemaphoreGive(uart_TR_handler);
+    //}
+  }
+}
+#endif
+
+/// Producer Consumer Tasks
+#if 1
+static QueueHandle_t switch_queue;
+
+typedef enum { switch__off, switch__on } switch_e;
+
+switch_e get_switch_input_from_switch0(port_pin_s pin_num) {
+  port_pin_s led0 = {2, 3};
+  gpiox__set_as_input(pin_num);
+  gpiox__set_as_output(led0);
+  if (gpiox__get_level(pin_num)) {
+    gpiox__set_low(led0);
+    vTaskDelay(50);
+    gpiox__set_high(led0);
+    vTaskDelay(50);
+    gpiox__set_low(led0);
+    vTaskDelay(50);
+    return switch__on;
+  } else {
+    return switch__off;
+  }
+}
+
+// TODO: Create this task at PRIORITY_LOW
+void producer(void *p) {
+  static port_pin_s test_switch = {1, 19};
+  while (1) {
+    // This xQueueSend() will internally switch context to "consumer" task because it is higher priority than this
+    // "producer" task Then, when the consumer task sleeps, we will resume out of xQueueSend()and go over to the next
+    // line
+
+    // TODO: Get some input value from your board
+    const switch_e switch_value = get_switch_input_from_switch0(test_switch);
+
+    // TODO: Print a message before xQueueSend()
+    fprintf(stderr, "producer: before xqueuesend...\n");
+    // Note: Use printf() and not fprintf(stderr, ...) because stderr is a polling printf
+    xQueueSend(switch_queue, &switch_value, 0);
+    // TODO: Print a message after xQueueSend()
+    fprintf(stderr, "producer: after xqueuesend...\n");
+    fprintf(stderr, "during 1 second delay-->\n");
+    vTaskDelay(1000);
+  }
+}
+
+// TODO: Create this task at PRIORITY_HIGH
+void consumer(void *p) { //先运行
+  switch_e switch_value;
+  while (1) {
+    // TODO: Print a message before xQueueReceive()
+    // vTaskDelay(50);
+    fprintf(stderr, "consumer: before xqueuerecieve...\n");
+    xQueueReceive(switch_queue, &switch_value, portMAX_DELAY);
+    // this task will sleep for up to portMAX_DELAY until there is an item in the queue
+    // vTaskDelay(50);
+    // TODO: Print a message after xQueueReceive()
+    fprintf(stderr, "consumer: switch value get from queue is: %d\n \n", switch_value);
+  }
+}
+#endif
+
+/// lab 7 CLI task
+#if 1
+void cli_led(void *p) {
+  const port_pin_s *led_num = (port_pin_s *)(p);
+  gpiox__set_as_output(*led_num);
+  while (1) {
+    gpiox__set_low(*led_num);
+    vTaskDelay(200);
+    gpiox__set_high(*led_num);
+    vTaskDelay(200);
   }
 }
 #endif
@@ -629,12 +766,12 @@ int main(void) {
   switch_press_indication = xSemaphoreCreateBinary();
   static port_pin_s test_switch = {0, 30}; // SW
   static port_pin_s test_led = {1, 24};    // LED
-  // printf("level: %d", gpiox__get_level(test_switch))
+  // printf("level: %d", gpiox__get_level(test_switch)) 
   xTaskCreate(switch_task, "test_switch", 1024 / sizeof(void *), &test_switch, 1, NULL);
   // xTaskCreate(switch_task, "test_switch", configMINIMAL_STACK_SIZE, (void *)&test_switch, 1, NULL);
   xTaskCreate(lab2_led_task, "test_led", 1024 / sizeof(void *), &test_led, 1, NULL);
-  // xTaskCreate(lab2_led_task, "test_led", configMINIMAL_STACK_SIZE, (void *)&test_led, 1, NULL);
-  vTaskStartScheduler();
+  // xTaskCreate(lab2_led_task, "test_led", , (void *)&test_led, 1, NULL);
+  vTaskStartScheduler();configMINIMAL_STACK_SIZE
   return 0;
 #endif
 
@@ -684,7 +821,7 @@ int main(void) {
 #endif
 
 /// lab 3 part 2
-#if 0
+#if 1
   /* SW0: P1_19; LED0: P2_3;
    * SW1: P1_15; LED1: P1_26;
    * SW2: P0_30; LED2: P1_24;
@@ -774,17 +911,21 @@ int main(void) {
 #if 0
   // TODO: Use uart_lab__init() function and initialize UART2 or UART3 (your choice)
   // TODO: Pin Configure IO pins to perform UART2/UART3 function
-  fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
-  const uint32_t peripheral_clock = clock__get_peripheral_clock_hz;
+  // fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
+  const uint32_t peripheral_clock = clock__get_peripheral_clock_hz();
   uart_lab__init(UART_2, peripheral_clock, 9600);
   uart_lab__init(UART_3, peripheral_clock, 9600);
-  fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
+  fprintf(stderr, "core clk:%ld  peripheral clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz()); 
 
-  gpio__construct_with_function(GPIO__PORT_0, 10, GPIO__FUNCTION_1); // U2_TXD
-  // gpio__construct_with_function(GPIO__PORT_0, 11, GPIO__FUNCTION_1); // U2_RXD
+  // gpio__construct_with_function(GPIO__PORT_0, 10, GPIO__FUNCTION_1); // U2_TXD this one not works
+  gpio__construct_with_function(GPIO__PORT_0, 11, GPIO__FUNCTION_1); // U2_RXD
+  gpio__construct_with_function(GPIO__PORT_2, 8, GPIO__FUNCTION_2);  // u2_txd
+  gpio__construct_with_function(GPIO__PORT_2, 9, GPIO__FUNCTION_2);  // u2_rxd
 
-  // gpio__construct_with_function(GPIO__PORT_0, 0, GPIO__FUNCTION_2); // U3_TXD
-  gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCTION_2); // U3_RXD
+  gpio__construct_with_function(GPIO__PORT_0, 0, GPIO__FUNCTION_2);  // U3_TXD
+  gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCTION_2);  // U3_RXD
+  gpio__construct_with_function(GPIO__PORT_0, 25, GPIO__FUNCTION_3); // u3_txd
+  gpio__construct_with_function(GPIO__PORT_0, 26, GPIO__FUNCTION_3); // u3_rxd
 
   xTaskCreate(uart_read_task, "uart_read", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(uart_write_task, "uart_write", (512U * 4) / sizeof(void *), NULL, 1, NULL);
@@ -792,26 +933,88 @@ int main(void) {
   vTaskStartScheduler();
 #endif
 
-/// lab 6 part 2
-#if 1
+/// lab 6 part 2 & 3
+#if 0
   // fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
-  const uint32_t peripheral_clock = clock__get_peripheral_clock_hz;
+  //uart_TR_handler = xSemaphoreCreateMutex();
+  const uint32_t peripheral_clock = clock__get_peripheral_clock_hz();
   uart_lab__init(UART_2, peripheral_clock, 9600);
   uart_lab__init(UART_3, peripheral_clock, 9600);
   fprintf(stderr, "core clk:%ld  peripheral clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
 
-  // gpio__construct_with_function(GPIO__PORT_0, 10, GPIO__FUNCTION_1); // U2_TXD
+  // gpio__construct_with_function(GPIO__PORT_0, 10, GPIO__FUNCTION_1); // U2_TXD this one not works
   gpio__construct_with_function(GPIO__PORT_0, 11, GPIO__FUNCTION_1); // U2_RXD
+  gpio__construct_with_function(GPIO__PORT_2, 8, GPIO__FUNCTION_2);  // u2_txd
+  gpio__construct_with_function(GPIO__PORT_2, 9, GPIO__FUNCTION_2);  // u2_rxd
 
-  gpio__construct_with_function(GPIO__PORT_0, 0, GPIO__FUNCTION_2); // U3_TXD
-  // gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCTION_2); // U3_RXD
+  gpio__construct_with_function(GPIO__PORT_0, 0, GPIO__FUNCTION_2);  // U3_TXD
+  gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCTION_2);  // U3_RXD
+  gpio__construct_with_function(GPIO__PORT_0, 25, GPIO__FUNCTION_3); // u3_txd
+  gpio__construct_with_function(GPIO__PORT_0, 26, GPIO__FUNCTION_3); // u3_rxd
 
   uart__enable_receive_interrupt(UART_2);
-  // uart__enable_receive_interrupt(UART_3);
+  uart__enable_receive_interrupt(UART_3);
 
-  xTaskCreate(uart_interrupt_task, "uart_read_interrupt", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  xTaskCreate(uart_write_task, "uart_write", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  // xTaskCreate(uart_interrupt_task, "uart_read_interrupt", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  // xTaskCreate(uart_write_task, "uart_write", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+
+  xTaskCreate(board_1_sender_task, "uart_send", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(board_2_receiver_task, "uart_recive", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  sj2_cli__init();
+  vTaskStartScheduler();
+#endif
+
+/// Producer Consumer Tasks
+#if 0
+  // sj2_cli__init();
+  // TODO: Create your tasks
+  xTaskCreate(producer, "producer", (512U * 4) / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
+  xTaskCreate(consumer, "consumer", (512U * 4) / sizeof(void *), NULL, PRIORITY_LOW, NULL);
+  // TODO Queue handle is not valid until you create it
+  switch_queue =
+      xQueueCreate(3, sizeof(switch_e)); // Choose depth of item being our enum (1 should be okay for this example)
 
   vTaskStartScheduler();
 #endif
+
+/// lab 7 CLI task
+#if 0
+  sj2_cli__init();
+  static port_pin_s cli_task_led = {2, 3};
+  xTaskCreate(cli_led, "cli_led", (512U * 4) / sizeof(void *), &cli_task_led, 1, NULL);
+  // vTaskResetRunTimeStats();
+  vTaskStartScheduler();
+#endif
 }
+
+// P3_15
+
+// LPC_IOCON->P3_15 &= ~(7 << 0); ~0111 = 1000
+// LPC_GPIO3->SET |= ( 1 << 15);
+// LPC_GPIO3->CLR |= ( 1 << 15);
+
+// LPC_SC->PCONP |= ( 1 << 24 );
+// PCONP里面有32个bit，每一个bit控制了一个peripheral的电源
+
+// ==, =, |=, &=,
+
+// LPC_UART2->LRC = ( 1 << 7 ); 1 << 7 = 0000 0000 0000 0000 0000 0000 10000000
+// LPC_UART2->LRC = 0000 0000 0000 0000 0000 0000 10000000
+
+// LPC_UART2->LRC &= ~( 1 << 7 ); ~(1 << 7) = 1111 1111 1111 1111 1111 1111 01111111
+// LPC_UART2->LRC &= 1111 1111 1111 1111 1111 1111 01111111
+
+// LPC_UART2->LRC ^= (1 << 5); (1 << 5) = 10000
+// LPC_UART2->LRC = (LPC_UART2->LRC) xor (10000)
+
+// $s1 write only
+// addi $t0, 5 (0101)
+// orr $s1, $s1, $t0
+
+// addi THR, output_byte
+
+// LPC_SSP0->SR
+// 96 0000 0000 hz = cpu clock
+// 9600 = baud
+
+// const uint16_t divider_16_bit = (96 0000 0000 / (16 * 9600));

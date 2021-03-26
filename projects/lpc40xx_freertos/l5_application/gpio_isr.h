@@ -22,7 +22,7 @@ void gpiox__attach_interrupt(port_pin_s pin, gpio_interrupt_e interrupt_type, fu
 // You can hijack 'interrupt_vector_table.c' or use API at lpc_peripherals.h
 void gpiox__interrupt_dispatcher(void);
 
-port_pin_toge check_all_pin_INT_status();
+port_pin_s check_all_pin_INT_status();
 
 // port_pin_trigger check_interrupt_pin();
 void clear_pin_interrupt(port_pin_s pin);

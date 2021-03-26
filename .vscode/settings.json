@@ -12,6 +12,13 @@
         "uart_lab.h": "c",
         "cstdio": "c",
         "*.def": "c",
-        "charconv": "c"
+        "charconv": "c",
+        "filesystem": "c",
+        "cli_handlers.h": "c",
+        "uart_printf.h": "c",
+        "stdarg.h": "c",
+        "uart.h": "c",
+        "app_cli.h": "c",
+        "*.mods": "c"
     }
 }
