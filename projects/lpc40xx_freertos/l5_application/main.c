@@ -769,12 +769,14 @@ void consumer(void *p) {
 #if 1
 static QueueHandle_t watchdog_queue;
 static EventGroupHandle_t watchdog_acc_sensor;
+static UINT total_bytes_write = 0;
+// uint16_t ticks = xTaskGetTickCount();
 
 typedef struct {
   int16_t x, y, z;
 } average_acc;
 
-static uint32_t bit_id_producer_task = (1 << 0);
+#define bit_id_producer_task (1 << 0)
 void producer_task(void *params) {
   while (1) { // Assume 100ms loop - vTaskDelay(100)
     // Sample code:
@@ -801,10 +803,11 @@ void producer_task(void *params) {
     // xEventGroupSetBits(watchdog_acc_sensor, bit_id_producer_task);
     // 4. vTaskDelay(100)
     // vTaskDelay(100);
+    xEventGroupSetBits(watchdog_acc_sensor, bit_id_producer_task);
   }
 }
 
-static uint32_t bit_id_consumer_task = (1 << 0);
+#define bit_id_consumer_task (1 << 1)
 void consumer_task(void *params) {
   // port_pin_s sd_cs = {1, 8};
   // gpiox__set_as_output(sd_cs);
@@ -814,7 +817,7 @@ void consumer_task(void *params) {
   const *acc_data_file_name = "sensor_data_sd.txt";
   FIL acc_file; // File handle
   UINT bytes_written = 0;
-  UINT total_bytes = 0;
+  // UINT total_bytes = 0;
   int data_size = 0;
 
   while (1) { // Assume 100ms loop
@@ -831,7 +834,7 @@ void consumer_task(void *params) {
         acc_data_array[data_size] = average_acc_data_from_queue; // storing the data get from queue for 10 times
         data_size++;
         // printf("%i", data_size);
-      } else {// after 10th store of Average accleration sensor data, go write them in the sd card
+      } else { // after 10th store of Average accleration sensor data, go write them in the sd card
         // fprintf(stderr, "Average accleration is:\n X axis: %i\n Y axis: %i\n Z axis: %i\n",
         //         average_acc_data_from_queue.x, average_acc_data_from_queue.y, average_acc_data_from_queue.z);
         FRESULT result = f_open(&acc_file, acc_data_file_name, (FA_WRITE | FA_CREATE_ALWAYS));
@@ -839,12 +842,12 @@ void consumer_task(void *params) {
           char string[512] = "0";
           int string_index = 0;
           for (int i = 0; i < 10; i++) { // store the array that contains 10 acc_sensor data into a string using sprintf
-            string_index += sprintf(&string[string_index], "Ticks: %i, X: %i, Y: %i, Z: %i \n", acc_data_array[i].tick,
+            string_index += sprintf(&string[string_index], "Ticks: %i, X: %i, Y: %i, Z: %i \n", xTaskGetTickCount(),
                                     acc_data_array[i].x, acc_data_array[i].y, acc_data_array[i].z);
           }
           // string[11] = "\n";
-          if (f_lseek(&acc_file, total_bytes) == FR_OK) { /* keep aiming the end of the file to append data */
-            fprintf(stderr, "the string is: %s \n", string);
+          if (f_lseek(&acc_file, total_bytes_write) == FR_OK) { /* keep aiming the end of the file to append data */
+            fprintf(stderr, "%s \n", string);
             const int fw_status =
                 f_write(&acc_file, string, strlen(string), &bytes_written); // write the string to the sd card
             fprintf(stderr, "%i bytes has been written, the file write status is: %i\n", bytes_written, fw_status);
@@ -852,7 +855,7 @@ void consumer_task(void *params) {
             } else {
               printf("ERROR: Failed to write data to file\n");
             }
-            total_bytes += bytes_written; // update the total bytes written
+            total_bytes_write += bytes_written; // update the total bytes written
             f_close(&acc_file);
           }
         } else {
@@ -861,43 +864,73 @@ void consumer_task(void *params) {
         data_size = 0;
       }
     }
-    // 2. xEventGroupSetBits(checkin)
+    xEventGroupSetBits(watchdog_acc_sensor, bit_id_consumer_task);
+  }
+}
+
+#define watchdog_tasks_id bit_id_producer_task | bit_id_consumer_task
+void watchdog_task(void *params) {
+  while (1) {
+    // ...
+    // vTaskDelay(200);
+    // We either should vTaskDelay, but for better robustness, we should
+    // block on xEventGroupWaitBits() for slightly more than 100ms because
+    // of the expected production rate of the producer() task and its check-in
+    const *acc_data_file_name = "sensor_data_sd.txt";
+    FIL acc_file; // File handle
+    UINT bytes_written = 0;
+    char string_watchdog_stauts[64] = "0";
+    const EventBits_t watchdog_result = // the xEventGroupWaitBits(); will return certain value based on the check in
+                                        // status of two watched tasks
+        xEventGroupWaitBits(watchdog_acc_sensor, // event group handle
+                            watchdog_tasks_id,   // both porducer and consumer task bit will be tested
+                            pdTRUE, // clear the bits that sets during the xEventGroupWaitBits(); will be cleared
+                            pdTRUE, // this task will return only when both producer and consumer tasks' bits are tested
+                            130);
+    /// fprintf(stderr, "watchdog result: %ld \n", watchdog_result);
+    switch (watchdog_result) {
+    case 3:
+      fprintf(stderr, " System is healthy... \n");
+      break;
+
+    case 0:
+      sprintf(string_watchdog_stauts, "Ticks: %i, Alert, producer task failed to check in... \n", xTaskGetTickCount());
+      fprintf(stderr, "%s", string_watchdog_stauts);
+      write_to_sd(string_watchdog_stauts);
+      break;
+
+    case 1:
+      sprintf(string_watchdog_stauts, "Ticks: %i, Alert, consumer task failed to check in... \n", xTaskGetTickCount());
+      fprintf(stderr, "%s", string_watchdog_stauts);
+      write_to_sd(string_watchdog_stauts);
+      break;
+    }
+    vTaskDelay(1000);
   }
 }
 
 // Sample code to write a file to the SD Card
-void write_file_using_fatfs_pi(void) {
-  const char *filename = "file.txt";
+void write_to_sd(char string_watchdog_stauts[256]) {
+  const *filename = "sensor_data_sd.txt";
   FIL file; // File handle
   UINT bytes_written = 0;
-  FRESULT result = f_open(&file, filename, (FA_WRITE | FA_CREATE_ALWAYS));
-
-  if (FR_OK == result) {
-    char string[64];
-    sprintf(string, "Value,%i\n", 123);
-    if (FR_OK == f_write(&file, string, strlen(string), &bytes_written)) {
+  FRESULT result = f_open(&file, filename, (FA_OPEN_APPEND | FA_WRITE)); // read/write pointer is set end of the file.
+  if (f_lseek(&file, total_bytes_write) == FR_OK) {
+    if (FR_OK == result) {
+      // char string[256];
+      // sprintf(string, "Alert, producer task failed to check in...\n");
+      if (FR_OK == f_write(&file, string_watchdog_stauts, strlen(string_watchdog_stauts), &bytes_written)) {
+        // fprintf(stderr, "%i bytes dog status has been written to %s\n", bytes_written, filename);
+      } else {
+        printf("ERROR: Failed to write data to file\n");
+      }
+      total_bytes_write += bytes_written;
+      f_close(&file);
     } else {
-      printf("ERROR: Failed to write data to file\n");
+      printf("ERROR: Failed to open: %s\n", filename);
     }
-    f_close(&file);
-  } else {
-    printf("ERROR: Failed to open: %s\n", filename);
   }
 }
-// void watchdog_task(void *params) {
-//   while(1) {
-//     // ...
-//     // vTaskDelay(200);
-//     // We either should vTaskDelay, but for better robustness, we should
-//     // block on xEventGroupWaitBits() for slightly more than 100ms because
-//     // of the expected production rate of the producer() task and its check-in
-
-//     if (xEventGroupWaitBits(...)) { // TODO
-//       // TODO
-//     }
-//   }
-// }
-
 #endif
 
 int main(void) {
@@ -1158,8 +1191,10 @@ int main(void) {
 /// watch dog
 #if 1
   watchdog_queue = xQueueCreate(30, sizeof(acceleration__axis_data_s));
+  watchdog_acc_sensor = xEventGroupCreate();
   xTaskCreate(producer_task, "wd_producer", (512U * 4) / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
   xTaskCreate(consumer_task, "wd_consumer", (512U * 4) / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
+  xTaskCreate(watchdog_task, "doggie", (512U * 4) / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
   sj2_cli__init();
   vTaskStartScheduler();
 #endif
