@@ -105,6 +105,17 @@ bool get_pin_INT_status(port_pin_s pin_num, int rising_or_falling) {
   }
 }
 
+void Lpc_peripheral_power_control(Peripheral_Symbol_e symbol, int power_level) {
+  switch (power_level) {
+  case 0:
+    LPC_SC->PCONP &= (1 << symbol);
+    break;
+
+  case 1:
+    LPC_SC->PCONP |= (1 << symbol);
+    break;
+  }
+}
 /*bool get_pin_INT_status(port_pin_s pin_num, int rising_or_falling) {
   if (pin_num.port == 0) {
     if (rising_or_falling == 0) {

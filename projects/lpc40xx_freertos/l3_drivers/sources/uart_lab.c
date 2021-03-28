@@ -122,6 +122,8 @@ static void richie_receive_interrupt_u3(void) {
     if (LPC_UART3->LSR & (1 << 0)) {  // and The UARTn receiver FIFO is not empty
       const char byte = LPC_UART3->RBR & 0xff;
       xQueueSendFromISR(richie_uart_rx_queue, &byte, NULL);
+      /*the "...fromISR" API has not alloance of sleep time anymore, since it is already insider an interrupt,
+       *the FreeRTOS cannot switch context, or drive the schedular insider of interrupt!*/
     } else {
       fprintf(stderr, "data not ready");
     }

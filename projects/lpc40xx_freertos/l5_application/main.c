@@ -8,7 +8,10 @@
 #include <stdint.h>
 #include <stdio.h>
 //#include "lpc_peripherals.h"
+#include "acceleration.h"
 #include "adc.h"
+#include "event_groups.h"
+#include "ff.h"
 #include "gpio.h"
 #include "periodic_scheduler.h"
 #include "pwm1.h"
@@ -37,7 +40,7 @@ void lab2_led_task(void *pvParameters) {
   LPC_IOCON->P2_3 &= (7 << 0);
   // 0x1000100101 & 0x000 = 0x1000100000
   // 1) Set the DIR register bit for the LED port pin, 1:output, 0:input
-  LPC_GPIO2->DIR |= (1 << 4); //0001 << 4 = 10000;
+  LPC_GPIO2->DIR |= (1 << 4); // 0001 << 4 = 10000;
   // 0001 << 3 = 1000; which port to use does not matter
   while (true) {
     // 2) Set PIN register bit to 0 to turn ON LED (led may be active low)
@@ -92,7 +95,7 @@ void lab2_led_task(void *task_parameter) {
 #endif
 
 /// lab 2 part 2 blink separate
-#if 0
+#if 1
 void lab2_led_task0(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
@@ -123,7 +126,7 @@ void lab2_led_task1(void *task_parameter) {
 #endif
 
 /// lab 2 part3
-#if 1
+#if 0
 void lab2_led_task(void *task_parameter) {
   // LPC_IOCON->P2_3 &= ~(7 << 0);
   const port_pin_s *led_num = (port_pin_s *)(task_parameter);
@@ -453,7 +456,7 @@ void spi_task(void *p) {
 #endif
 
 /// lab 5 part 2
-#if 1
+#if 0
 xSemaphoreHandle spi_id_mutex_handler;
 
 void spi_id_verification_task(void *p) {
@@ -569,7 +572,7 @@ void spi_flash_read_page(void) {
 #endif
 
 /// lab 6 part 1
-#if 1
+#if 0
 void uart_read_task(void *p) {
   while (1) {
     // TODO: Use uart_lab__polled_get() function and printf the received value
@@ -594,7 +597,7 @@ void uart_write_task(void *p) {
 #endif
 
 /// lab 6 part 2
-#if 0
+#if 1
 void uart_interrupt_task(void *p) {
   const char data_get_from_uart_queue;
   while (1) {
@@ -607,7 +610,7 @@ void uart_interrupt_task(void *p) {
 #endif
 
 /// lab 6 part 3
-#if 0
+#if 1
 xSemaphoreHandle uart_TR_handler;
 // This task is done for you, but you should understand what this code is doing
 void board_1_sender_task(void *p) {
@@ -667,7 +670,7 @@ void board_2_receiver_task(void *p) {
 #endif
 
 /// Producer Consumer Tasks
-#if 1
+#if 0
 static QueueHandle_t switch_queue;
 
 typedef enum { switch__off, switch__on } switch_e;
@@ -703,11 +706,12 @@ void producer(void *p) {
     // TODO: Print a message before xQueueSend()
     fprintf(stderr, "producer: before xqueuesend...\n");
     // Note: Use printf() and not fprintf(stderr, ...) because stderr is a polling printf
-    xQueueSend(switch_queue, &switch_value, 0);
+    xQueueSend(switch_queue, &switch_value, 1000);
+    // this task will sleep for up to 0 ticks if the queue is full
     // TODO: Print a message after xQueueSend()
     fprintf(stderr, "producer: after xqueuesend...\n");
     fprintf(stderr, "during 1 second delay-->\n");
-    vTaskDelay(1000);
+    // vTaskDelay(1000);
   }
 }
 
@@ -718,7 +722,7 @@ void consumer(void *p) { //先运行
     // TODO: Print a message before xQueueReceive()
     // vTaskDelay(50);
     fprintf(stderr, "consumer: before xqueuerecieve...\n");
-    xQueueReceive(switch_queue, &switch_value, portMAX_DELAY);
+    xQueueReceive(switch_queue, &switch_value, 500);
     // this task will sleep for up to portMAX_DELAY until there is an item in the queue
     // vTaskDelay(50);
     // TODO: Print a message after xQueueReceive()
@@ -728,7 +732,7 @@ void consumer(void *p) { //先运行
 #endif
 
 /// lab 7 CLI task
-#if 1
+#if 0
 void cli_led(void *p) {
   const port_pin_s *led_num = (port_pin_s *)(p);
   gpiox__set_as_output(*led_num);
@@ -739,6 +743,161 @@ void cli_led(void *p) {
     vTaskDelay(200);
   }
 }
+#endif
+
+/// midterm question
+#if 1
+QueueHandle_t q;
+void producer(void *p) {
+  int x;
+  while (1) {
+    xQueueSend(q, &x, 0);
+    vTaskDelay(100);
+  }
+}
+
+void consumer(void *p) {
+  int y;
+  while (1) {
+    xQueueReceive(q, &y, 100);
+    printf("Received %d\n", y);
+  }
+}
+#endif
+
+/// watch dog
+#if 1
+static QueueHandle_t watchdog_queue;
+static EventGroupHandle_t watchdog_acc_sensor;
+
+typedef struct {
+  int16_t x, y, z;
+} average_acc;
+
+static uint32_t bit_id_producer_task = (1 << 0);
+void producer_task(void *params) {
+  while (1) { // Assume 100ms loop - vTaskDelay(100)
+    // Sample code:
+    // 1. get_sensor_value()
+    acceleration__axis_data_s acc_sensor_data;
+    acceleration__init();
+    acc_sensor_data = acceleration__get_data();
+    acceleration__axis_data_s average_acc_data;
+    for (int i = 0; i < 100; i++) {
+      average_acc_data.x += acc_sensor_data.x;
+      average_acc_data.y += acc_sensor_data.y;
+      average_acc_data.z += acc_sensor_data.z;
+      vTaskDelay(1);
+    }
+    average_acc_data.x /= 100;
+    average_acc_data.y /= 100;
+    average_acc_data.z /= 100;
+    average_acc_data.tick = xTaskGetTickCount();
+    // fprintf(stderr, "Average accleration is:\n X axis: %i\n Y axis: %i\n Z axis: %i\n", average_acc_data.x,
+    //         average_acc_data.y, average_acc_data.z);
+    // 2. xQueueSend(handle, &sensor_value, 0);
+    xQueueSend(watchdog_queue, &average_acc_data, 0);
+    // 3. xEventGroupSetBits(checkin)
+    // xEventGroupSetBits(watchdog_acc_sensor, bit_id_producer_task);
+    // 4. vTaskDelay(100)
+    // vTaskDelay(100);
+  }
+}
+
+static uint32_t bit_id_consumer_task = (1 << 0);
+void consumer_task(void *params) {
+  // port_pin_s sd_cs = {1, 8};
+  // gpiox__set_as_output(sd_cs);
+  // gpiox__set_low(sd_cs);
+  acceleration__axis_data_s average_acc_data_from_queue;
+  acceleration__axis_data_s acc_data_array[10];
+  const *acc_data_file_name = "sensor_data_sd.txt";
+  FIL acc_file; // File handle
+  UINT bytes_written = 0;
+  UINT total_bytes = 0;
+  int data_size = 0;
+
+  while (1) { // Assume 100ms loop
+    // No need to use vTaskDelay() because the consumer will consume as fast as production rate
+    // because we should block on xQueueReceive(&handle, &item, portMAX_DELAY);
+    // Sample code:
+    // 1. xQueueReceive(handle, &sensor_value, portMAX_DELAY); // Wait forever for an item
+    if (xQueueReceive(watchdog_queue, &average_acc_data_from_queue, portMAX_DELAY)) {
+      // fprintf(stderr, "%i", LPC_PCSDC);
+      // Lpc_peripheral_power_control(LPC_PCSDC, 1);
+      // data_size++;
+      // printf("%i", data_size);
+      if (data_size < 10) { // when data size < 10, go 10 times xQueueRecive to get data
+        acc_data_array[data_size] = average_acc_data_from_queue; // storing the data get from queue for 10 times
+        data_size++;
+        // printf("%i", data_size);
+      } else {// after 10th store of Average accleration sensor data, go write them in the sd card
+        // fprintf(stderr, "Average accleration is:\n X axis: %i\n Y axis: %i\n Z axis: %i\n",
+        //         average_acc_data_from_queue.x, average_acc_data_from_queue.y, average_acc_data_from_queue.z);
+        FRESULT result = f_open(&acc_file, acc_data_file_name, (FA_WRITE | FA_CREATE_ALWAYS));
+        if (FR_OK == result) {
+          char string[512] = "0";
+          int string_index = 0;
+          for (int i = 0; i < 10; i++) { // store the array that contains 10 acc_sensor data into a string using sprintf
+            string_index += sprintf(&string[string_index], "Ticks: %i, X: %i, Y: %i, Z: %i \n", acc_data_array[i].tick,
+                                    acc_data_array[i].x, acc_data_array[i].y, acc_data_array[i].z);
+          }
+          // string[11] = "\n";
+          if (f_lseek(&acc_file, total_bytes) == FR_OK) { /* keep aiming the end of the file to append data */
+            fprintf(stderr, "the string is: %s \n", string);
+            const int fw_status =
+                f_write(&acc_file, string, strlen(string), &bytes_written); // write the string to the sd card
+            fprintf(stderr, "%i bytes has been written, the file write status is: %i\n", bytes_written, fw_status);
+            if (FR_OK == fw_status) {
+            } else {
+              printf("ERROR: Failed to write data to file\n");
+            }
+            total_bytes += bytes_written; // update the total bytes written
+            f_close(&acc_file);
+          }
+        } else {
+          printf("ERROR: Failed to open: %s\n", acc_data_file_name);
+        }
+        data_size = 0;
+      }
+    }
+    // 2. xEventGroupSetBits(checkin)
+  }
+}
+
+// Sample code to write a file to the SD Card
+void write_file_using_fatfs_pi(void) {
+  const char *filename = "file.txt";
+  FIL file; // File handle
+  UINT bytes_written = 0;
+  FRESULT result = f_open(&file, filename, (FA_WRITE | FA_CREATE_ALWAYS));
+
+  if (FR_OK == result) {
+    char string[64];
+    sprintf(string, "Value,%i\n", 123);
+    if (FR_OK == f_write(&file, string, strlen(string), &bytes_written)) {
+    } else {
+      printf("ERROR: Failed to write data to file\n");
+    }
+    f_close(&file);
+  } else {
+    printf("ERROR: Failed to open: %s\n", filename);
+  }
+}
+// void watchdog_task(void *params) {
+//   while(1) {
+//     // ...
+//     // vTaskDelay(200);
+//     // We either should vTaskDelay, but for better robustness, we should
+//     // block on xEventGroupWaitBits() for slightly more than 100ms because
+//     // of the expected production rate of the producer() task and its check-in
+
+//     if (xEventGroupWaitBits(...)) { // TODO
+//       // TODO
+//     }
+//   }
+// }
+
 #endif
 
 int main(void) {
@@ -757,6 +916,7 @@ int main(void) {
   // vTaskDelay(1500);
   xTaskCreate(lab2_led_task1, "LED1", 1024 / sizeof(void *), &led1, 1, NULL);
   // vTaskDelay(1500);
+  sj2_cli__init();
   vTaskStartScheduler();
   // return 0;
 #endif
@@ -815,13 +975,13 @@ int main(void) {
   gpiox__trigger_level(test_switch2, 0);
   // configure_your_gpio_interrupt(); // T/ODO: Setup interrupt by re-using code from Part 0
   NVIC_EnableIRQ(GPIO_IRQn); // Enable interrupt gate for the GPIO
-  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt2);
+  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpio_interrupt2, "unused");
   xTaskCreate(sleep_on_sem_task, "sleep_sem", (512U * 4) / sizeof(void *), &test_led2, 1, NULL);
   vTaskStartScheduler();
 #endif
 
 /// lab 3 part 2
-#if 1
+#if 0
   /* SW0: P1_19; LED0: P2_3;
    * SW1: P1_15; LED1: P1_26;
    * SW2: P0_30; LED2: P1_24;
@@ -936,7 +1096,7 @@ int main(void) {
 /// lab 6 part 2 & 3
 #if 0
   // fprintf(stderr, "core clk:%ld  per_clk: %ld\n", clock__get_core_clock_hz(), clock__get_peripheral_clock_hz());
-  //uart_TR_handler = xSemaphoreCreateMutex();
+  // uart_TR_handler = xSemaphoreCreateMutex();
   const uint32_t peripheral_clock = clock__get_peripheral_clock_hz();
   uart_lab__init(UART_2, peripheral_clock, 9600);
   uart_lab__init(UART_3, peripheral_clock, 9600);
@@ -966,15 +1126,16 @@ int main(void) {
 
 /// Producer Consumer Tasks
 #if 0
-  // sj2_cli__init();
   // TODO: Create your tasks
-  xTaskCreate(producer, "producer", (512U * 4) / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
-  xTaskCreate(consumer, "consumer", (512U * 4) / sizeof(void *), NULL, PRIORITY_LOW, NULL);
+  TaskHandle_t consumer_task_handle;
+  xTaskCreate(producer, "producer", (512U * 4) / sizeof(void *), NULL, PRIORITY_LOW, NULL);
+  xTaskCreate(consumer, "consumer", (512U * 4) / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
   // TODO Queue handle is not valid until you create it
   switch_queue =
       xQueueCreate(3, sizeof(switch_e)); // Choose depth of item being our enum (1 should be okay for this example)
-
+  sj2_cli__init();
   vTaskStartScheduler();
+
 #endif
 
 /// lab 7 CLI task
@@ -983,6 +1144,23 @@ int main(void) {
   static port_pin_s cli_task_led = {2, 3};
   xTaskCreate(cli_led, "cli_led", (512U * 4) / sizeof(void *), &cli_task_led, 1, NULL);
   // vTaskResetRunTimeStats();
+  vTaskStartScheduler();
+#endif
+
+/// midterm question
+#if 0
+  q = xQueueCreate(1, sizeof(int));
+  xTaskCreate(producer, "producer", 1024, NULL, PRIORITY_LOW, NULL);
+  xTaskCreate(consumer, "consumer", 1024, NULL, PRIORITY_LOW, NULL);
+  vTaskStartScheduler();
+#endif
+
+/// watch dog
+#if 1
+  watchdog_queue = xQueueCreate(30, sizeof(acceleration__axis_data_s));
+  xTaskCreate(producer_task, "wd_producer", (512U * 4) / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
+  xTaskCreate(consumer_task, "wd_consumer", (512U * 4) / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
+  sj2_cli__init();
   vTaskStartScheduler();
 #endif
 }
