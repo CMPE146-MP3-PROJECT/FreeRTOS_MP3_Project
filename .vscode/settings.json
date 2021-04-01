@@ -51,6 +51,7 @@
         "xtree": "c",
         "xutility": "c",
         "startup.h": "c",
-        "xstring": "c"
+        "xstring": "c",
+        "ssp2.h": "c"
     }
 }
