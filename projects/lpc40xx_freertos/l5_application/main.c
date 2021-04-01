@@ -860,7 +860,7 @@ void consumer_task(void *params) {
           }
           // string[11] = "\n";
           if (f_lseek(&acc_file, total_bytes_write) == FR_OK) { /* keep aiming the end of the file to append data */
-            // fprintf(stderr, "%s \n", string);
+            fprintf(stderr, "%s \n", string);
             const int fw_status =
                 f_write(&acc_file, string, strlen(string), &bytes_written); // write the string to the sd card
             // fprintf(stderr, "%i bytes has been written, the file write status is: %i\n", bytes_written, fw_status);
@@ -908,7 +908,7 @@ void watchdog_task(void *params) {
     case 0:
       sprintf(string_watchdog_stauts, "Ticks: %i, System halt, all task have been suspended... \n",
               xTaskGetTickCount());
-      fprintf(stderr, "q%s", string_watchdog_stauts);
+      fprintf(stderr, "%s", string_watchdog_stauts);
       write_to_sd(string_watchdog_stauts);
       break;
 
