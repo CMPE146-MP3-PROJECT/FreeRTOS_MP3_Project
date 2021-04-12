@@ -13,6 +13,7 @@
 #include "event_groups.h"
 #include "ff.h"
 #include "gpio.h"
+#include "i2c_slave_init.h"
 #include "periodic_scheduler.h"
 #include "pwm1.h"
 #include "queue.h"
@@ -210,7 +211,7 @@ void sleep_on_sem_task(void *p) {
 #endif
 
 /// lab 3 part 2
-#if 1
+#if 0
 static SemaphoreHandle_t switch_pressed_signal_hw3_part2_30;
 static SemaphoreHandle_t switch_pressed_signal_hw3_part2_31;
 void gpio_interrupt_part2_0(void) { xSemaphoreGiveFromISR(switch_pressed_signal_hw3_part2_30, NULL); } // ISR 1
@@ -732,7 +733,7 @@ void consumer(void *p) { //先运行
 #endif
 
 /// lab 7 CLI task
-#if 0
+#if 1
 void cli_led(void *p) {
   const port_pin_s *led_num = (port_pin_s *)(p);
   gpiox__set_as_output(*led_num);
@@ -1197,9 +1198,12 @@ int main(void) {
 
 /// lab 7 CLI task
 #if 0
-  sj2_cli__init();
+
+  peripherals_init__i2c1_init(0x86);
   static port_pin_s cli_task_led = {2, 3};
   xTaskCreate(cli_led, "cli_led", (512U * 4) / sizeof(void *), &cli_task_led, 1, NULL);
+
+  sj2_cli__init();
   // vTaskResetRunTimeStats();
   vTaskStartScheduler();
 #endif
@@ -1213,13 +1217,22 @@ int main(void) {
 #endif
 
 /// watch dog
-#if 1
+#if 0
   watchdog_queue = xQueueCreate(1, sizeof(acceleration__axis_data_s));
   watchdog_acc_sensor = xEventGroupCreate();
   xTaskCreate(producer_task, "wd_producer", (512U * 4) / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
   xTaskCreate(consumer_task, "wd_consumer", (512U * 4) / sizeof(void *), NULL, PRIORITY_MEDIUM, NULL);
   xTaskCreate(watchdog_task, "doggie", (512U * 4) / sizeof(void *), NULL, PRIORITY_HIGH, NULL);
   sj2_cli__init();
+  vTaskStartScheduler();
+#endif
+
+/// LAB i2c
+#if 1
+  peripherals_init__i2c1_init(0x86);
+  sj2_cli__init();
+  static port_pin_s cli_task_led = {2, 3};
+  xTaskCreate(cli_led, "cli_led", (512U * 4) / sizeof(void *), &cli_task_led, 1, NULL);
   vTaskStartScheduler();
 #endif
 }

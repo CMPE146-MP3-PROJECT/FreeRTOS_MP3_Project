@@ -52,6 +52,14 @@
         "xutility": "c",
         "startup.h": "c",
         "xstring": "c",
-        "ssp2.h": "c"
+        "ssp2.h": "c",
+        "i2c.h": "c",
+        "i2c_slave_init.h": "c",
+        "gpio_lab.h": "c",
+        "common_macros.h": "c",
+        "board_io.h": "c",
+        "peripherals_init.h": "c",
+        "ff.h": "c",
+        "stdbool.h": "c"
     }
 }

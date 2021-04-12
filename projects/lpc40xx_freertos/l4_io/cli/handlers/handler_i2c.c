@@ -80,7 +80,7 @@ static void cli__i2c_write(sl_string_t command_params, app_cli__print_string_fun
     while (sl_string__erase_int(command_params, &value_to_write)) {
       buffer[count] = (uint8_t)value_to_write;
       ++count;
-    }
+    } // 100%
 
     if (i2c__write_slave_data(i2c_bus, slave_address, slave_register, &buffer[0], count)) {
       sl_string__printf(output, "Wrote %u bytes to slave 0x%02X\n", count, slave_address);

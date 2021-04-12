@@ -1,5 +1,6 @@
 #pragma once
 
+#include "i2c_slave_function.h"
 #include <stdbool.h>
 #include <stdint.h>
 
