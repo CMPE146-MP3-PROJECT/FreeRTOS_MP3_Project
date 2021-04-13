@@ -60,6 +60,9 @@
         "board_io.h": "c",
         "peripherals_init.h": "c",
         "ff.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "i2c_slave_function.h": "c",
+        "random": "c",
+        "stdio.h": "c"
     }
 }

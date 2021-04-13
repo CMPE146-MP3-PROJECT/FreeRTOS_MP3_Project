@@ -96,7 +96,7 @@ void lab2_led_task(void *task_parameter) {
 #endif
 
 /// lab 2 part 2 blink separate
-#if 1
+#if 0
 void lab2_led_task0(void *task_parameter) {
   // Type-cast the paramter that was passed from xTaskCreate()
   port_pin_s *led_num = (port_pin_s *)(task_parameter);
@@ -186,7 +186,7 @@ void gpio_interrupt(void) {
 #endif
 
 /// lab 3 part 1
-#if 1
+#if 0
 void gpio_interrupt2(void) {
   fprintf(stderr, "Calling ISR...");
   xSemaphoreGiveFromISR(switch_pressed_signal, NULL);
@@ -271,7 +271,7 @@ void main_func(void *p) {
 
 /// lab 4 part 0
 #if 0
- void pwm_task(void *p) {
+void pwm_task(void *p) {
   pwm1__init_single_edge(1000);
 
   // Locate a GPIO pin that a PWM channel will control
@@ -360,7 +360,7 @@ void pwm_task(void *p) {
   // NOTE: Reuse the code from Part 0
   pwm1__init_single_edge(1000);
   gpio__construct_with_function(GPIO__PORT_2, 0, 1);
-  LPC_IOCON->P2_0 &= ~(1 << 7);
+  LPC_IOCON->P2_0 &= ~(1 << 7); // set pin to Analog mode
   pwm1__set_duty_cycle(PWM1__2_0, 10);
   // uint8_t percent = 0;
   int adc_reading = 0;
@@ -598,7 +598,7 @@ void uart_write_task(void *p) {
 #endif
 
 /// lab 6 part 2
-#if 1
+#if 0
 void uart_interrupt_task(void *p) {
   const char data_get_from_uart_queue;
   while (1) {
@@ -611,7 +611,7 @@ void uart_interrupt_task(void *p) {
 #endif
 
 /// lab 6 part 3
-#if 1
+#if 0
 xSemaphoreHandle uart_TR_handler;
 // This task is done for you, but you should understand what this code is doing
 void board_1_sender_task(void *p) {
@@ -747,7 +747,7 @@ void cli_led(void *p) {
 #endif
 
 /// midterm question
-#if 1
+#if 0
 QueueHandle_t q;
 void producer(void *p) {
   int x;
@@ -954,6 +954,65 @@ void write_to_sd(char string_watchdog_stauts[128]) {
     } else {
       printf("ERROR: Failed to open: %s\n", filename);
     }
+  }
+}
+#endif
+
+/// i2c lab
+#if 1
+static QueueHandle_t i2c_pwm_queue;
+int data_value = 0;
+
+void i2c_slave_buffer_size(void *p) {
+  while (1) {
+    data_value = i2c_memory_utilization();
+    // fprintf(stderr, "data size is: %d \n", data_value);
+    vTaskDelay(5);
+    xQueueSend(i2c_pwm_queue, &data_value, 0);
+  }
+}
+
+void i2c_pwm_led(void *p) {
+  int data_recieved = 0;
+  pwm_init(PWM1__2_0);
+  pwm_init(PWM1__2_1);
+  pwm_init(PWM1__2_2);
+  static double red = 0, green = 0, blue = 0;
+  while (1) {
+    if (xQueueReceive(i2c_pwm_queue, &data_recieved, 10)) {
+      // fprintf(stderr, "data recive is: %i\n", data_recieved);
+      double percent = ((double)data_recieved / 256 * 100);
+      red = percent;
+      green = 100 - percent;
+      blue = 0;
+      // fprintf(stderr, "R:%.2f, G:%.2f, B:%.2f\n", red, green, blue);
+      pwm1__set_duty_cycle(PWM1__2_0, red);
+      pwm1__set_duty_cycle(PWM1__2_1, green);
+      pwm1__set_duty_cycle(PWM1__2_2, blue);
+    }
+  }
+}
+
+void pwm_init(pwm1_channel_e pwm_channel) {
+  pwm1__init_single_edge(1000);
+  switch (pwm_channel) {
+  case 0:
+    gpio__construct_with_function(GPIO__PORT_2, 0, 1); // configure pin function
+    LPC_IOCON->P2_0 &= ~(1 << 7);                      // set pin to Analog mode
+    pwm1__set_duty_cycle(PWM1__2_0, 10);
+    break;
+
+  case 1:
+    gpio__construct_with_function(GPIO__PORT_2, 1, 1);
+    LPC_IOCON->P2_1 &= ~(1 << 7); // set pin to Analog mode
+    pwm1__set_duty_cycle(PWM1__2_1, 10);
+    break;
+
+  case 2:
+    gpio__construct_with_function(GPIO__PORT_2, 2, 1);
+    LPC_IOCON->P2_2 &= ~(1 << 7); // set pin to Analog mode
+    pwm1__set_duty_cycle(PWM1__2_2, 10);
+    break;
   }
 }
 #endif
@@ -1229,10 +1288,15 @@ int main(void) {
 
 /// LAB i2c
 #if 1
-  peripherals_init__i2c1_init(0x86);
+  i2c_pwm_queue = xQueueCreate(1, sizeof(uint8_t)); // important to do this initailize step
+  peripherals_init__i2c1_init(0x66);
+
   sj2_cli__init();
   static port_pin_s cli_task_led = {2, 3};
   xTaskCreate(cli_led, "cli_led", (512U * 4) / sizeof(void *), &cli_task_led, 1, NULL);
+
+  xTaskCreate(i2c_slave_buffer_size, "i2c_to_pwm", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(i2c_pwm_led, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
 #endif
 }

@@ -6,5 +6,3 @@
 #include <stdint.h>
 
 void peripherals_init__i2c1_init(uint8_t slave_address_to_respond_to);
-
-void i2c1__slave_init(uint8_t slave_address_to_respond_to);
