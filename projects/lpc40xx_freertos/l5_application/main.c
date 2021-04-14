@@ -52,7 +52,7 @@ void mp3_reader_task(void *p) {
 
   while (1) {
     xQueueReceive(Q_songname, &name, portMAX_DELAY);
-    fprintf(stderr, "Received song to play: %d\n", name);
+    fprintf(stderr, "Received song to play: %s\n", name);
 
     // open_file();
     // while (!file.end()) {
