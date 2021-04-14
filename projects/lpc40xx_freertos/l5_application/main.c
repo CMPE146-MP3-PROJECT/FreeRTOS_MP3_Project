@@ -79,6 +79,22 @@ void mp3_player_task(void *p) {
     vTaskDelay(10000);
   }
 }
+
+void cli_led(void *p) {
+  const port_pin_s *led_num = (port_pin_s *)(p);
+  gpiox__set_as_output(*led_num);
+  while (1) {
+    gpiox__set_low(*led_num);
+    vTaskDelay(300);
+    gpiox__set_high(*led_num);
+    vTaskDelay(300);
+    gpiox__set_low(*led_num);
+    vTaskDelay(300);
+    gpiox__set_high(*led_num);
+    vTaskDelay(1000);
+  }
+}
+
 #endif
 
 int main(void) {
@@ -87,6 +103,8 @@ int main(void) {
   Q_songname = xQueueCreate(1, sizeof(songname));
   Q_songdata = xQueueCreate(1, 512);
   sj2_cli__init();
+  static port_pin_s cli_task_led = {2, 3};
+  xTaskCreate(cli_led, "cli_led", (512U * 4) / sizeof(void *), &cli_task_led, 1, NULL);
   xTaskCreate(mp3_reader_task, "song_name", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(mp3_player_task, "play_song", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
