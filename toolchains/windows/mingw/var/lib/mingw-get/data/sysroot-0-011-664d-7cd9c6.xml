@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<sysroot id="sysroot-0-011-664d-7cd9c6" path="%R/msys/1.0">
+    <installed tarname="msysCORE-1.0.19-1-msys-1.0.19-lic.tar.xz" />
+    <installed tarname="msysCORE-1.0.19-1-msys-1.0.19-doc.tar.xz" />
+    <installed tarname="w32api-3.14-3-msys-1.0.12-dev.tar.lzma" />
+    <installed tarname="msysCORE-1.0.19-1-msys-1.0.19-dev.tar.xz" />
+    <installed tarname="msysCORE-1.0.19-1-msys-1.0.19-bin.tar.xz">
+        <requires eq="msys-core-%-msys-%-doc.tar" />
+        <requires eq="msys-core-%-msys-%-lic.tar" />
+    </installed>
+    <installed tarname="binutils-2.19.51-3-msys-1.0.13-bin.tar.lzma">
+        <requires ge="msys-core-*-msys-*-bin.tar" />
+    </installed>
+</sysroot>
