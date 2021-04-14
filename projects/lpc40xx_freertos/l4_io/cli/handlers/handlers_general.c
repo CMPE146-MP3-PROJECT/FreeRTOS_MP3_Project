@@ -88,6 +88,11 @@ app_cli_status_e cli__task_list(app_cli__argument_t argument, sl_string_t user_i
   return APP_CLI_STATUS__SUCCESS;
 }
 
+// CLI needs access to the QueueHandle_t where you can queue the song name
+// One way to do this is to declare 'QueueHandle_t' in main() that is NOT static
+// and then extern it here
+extern QueueHandle_t Q_songname;
+
 static void cli__task_list_print(sl_string_t output_string, app_cli__print_string_function cli_output) {
   void *unused_cli_param = NULL;
 

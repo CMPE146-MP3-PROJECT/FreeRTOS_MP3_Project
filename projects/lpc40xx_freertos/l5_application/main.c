@@ -1,4 +1,5 @@
 #include "FreeRTOS.h"
+#include "app_cli.h"
 #include "board_io.h"
 #include "common_macros.h"
 #include "gpio_isr.h"
@@ -1017,6 +1018,62 @@ void pwm_init(pwm1_channel_e pwm_channel) {
 }
 #endif
 
+/******************************************************************************************/
+/***************************************MP3 PROJECT****************************************/
+#if 1
+typedef char songname_t[16];
+typedef char songname[32];
+
+QueueHandle_t Q_songname;
+QueueHandle_t Q_songdata;
+
+app_cli_status_e cli__mp3_play(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
+                               app_cli__print_string_function cli_output) {
+  // user_input_minus_command_name is actually a 'char *' pointer type
+  // We tell the Queue to copy 32 bytes of songname from this location
+  songname songname = user_input_minus_command_name;
+  xQueueSend(Q_songname, &songname, portMAX_DELAY);
+
+  printf("Sent %s over to the Q_songname\n", user_input_minus_command_name);
+  return APP_CLI_STATUS__SUCCESS;
+}
+
+// Reader tasks receives song-name over Q_songname to start reading it
+void mp3_reader_task(void *p) {
+  songname name;
+  char bytes_512[512];
+
+  while (1) {
+    xQueueReceive(Q_songname, &name, portMAX_DELAY);
+    fprintf(stderr, "Received song to play: %d\n", name);
+
+    // open_file();
+    // while (!file.end()) {
+    //   read_from_file(bytes_512);
+    //   xQueueSend(Q_songdata, &bytes_512[0], portMAX_DELAY);
+    // }
+    // close_file();
+  }
+}
+
+// Player task receives song data over Q_songdata to send it to the MP3 decoder
+void mp3_player_task(void *p) {
+  char bytes_512[512];
+
+  while (1) {
+    // xQueueReceive(Q_songdata, &bytes_512[0], portMAX_DELAY);
+    // for (int i = 0; i < sizeof(bytes_512); i++) {
+    //   while (!mp3_decoder_needs_data()) {
+    //     vTaskDelay(1);
+    //   }
+
+    //   spi_send_to_mp3_decoder(bytes_512[i]);
+    // }
+    vTaskDelay(10000);
+  }
+}
+#endif
+
 int main(void) {
 /// lab 2 part 0, 1
 #if 0
@@ -1287,7 +1344,7 @@ int main(void) {
 #endif
 
 /// LAB i2c
-#if 1
+#if 0
   i2c_pwm_queue = xQueueCreate(1, sizeof(uint8_t)); // important to do this initailize step
   peripherals_init__i2c1_init(0x66);
 
@@ -1297,6 +1354,15 @@ int main(void) {
 
   xTaskCreate(i2c_slave_buffer_size, "i2c_to_pwm", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(i2c_pwm_led, "pwm_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  vTaskStartScheduler();
+#endif
+
+#if 1
+  Q_songname = xQueueCreate(1, sizeof(songname));
+  Q_songdata = xQueueCreate(1, 512);
+  sj2_cli__init();
+  xTaskCreate(mp3_reader_task, "song_name", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(mp3_player_task, "play_song", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   vTaskStartScheduler();
 #endif
 }

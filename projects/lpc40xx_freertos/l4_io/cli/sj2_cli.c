@@ -42,9 +42,14 @@ void sj2_cli__init(void) {
                                                                            "you can chose to suspend or resume a task\n"
                                                                            "cli input: tcl <0/1> <task name>",
                                                .app_cli_handler = cli__my_task_control}; ///<--my task here
-
+  static app_cli__command_s mp3_song_name = {.command_name = "play",
+                                             .help_message_for_command = "sending song name to MP3_queue\n"
+                                                                         "I don't know what to put here yet\n"
+                                                                         "LOL",
+                                             .app_cli_handler = cli__mp3_play}; ///<--my MP3 task here
   // Add your CLI commands in descending sorted order to make them appear in sorted order
   app_cli__add_command_handler(&sj2_cli_struct, &crash);
+  app_cli__add_command_handler(&sj2_cli_struct, &mp3_song_name);   ///<--my MP3 task here
   app_cli__add_command_handler(&sj2_cli_struct, &my_task_control); ///<--my task here
   app_cli__add_command_handler(&sj2_cli_struct, &task_list);
   app_cli__add_command_handler(&sj2_cli_struct, &uart3_transmit);

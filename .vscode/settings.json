@@ -63,6 +63,9 @@
         "stdbool.h": "c",
         "i2c_slave_function.h": "c",
         "random": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "typeindex": "c",
+        "typeinfo": "c",
+        "xlocale": "c"
     }
 }
