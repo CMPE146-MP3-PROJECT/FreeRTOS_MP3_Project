@@ -1,6 +1,7 @@
 
 ## lpc40xx_FreeRTOS_MP3_Project
-* `MP3 player` based on ‘FreeROTS’ Realtime Embedded System; 
+* `MP3 player` based on Realtime Embedded System; 
+* Main OS: FreeROTS V8.2.0;
 * Main CPU: LPC4078F from NXP Semiconductors; 
 * Main language: C17(ISO/IEC 9899:2018);
 * Build system: SCons v4.1.0;
