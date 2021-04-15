@@ -66,6 +66,7 @@
         "stdio.h": "c",
         "typeindex": "c",
         "typeinfo": "c",
-        "xlocale": "c"
+        "xlocale": "c",
+        "mp3_codec_spi.h": "c"
     }
 }
