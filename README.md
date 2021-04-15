@@ -7,7 +7,7 @@
 * Main language: C17 (ISO/IEC 9899:2018);
 * Build system: SCons v4.1.0;
 ## Hardware info:
-* Programmable-SoC: SJTwo from SCE.SJSU;
+* Programmable-SoC: SJTwo board from SCE.SJSU;
 * MP3 decoder: Adafruit VS1053 Codec v4, [you can download datasheet here](https://cdn-shop.adafruit.com/datasheets/vs1053.pdf).
 # How to work with this Git repo:
 * please create you own branch ([here is how to](https://gist.github.com/nanusdad/7e516743e5e709073f7e)) and push to that branch, **leave the main branch empty FOR NOW**;
