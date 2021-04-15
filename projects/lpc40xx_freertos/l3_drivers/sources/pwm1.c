@@ -34,7 +34,8 @@ void pwm1__set_duty_cycle(pwm1_channel_e pwm1_channel, float duty_cycle_in_perce
   const uint32_t match_reg_value = (mr0_reg_val * duty_cycle_in_percent) / 100;
 
   switch (pwm1_channel) {
-  case PWM1__2_0:
+  // case PWM1__2_0:
+  case PWM1__1_18:
     LPC_PWM1->MR1 = match_reg_value;
     break;
   case PWM1__2_1:

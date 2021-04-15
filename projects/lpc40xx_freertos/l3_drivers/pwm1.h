@@ -7,7 +7,8 @@
 
 /// Only the below PWM1 channels are available on SJ2 board
 typedef enum {
-  PWM1__2_0 = 0, ///< Controls P2.0
+  // PWM1__2_0 = 0, ///< Controls P2.0
+  PWM1__1_18 = 0,
   PWM1__2_1 = 1, ///< Controls P2.1
   PWM1__2_2 = 2, ///< Controls P2.2
   PWM1__2_4 = 4, ///< Controls P2.4

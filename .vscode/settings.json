@@ -67,6 +67,10 @@
         "typeindex": "c",
         "typeinfo": "c",
         "xlocale": "c",
-        "mp3_codec_spi.h": "c"
+        "mp3_codec_spi.h": "c",
+        "sensors.h": "c",
+        "pwm1.h": "c",
+        "mp3_functions.h": "c",
+        "corecrt.h": "c"
     }
 }
