@@ -3,7 +3,7 @@
 * `MP3 player` based on Realtime Embedded System; 
 * Main OS: FreeROTS V8.2.0;
 * Main CPU: LPC4078F from NXP Semiconductors; 
-* Main language: C17(ISO/IEC 9899:2018);
+* Main language: C17 (ISO/IEC 9899:2018);
 * Build system: SCons v4.1.0;
 * Main decoder use: VS1053 Codec + MicroSD Breakout - MP3/WAV/MIDI/OGG Play + Record - v4, [datasheet](https://cdn-shop.adafruit.com/datasheets/vs1053.pdf)
 ## How to work with this Git repo:
