@@ -1,7 +1,7 @@
 
 ## lpc40xx_FreeRTOS_MP3_Project
 
-* `MP3 player` based on FreeROTS Realtime Embedded System; Main CPU: LPC4078F from NXP; Main language: C;
+* `MP3 player` based on ‘FreeROTS’ Realtime Embedded System; Main CPU: LPC4078F from NXP; Main language: C;
 * Main decoder use: VS1053 Codec + MicroSD Breakout - MP3/WAV/MIDI/OGG Play + Record - v4, [datasheet](https://cdn-shop.adafruit.com/datasheets/vs1053.pdf)
 ## How to work with this Git repo:
 * please create you own branch ([here is how to](https://gist.github.com/nanusdad/7e516743e5e709073f7e)) and push to that branch, **leave the main branch empty FOR NOW**;
