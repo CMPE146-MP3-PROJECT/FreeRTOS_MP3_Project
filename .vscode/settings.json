@@ -71,6 +71,8 @@
         "sensors.h": "c",
         "pwm1.h": "c",
         "mp3_functions.h": "c",
-        "corecrt.h": "c"
+        "corecrt.h": "c",
+        "clock.h": "c",
+        "stdlib.h": "c"
     }
 }

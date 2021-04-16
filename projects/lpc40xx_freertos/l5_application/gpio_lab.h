@@ -7,7 +7,7 @@
 typedef struct {
   uint8_t port;
   uint8_t pin;
-  int port_pin;
+  // int port_pin;
 } port_pin_s;
 
 typedef enum {

@@ -28,15 +28,19 @@
 
 /******************************************************************************************/
 /***************************************MP3 PROJECT****************************************/
-#if 1
+#define SD_MP3_FILE_READ_WRITE_TEST 0
+#define MP3_DECODER_STARTUP 1
+
+#if MP3_DECODER_STARTUP
+
 typedef char songname_t[16];
 typedef char songname[32];
-typedef char song_data_t[512];
-
-#define SD_MP3_FILE_READ_WRITE_TEST 0
+typedef uint8_t song_data_t[512];
 
 QueueHandle_t Q_songname;
 QueueHandle_t Q_songdata;
+
+static SemaphoreHandle_t song_playing_indication;
 
 app_cli_status_e cli__mp3_play(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
                                app_cli__print_string_function cli_output) {
@@ -65,7 +69,8 @@ void mp3_reader_task(void *p) {
   FRESULT f_result; /* FatFs function common result code */
   while (1) {
     if (xQueueReceive(Q_songname, &song_file_name, 1000)) {
-      fprintf(stderr, " Received song to play: %s\n", song_file_name);
+      fprintf(stderr, "\nReceived song to play: %s\n", song_file_name);
+      // xSemaphoreGive(song_playing_indication);
       f_result = f_open(&song_file, song_file_name, FA_READ); // open_file();
       if (FR_OK == f_result) {
         while (f_eof(&song_file) == 0) { // while not reachh the end of the file
@@ -88,19 +93,24 @@ void mp3_player_task(void *p) {
   song_data_t byte_512_song_data;
   UINT bytes_written = 0;
   FIL acc_file;
-  int byte_sent_number = 0;
+  int byte_send_per_time = 32;
   const *acc_data_file_name = "sensor_data_sd.txt";
 
   while (1) {
     if (xQueueReceive(Q_songdata, &byte_512_song_data, portMAX_DELAY)) {
-      for (int i = 0; i < sizeof(byte_512_song_data); i++) {
+      int byte_sent_number = 0;
+      while (byte_sent_number < sizeof(byte_512_song_data)) {
         while (!mp3_decoder_needs_data()) {
           vTaskDelay(1);
         }
         adafruit_cs();
-        spi_send_from_main_to_mp3_decoder(byte_512_song_data[i]);
+        for (int j = byte_sent_number; j < (byte_sent_number + byte_send_per_time); j++) {
+          // spi_send_from_main_to_mp3_decoder(byte_512_song_data[i]);
+          spi0__mp3_exchange_byte(byte_512_song_data[j]);
+          // puts("playing...");
+        }
+        byte_sent_number += byte_send_per_time;
         adafruit_ds();
-        byte_sent_number++;
       }
       // vTaskDelay(100000);
 #if SD_MP3_FILE_READ_WRITE_TEST
@@ -123,8 +133,13 @@ typedef enum {
   two = 0x2,
 } x_two;
 
+void write_data(uint16_t *ppp) { *ppp = 0x1234; }
+
 void system_led(void *p) {
   // const port_pin_s *led_num = (port_pin_s *)(p);
+  // uint16_t aaa;
+  // write_data(&aaa);
+  // fprintf(stderr, "aaa value: 0x%X", aaa);
   static port_pin_s system_led = {1, 18};
   pwm1__init_single_edge(1000);
   // gpio__construct_with_function(GPIO__PORT_1, 18, GPIO__FUNCTION_2); // PWM
@@ -141,21 +156,41 @@ void system_led(void *p) {
   }
 }
 
-#endif
+void system_init_count(void) {
+  for (int i = 1; i <= 100; i++) {
+    if (i == 1) {
+      printf("system Initializing %3d%%", i);
+    } else {
+      printf("\b\b\b\b%3d%%", i);
+    }
+    fflush(stdout);
+  }
+}
 
 int main(void) {
-
-#if 1
+  /******************define system queues*********************/
   Q_songname = xQueueCreate(1, sizeof(songname));
   Q_songdata = xQueueCreate(1, 512);
-
+  /***********************************************************/
+  /****************define system semaphore********************/
+  song_playing_indication = xSemaphoreCreateBinary();
+  /***********************************************************/
+  /*****************system drivers startup********************/
   const uint32_t spi_clock_mhz = 24;
   sj2_cli__init();
   spi0__mp3_init(spi_clock_mhz);
+  // ssp2__lab_init(spi_clock_mhz);
+  SCI_enable_DAC();
+  system_init_count();
   // static port_pin_s cli_task_led = {2, 3};
+  // SCI_select_system_mode(sdi_share_mode);
+  // SCI_set_CLOCKF(0xC000); // SC_MULT[15:13] = 110 (XTALIx4.5); SC_ADD[12:11] = 00 (No modification)
+  // SCI_set_volume(volume_quite);
+  /***********************************************************/
+
   xTaskCreate(system_led, "system_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  xTaskCreate(mp3_reader_task, "song_name", (1500 + (512U * 4) / sizeof(song_data_t)), NULL, 1, NULL);
-  xTaskCreate(mp3_player_task, "play_song", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(mp3_reader_task, "send_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 2, NULL);
+  xTaskCreate(mp3_player_task, "play_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 3, NULL);
   vTaskStartScheduler();
 #endif
 }

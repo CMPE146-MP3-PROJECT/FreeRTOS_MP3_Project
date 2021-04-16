@@ -97,6 +97,11 @@ adesto_flash_id_s adesto_read_signature(void) {
 void ssp2__lab_init(uint32_t max_clock_mhz) {
   // Refer to LPC User manual and setup the register bits correctly
   // a) Power on Peripheral
+
+  adesto_ds();
+  gpio__construct_with_function(GPIO__PORT_0, 6, GPIO__FUNCITON_0_IO_PIN);
+  LPC_GPIO0->DIR |= (1 << 6);
+
   LPC_SC->PCONP |= (1 << 20); // power on SSP2
   // LPC_SC->PCLKSEL = 4; //reset Peripheral Clock Selection register
   // LPC_SC->PCLKSEL |= (0b10 < 0); // set Peripheral Clock /2 by default
@@ -104,7 +109,7 @@ void ssp2__lab_init(uint32_t max_clock_mhz) {
   LPC_SSP2->CR0 |= (7 << 0); // select data size for SSP2 as 8 bits
   LPC_SSP2->CR1 |= (1 << 1); // enable SSP controller for SSP2
   // c) Setup prescalar register to be <= max_clock_mhz
-  const uint32_t cur_cpu_clk_mhz = UINT32_C(96) * 1000 * 1000;
+  const uint32_t cur_cpu_clk_mhz = UINT32_C(96); /* * 1000 * 1000;*/
   uint8_t devider_prescalar = 2;
   while (max_clock_mhz < (cur_cpu_clk_mhz / devider_prescalar) && devider_prescalar <= 254) {
     devider_prescalar += 2;
@@ -113,6 +118,7 @@ void ssp2__lab_init(uint32_t max_clock_mhz) {
 }
 
 void ssp2__init_spi_pins(void) {
+
   gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCITON_0_IO_PIN);
   gpio__construct_with_function(GPIO__PORT_1, 0, GPIO__FUNCTION_4); // enable SSP2_SCK
 
