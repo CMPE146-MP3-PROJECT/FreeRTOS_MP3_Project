@@ -45,7 +45,7 @@ void read_keys(void) {
   int result_arrary[4];
 
   IO_pins_value_write(1);                      // write 1110 to keypad
-  int *c1 = IO_pins_value_read(result_arrary); // read
+  int *c1 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
     if (c1[i] != 1) {
       // fprintf(stderr, "%c", key[0 + i]);
@@ -57,7 +57,7 @@ void read_keys(void) {
   }
 
   IO_pins_value_write(2);                      // write 1101 to keypad
-  int *c2 = IO_pins_value_read(result_arrary); // read
+  int *c2 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
     if (c2[i] != 1) {
       // fprintf(stderr, "%c", key[4 + i]);
@@ -68,7 +68,7 @@ void read_keys(void) {
   }
 
   IO_pins_value_write(3);                      // write 1011 to keypad
-  int *c3 = IO_pins_value_read(result_arrary); // read
+  int *c3 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
     if (c3[i] != 1) {
       // fprintf(stderr, "%c", key[8 + i]);
@@ -79,10 +79,11 @@ void read_keys(void) {
   }
 
   IO_pins_value_write(4);                      // write 0111 to keypad
-  int *c4 = IO_pins_value_read(result_arrary); // read from
+  int *c4 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
     if (c4[i] != 1) {
-      // break;
+      // which_bottom = key[12 + i];
+      // xQueueSend(Q_keypad_bottom, &which_bottom, 0);
     }
   }
 
@@ -98,28 +99,28 @@ void IO_pins_value_write(int write_state) {
     gpiox__set_high(IO_to_key_pin2);
     gpiox__set_high(IO_to_key_pin3);
     gpiox__set_low(IO_to_key_pin4);
-    vTaskDelay(5);
+    // vTaskDelay(5);
     break;
   case 2: // 1101
     gpiox__set_high(IO_to_key_pin1);
     gpiox__set_high(IO_to_key_pin2);
     gpiox__set_low(IO_to_key_pin3);
     gpiox__set_high(IO_to_key_pin4);
-    vTaskDelay(5);
+    // vTaskDelay(5);
     break;
   case 3: // 1011
     gpiox__set_high(IO_to_key_pin1);
     gpiox__set_low(IO_to_key_pin2);
     gpiox__set_high(IO_to_key_pin3);
     gpiox__set_high(IO_to_key_pin4);
-    vTaskDelay(5);
+    // vTaskDelay(5);
     break;
   case 4: // 0111 (1111)
     gpiox__set_low(IO_to_key_pin1);
     gpiox__set_high(IO_to_key_pin2);
     gpiox__set_high(IO_to_key_pin3);
     gpiox__set_high(IO_to_key_pin4);
-    vTaskDelay(5);
+    // vTaskDelay(5);
     break;
   }
 }
@@ -132,5 +133,5 @@ int *IO_pins_value_read(int *result_arrary) {
   result_arrary[3] = gpiox__get_level(key_to_IO_pin1);
   // printf(stderr, "result arrary: %ls", result_arrary);
   return result_arrary;
-  // https://www.awaimai.com/2819.html <<<-passing a array to a function
+  // https://www.awaimai.com/2819.html <<<-passing a array to a function using DAA (dynamically allocated array)
 }

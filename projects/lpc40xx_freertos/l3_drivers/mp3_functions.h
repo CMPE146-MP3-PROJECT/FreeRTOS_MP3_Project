@@ -34,15 +34,21 @@
 #define factory_EarSpeaker_low_mpde 0x4810
 /****************************************************************************/
 /*****************SET_VOLUME register value, datasheet pg.47*****************/
-#define maximum_volume 0x0000   // mp3_function.h
-#define volume_laud 0x0707      // L:7*(-0.5dB)/R:7*(-0.5dB)->L:-3.5dB/R:-3.5dB, mp3_function.h
-#define volume_quite 0x2424     // L:36*(-0.5dB)/R:36*(-0.5dB)->L:-18.0dB/R:-18.0dB,mp3_function.h
-#define total_silence 0xFEFE    // mp3_function.h
 #define analog_powerdowm 0xFFFF // mp3_function.h
+#define volume_laud 0x0707      // L:7*(-0.5dB)/R:7*(-0.5dB)->L:-3.5dB/R:-3.5dB, mp3_function.h
+#define volume_quite 0x3232
+#define volume_normal 0x2020  // L:36*(-0.5dB)/R:36*(-0.5dB)->L:-18.0dB/R:-18.0dB,mp3_function.h
+#define total_silence 0xFEFE  // mp3_function.h
+#define maximum_volume 0x0000 // mp3_function.h
 /****************************************************************************/
-/******************AU_DATA register value, datasheet pg.47*******************/
+/******************AU_DATA register value, datasheet pg.43*******************/
 #define stereo_decoding 0xAC45 // 44100 Hz stereo data reads
 #define mono_decoding 0x2B10   // 11025 Hz mono data reads
+/****************************************************************************/
+/***************TREBLE_BASE register value, datasheet pg.41*******************/
+#define bass_enhance 0x00F6
+#define vocal_enhance 0x7A00
+#define no_adjustment 0x0000
 /****************************************************************************/
 
 typedef struct {
@@ -70,6 +76,7 @@ void SCI_select_system_mode(uint16_t SYSTEM_MODE);
 void SCI_set_CLOCKF(uint16_t CLOCKF_REG_VALUE);
 void SCI_set_volume(uint16_t SET_VOLUME);
 void SCI_set_mono_stereo(uint16_t AU_DATA);
+void SCI_set_bass_treble(uint16_t TREBLE_BASE);
 
 void SCI_enable_DAC(void);
 

@@ -103,11 +103,15 @@ void mp3_player_task(void *p) {
     if (xQueueReceive(Q_songdata, &byte_512_song_data, portMAX_DELAY)) {
       int byte_sent_number = 0;
       while (byte_sent_number < sizeof(byte_512_song_data)) {
+        // while (mp3_decoder_needs_data() != 1) {
+        //   printf("Bitstream FIFO not ready\n");
+        //   vTaskDelay(portMAX_DELAY);
+        // }
         while (mp3_decoder_needs_data() != 1) {
-          printf("Bitstream FIFO not ready\n");
-          vTaskDelay(portMAX_DELAY);
+          // printf("Bitstream FIFO not ready\n");
+          vTaskDelay(1);
         }
-        adafruit_cs();
+        // adafruit_cs();
         ADA_DCS();
         for (int j = byte_sent_number; j < (byte_sent_number + byte_send_per_time); j++) {
           // spi_send_from_main_to_mp3_decoder(byte_512_song_data[i]);
@@ -116,7 +120,7 @@ void mp3_player_task(void *p) {
         }
         byte_sent_number += byte_send_per_time;
         ADA_DDS();
-        adafruit_ds();
+        // adafruit_ds();
       }
       // vTaskDelay(100000);
 #if SD_MP3_FILE_READ_WRITE_TEST
@@ -174,11 +178,7 @@ void system_init_count(void) {
 }
 
 void key_press_detect(void) {
-  port_pin_s key_pad_interrupt_pin = {0, 1};
   while (1) {
-    // if (gpiox__get_level(key_pad_interrupt_pin) != 1) {
-    //   xSemaphoreGive(key_press_indication);
-    // }
     read_keys();
   }
 }
@@ -187,6 +187,10 @@ void key_press_ISR(void) {
   while (1) {
     if (xQueueReceive(Q_keypad_bottom, &key, 1000)) {
       fprintf(stderr, "key pressed is: %c\n", key);
+      // switch (key){ //https://www.yiibai.com/book/article/820 <<-switch a char
+      //   case 'B':
+      //   break;
+      // }
     } else {
       fprintf(stderr, "no key has been pressed\n");
     }
@@ -204,7 +208,7 @@ int main(void) {
   key_press_indication = xSemaphoreCreateBinary();
   /***********************************************************/
   /*****************system drivers startup********************/
-  const uint32_t spi_clock_mhz = 24;
+  const uint32_t spi_clock_mhz = 1;
   sj2_cli__init();
   key_pins_init();
   spi0__mp3_init(spi_clock_mhz);
@@ -217,7 +221,7 @@ int main(void) {
   // SCI_set_volume(volume_quite);
   /***********************************************************/
 
-  xTaskCreate(system_led, "system_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  // xTaskCreate(system_led, "system_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(mp3_reader_task, "send_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 2, NULL);
   xTaskCreate(mp3_player_task, "play_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 3, NULL);
   xTaskCreate(key_press_detect, "key_detect", (512U * 4) / sizeof(void *), NULL, 3, NULL);

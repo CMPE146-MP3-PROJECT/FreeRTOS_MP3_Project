@@ -59,11 +59,14 @@ void spi0__mp3_init(uint32_t max_spi_clock_mhz) {
   LPC_SSP0->CR1 |= spi_controller_bit_mask; // enable spi0 controller
   // c) Setup prescalar register to be <= max_clock_mhz
   const uint32_t cur_cpu_clk_mhz = UINT32_C(96) * 1000 * 1000;
-  uint8_t devider_prescalar = 2;
-  while (max_spi_clock_mhz < (cur_cpu_clk_mhz / devider_prescalar) && devider_prescalar <= 254) {
-    devider_prescalar += 2;
-  }
-  LPC_SSP2->CPSR = devider_prescalar;
+
+  uint8_t devider_prescalar = (uint8_t)(96U / max_spi_clock_mhz);
+  // uint8_t devider_prescalar = 2;
+  // while (max_spi_clock_mhz < (cur_cpu_clk_mhz / devider_prescalar) && devider_prescalar <= 254) {
+  //   devider_prescalar += 2;
+  // }
+  printf("pre_dev: 0x%X", devider_prescalar);
+  LPC_SSP0->CPSR = devider_prescalar;
 }
 
 uint8_t spi0__mp3_exchange_byte(uint8_t data_out) {

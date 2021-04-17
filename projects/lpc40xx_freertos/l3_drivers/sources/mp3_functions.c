@@ -41,6 +41,11 @@ void SCI_set_mono_stereo(uint16_t AU_DATA) {
   puts("sterro decoding mode...");
 }
 
+void SCI_set_bass_treble(uint16_t TREBLE_BASE) {
+  SCI_write_16bits_reg_value(SCI_BASS, TREBLE_BASE);
+  puts("no BASS adjustment...");
+}
+
 void SCI_enable_DAC(void) {
 
   adafruit_ds();
@@ -48,11 +53,12 @@ void SCI_enable_DAC(void) {
   adafruit_hw_rst();
   // vTaskDelay(100);
 
-  SCI_select_system_mode(factory_EarSpeaker_low_mpde);
-  SCI_select_system_mode(factory_EarSpeaker_low_mpde);
+  SCI_select_system_mode(factory_sysytem_mode);
+  SCI_select_system_mode(factory_sysytem_mode);
   SCI_set_CLOCKF(0xC000); // SC_MULT[15:13] = 110 (XTALIx4.5); SC_ADD[12:11] = 00 (No modification)
-  SCI_set_volume(volume_quite);
+  SCI_set_volume(volume_normal);
   SCI_set_mono_stereo(stereo_decoding);
+  SCI_set_bass_treble(no_adjustment);
 
   SCI_16bits_data_s mode_red_data = SCI_read_16bits_reg_value(SCI_MODE);
   fprintf(stderr, "decoder mode_reg msb: 0x%X, lsb: 0x%X\n", mode_red_data.byte_one_msb, mode_red_data.byte_two_lsb);
