@@ -17,4 +17,4 @@ void spi0__mp3_init(uint32_t max_spi_clock_mhz);
 
 uint8_t spi0__mp3_exchange_byte(uint8_t data_out);
 
-bool mp3_decoder_needs_data();
+int mp3_decoder_needs_data();

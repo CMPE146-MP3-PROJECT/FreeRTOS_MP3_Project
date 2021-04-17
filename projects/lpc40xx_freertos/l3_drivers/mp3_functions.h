@@ -31,6 +31,7 @@
 /****************SYSTEM_MODE register value, datasheet pg.20*****************/
 #define factory_sysytem_mode 0x4800 // SM_SDINEW set and LIN1 selected, mp3_function.h
 #define sdi_share_mode 0x0C00       // SM_SDISHARE enableed, XDCS driven by XCS, mp3_function.h
+#define factory_EarSpeaker_low_mpde 0x4810
 /****************************************************************************/
 /*****************SET_VOLUME register value, datasheet pg.47*****************/
 #define maximum_volume 0x0000   // mp3_function.h

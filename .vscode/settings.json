@@ -73,6 +73,7 @@
         "mp3_functions.h": "c",
         "corecrt.h": "c",
         "clock.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "keypad.h": "c"
     }
 }

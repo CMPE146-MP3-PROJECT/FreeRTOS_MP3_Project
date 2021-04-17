@@ -79,4 +79,4 @@ uint8_t spi0__mp3_exchange_byte(uint8_t data_out) {
   //}
 }
 
-bool mp3_decoder_needs_data() { return gpiox__get_level(decoder_spi_ready_transfer_pin); }
+int mp3_decoder_needs_data() { return gpiox__get_level(decoder_spi_ready_transfer_pin); }

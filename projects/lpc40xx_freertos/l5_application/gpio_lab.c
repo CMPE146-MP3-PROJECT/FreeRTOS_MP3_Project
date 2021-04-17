@@ -57,15 +57,22 @@ void gpiox__set(port_pin_s pin_num, bool high) {
   }
 }
 
-bool gpiox__get_level(port_pin_s pin_num) {
+int gpiox__get_level(port_pin_s pin_num) {
+  int status = 0;
   if (pin_num.port == 0) {
-    return (LPC_GPIO0->PIN & (1 << pin_num.pin));
+    if (LPC_GPIO0->PIN & (1 << pin_num.pin)) {
+      status = 1;
+    }
   } else if (pin_num.port == 1) {
-    return (LPC_GPIO1->PIN & (1 << pin_num.pin));
+    if (LPC_GPIO1->PIN & (1 << pin_num.pin)) {
+      status = 1;
+    }
   } else if (pin_num.port == 2) {
-    return (LPC_GPIO2->PIN & (1 << pin_num.pin));
+    if (LPC_GPIO2->PIN & (1 << pin_num.pin)) {
+      status = 1;
+    }
   }
-  return false;
+  return status;
 }
 
 void gpiox__trigger_level(port_pin_s gpio_pin, int posedge_or_negedge) {
