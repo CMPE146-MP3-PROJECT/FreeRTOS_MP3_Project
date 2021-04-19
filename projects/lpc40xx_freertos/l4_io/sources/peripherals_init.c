@@ -26,7 +26,7 @@ void peripherals_init(void) {
   const char *mount_info = peripherals_init__mount_sd_card();
 
   // UART is initialized, so we can now start using printf()
-  const char *line = "--------------------------------------------------------------------------------";
+  const char *line = "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-PROJECT GROUP 3-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n";
   printf("\n%s\n%s(): Low level startup\n%s\n", line, __FUNCTION__, mount_info);
 
   peripherals_init__i2c_init();
@@ -88,7 +88,7 @@ static void peripherals_init__i2c_init(void) {
 
   for (unsigned slave_address = 2; slave_address <= 254; slave_address += 2) {
     if (i2c__detect(I2C__2, slave_address)) {
-      printf("I2C slave detected at address: 0x%02X\n", slave_address);
+      // printf("I2C slave detected at address: 0x%02X\n", slave_address);
     }
   }
 }

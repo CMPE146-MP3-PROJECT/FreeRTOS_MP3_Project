@@ -23,9 +23,9 @@
 #include "task.h"
 // #include "uart.h"
 // #include "uart_lab.h"
+#include "DAC_functions.h"
 #include "keypad.h"
 #include "mp3_codec_spi.h"
-#include "mp3_functions.h"
 
 /******************************************************************************************/
 /***************************************MP3 PROJECT****************************************/
@@ -43,7 +43,7 @@ QueueHandle_t Q_songdata;
 // QueueHandle_t Q_keypad_bottom;
 
 static SemaphoreHandle_t song_playing_indication;
-// SemaphoreHandle_t key_press_indication;
+SemaphoreHandle_t key_press_indication;
 
 app_cli_status_e cli__mp3_play(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
                                app_cli__print_string_function cli_output) {
@@ -52,13 +52,15 @@ app_cli_status_e cli__mp3_play(app_cli__argument_t argument, sl_string_t user_in
   songname song_file_name = {0};
 
   strncpy(song_file_name, user_input_minus_command_name, sizeof(songname) - 1);
-  printf("Sending input \"%s\" to queue\n", song_file_name);
+  // printf("Sending input \"%s\" to queue\n", song_file_name);
   xQueueSend(Q_songname, song_file_name, portMAX_DELAY);
   return APP_CLI_STATUS__SUCCESS;
 }
 
 // Reader tasks receives song-name over Q_songname to start reading it
 void mp3_reader_task(void *p) {
+
+  char dot[3] = {' ', '.', '..', '...'};
   songname song_file_name;
   song_data_t byte_512_song_data;
 
@@ -72,21 +74,26 @@ void mp3_reader_task(void *p) {
   FRESULT f_result; /* FatFs function common result code */
   while (1) {
     if (xQueueReceive(Q_songname, &song_file_name, 1000)) {
-      fprintf(stderr, "\nReceived song to play: %s\n", song_file_name);
+      fprintf(stderr, "\n...Now playing: \"%s\"\n", song_file_name);
       // xSemaphoreGive(song_playing_indication);
       f_result = f_open(&song_file, song_file_name, FA_READ); // open_file();
       if (FR_OK == f_result) {
         while (f_eof(&song_file) == 0) { // while not reachh the end of the file
+          if (xSemaphoreTake(next_song, 0)) {
+            song_file.fptr = song_file.obj.objsize;
+          }
           f_read(&song_file, byte_512_song_data, sizeof(byte_512_song_data), &br);
           // fprintf(stderr, "song data: %s\n", byte_512_song_data);
+
           xQueueSend(Q_songdata, &byte_512_song_data, portMAX_DELAY);
         }
         f_close(&song_file);
       } else {
-        printf("ERROR: Failed to open: %s\n", song_file_name);
+        fprintf(stderr, "ERROR: Failed to open: %s\n", song_file_name);
       }
     } else {
-      fprintf(stderr, "waiting for song name...\n");
+      fprintf(stderr, "\rwaiting for song name...");
+      fflush(stdout);
     }
   }
 }
@@ -110,34 +117,38 @@ void mp3_player_task(void *p) {
         while (mp3_decoder_needs_data() != 1) {
           // printf("Bitstream FIFO not ready\n");
           vTaskDelay(1);
+          // delay__ms(25);
         }
-        // adafruit_cs();
+        // adafruit_ds();
         ADA_DCS();
         for (int j = byte_sent_number; j < (byte_sent_number + byte_send_per_time); j++) {
           // spi_send_from_main_to_mp3_decoder(byte_512_song_data[i]);
           spi0__mp3_exchange_byte(byte_512_song_data[j]);
           // puts("playing...");
+          // SCI_read_volume();
         }
         byte_sent_number += byte_send_per_time;
         ADA_DDS();
-        // adafruit_ds();
+        // SCI_read_volume();
+        // adafruit_cs();
       }
       // vTaskDelay(100000);
-#if SD_MP3_FILE_READ_WRITE_TEST
-      if (FR_OK == f_open(&acc_file, acc_data_file_name, (FA_WRITE | FA_CREATE_ALWAYS))) {
-        if (FR_OK == f_write(&acc_file, byte_512_song_data, sizeof(byte_512_song_data), &bytes_written)) {
-          fprintf(stderr, "writing data to another file...\n");
-          f_close(&acc_file);
-        } else {
-          fprintf(stderr, "fail to write...\n");
-        }
-      } else {
-        fprintf(stderr, "fail to open: %c\n", acc_data_file_name);
-      }
-#endif
     }
   }
 }
+
+#if SD_MP3_FILE_READ_WRITE_TEST
+if (FR_OK == f_open(&acc_file, acc_data_file_name, (FA_WRITE | FA_CREATE_ALWAYS))) {
+  if (FR_OK == f_write(&acc_file, byte_512_song_data, sizeof(byte_512_song_data), &bytes_written)) {
+    fprintf(stderr, "writing data to another file...\n");
+    f_close(&acc_file);
+  } else {
+    fprintf(stderr, "fail to write...\n");
+  }
+} else {
+  fprintf(stderr, "fail to open: %c\n", acc_data_file_name);
+}
+#endif
 
 typedef enum {
   two = 0x2,
@@ -169,43 +180,54 @@ void system_led(void *p) {
 void system_init_count(void) {
   for (int i = 1; i <= 100; i++) {
     if (i == 1) {
-      printf("system Initializing %3d%%", i);
+      printf("  system Initializing %3d%%", i);
     } else {
       printf("\b\b\b\b%3d%%", i);
     }
     fflush(stdout);
   }
 }
-
+void key_input_interrupt(void) { xSemaphoreGiveFromISR(key_press_indication, NULL); }
 void key_press_detect(void) {
+  port_pin_s IO_to_keypad[4] = {{0, 26}, {1, 31}, {1, 20}, {1, 28}};
   while (1) {
-    read_keys();
+    for (int i = 0; i < 4; i++) {
+      gpiox__set_low(IO_to_keypad[i]);
+    }
+    if (xSemaphoreTake(key_press_indication, portMAX_DELAY)) {
+      read_keys();
+    }
   }
 }
 void key_press_ISR(void) {
   char key = 0;
   while (1) {
-    if (xQueueReceive(Q_keypad_bottom, &key, 1000)) {
-      fprintf(stderr, "key pressed is: %c\n", key);
-      // switch (key){ //https://www.yiibai.com/book/article/820 <<-switch a char
-      //   case 'B':
-      //   break;
-      // }
-    } else {
-      fprintf(stderr, "no key has been pressed\n");
+    if (xQueueReceive(Q_keypad_bottom, &key, portMAX_DELAY)) {
+      // fprintf(stderr, "you just pressed: %c\n", key);
+      key_functions(key);
     }
+    // else {
+    //   //fprintf(stderr, "no key has been pressed\n");
+    // }
   }
 }
 
 int main(void) {
   /******************define system queues*********************/
-  Q_songname = xQueueCreate(1, sizeof(songname));
+  Q_songname = xQueueCreate(3, sizeof(songname));
   Q_songdata = xQueueCreate(1, 512);
   Q_keypad_bottom = xQueueCreate(1, sizeof(char));
+  Q_key_to_OLED = xQueueCreate(1, sizeof(char)); // should it have more space?
   /***********************************************************/
   /****************define system semaphore********************/
   song_playing_indication = xSemaphoreCreateBinary();
   key_press_indication = xSemaphoreCreateBinary();
+  next_song = xSemaphoreCreateBinary();
+  /***********************************************************/
+  /***************system interrupt initialize*****************/
+  static port_pin_s system_input_interrupt_pin = {0, 1};
+  gpiox__attach_interrupt(system_input_interrupt_pin, GPIO_INTR__FALLING_EDGE, key_input_interrupt);
+  lpc_peripheral__enable_interrupt(GPIO_IRQn, gpiox__interrupt_dispatcher, "unused");
   /***********************************************************/
   /*****************system drivers startup********************/
   const uint32_t spi_clock_mhz = 1;
@@ -215,17 +237,14 @@ int main(void) {
   // ssp2__lab_init(spi_clock_mhz);
   SCI_enable_DAC();
   system_init_count();
-  // static port_pin_s cli_task_led = {2, 3};
-  // SCI_select_system_mode(sdi_share_mode);
-  // SCI_set_CLOCKF(0xC000); // SC_MULT[15:13] = 110 (XTALIx4.5); SC_ADD[12:11] = 00 (No modification)
-  // SCI_set_volume(volume_quite);
+  static port_pin_s cli_task_led = {2, 3};
   /***********************************************************/
 
-  // xTaskCreate(system_led, "system_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
-  xTaskCreate(mp3_reader_task, "send_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 2, NULL);
-  xTaskCreate(mp3_player_task, "play_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 3, NULL);
-  xTaskCreate(key_press_detect, "key_detect", (512U * 4) / sizeof(void *), NULL, 3, NULL);
-  xTaskCreate(key_press_ISR, "do_stuff", (512U * 4) / sizeof(void *), NULL, 4, NULL);
+  xTaskCreate(system_led, "system_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
+  xTaskCreate(mp3_reader_task, "send_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 3, NULL);
+  xTaskCreate(mp3_player_task, "play_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 2, NULL);
+  xTaskCreate(key_press_detect, "key_detect", (512U * 4) / sizeof(void *), NULL, 2, NULL);
+  xTaskCreate(key_press_ISR, "key_intr", (512U * 4) / sizeof(void *), NULL, 2, NULL);
   vTaskStartScheduler();
 }
 #endif

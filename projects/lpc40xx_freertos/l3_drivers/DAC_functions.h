@@ -48,13 +48,13 @@
 /***************TREBLE_BASE register value, datasheet pg.41*******************/
 #define bass_enhance 0x00F6
 #define vocal_enhance 0x7A00
-#define no_adjustment 0x0000
+#define no_adjustment 0x0002
 /****************************************************************************/
 
-typedef struct {
-  uint8_t byte_one_msb;
-  uint8_t byte_two_lsb;
-} SCI_16bits_data_s;
+// typedef struct {
+//   uint8_t byte_one_msb;
+//   uint8_t byte_two_lsb;
+// } SCI_16bits_data_s;
 
 // typedef struct {
 //   uint8_t byte_one_msb;
@@ -81,6 +81,12 @@ void SCI_set_bass_treble(uint16_t TREBLE_BASE);
 void SCI_enable_DAC(void);
 
 void SCI_write_16bits_reg_value(uint8_t reg_to_set, uint16_t value_to_write);
-SCI_16bits_data_s SCI_read_16bits_reg_value(uint8_t reg_to_read);
+uint16_t SCI_read_16bits_reg_value(uint8_t reg_to_read);
 
 void spi_send_from_main_to_mp3_decoder(uint8_t one_byte_song_data);
+
+void DAC_volume_control(int plus_or_mins);
+
+void SCI_read_volume(void);
+
+// void DAC_play_pause(void);

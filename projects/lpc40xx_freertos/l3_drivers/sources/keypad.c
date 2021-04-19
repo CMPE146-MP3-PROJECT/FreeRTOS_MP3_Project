@@ -1,7 +1,7 @@
 #include "keypad.h"
 //#include "gpio_lab.h"
 
-static port_pin_s IO_to_key_pin1 = {0, 25}; // output
+static port_pin_s IO_to_key_pin1 = {0, 26}; // output
 static port_pin_s IO_to_key_pin2 = {1, 31}; // output
 static port_pin_s IO_to_key_pin3 = {1, 20}; // output
 static port_pin_s IO_to_key_pin4 = {1, 28}; // output
@@ -17,7 +17,7 @@ void key_pins_init(void) {
   gpio__construct_with_function(GPIO__PORT_0, 1, GPIO__FUNCITON_0_IO_PIN);
   gpiox__set_as_input(key_pad_interrupt_pin);
 
-  gpio__construct_with_function(GPIO__PORT_0, 25, GPIO__FUNCITON_0_IO_PIN);
+  gpio__construct_with_function(GPIO__PORT_0, 26, GPIO__FUNCITON_0_IO_PIN);
   gpio__construct_with_function(GPIO__PORT_1, 31, GPIO__FUNCITON_0_IO_PIN);
   gpio__construct_with_function(GPIO__PORT_1, 20, GPIO__FUNCITON_0_IO_PIN);
   gpio__construct_with_function(GPIO__PORT_1, 28, GPIO__FUNCITON_0_IO_PIN);
@@ -34,6 +34,8 @@ void key_pins_init(void) {
   gpiox__set_as_input(key_to_IO_pin2);
   gpiox__set_as_input(key_to_IO_pin3);
   gpiox__set_as_input(key_to_IO_pin4);
+
+  // key_functions_init();
 }
 
 void read_keys(void) {
@@ -41,53 +43,62 @@ void read_keys(void) {
   // while(1){
   // if (xSemaphoreTake(key_press_indication, portMAX_DELAY)) {
   char which_bottom = 0;
-  char key[16] = {'D', '#', '0', '*', 'C', '9', '8', '7', 'B', '6', '5', '4', 'A', '3', '2', 'i'};
+  char key[16] = {'D', '#', '0', '*', 'C', '9', '8', '7', 'B', '6', '5', '4', 'A', '3', '2', '1'};
   int result_arrary[4];
 
   IO_pins_value_write(1);                      // write 1110 to keypad
   int *c1 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
+    // printf("%d", c1[i]);
     if (c1[i] != 1) {
-      // fprintf(stderr, "%c", key[0 + i]);
       which_bottom = key[0 + i];
       // fprintf(stderr, "!!!!! %c", c1);
       xQueueSend(Q_keypad_bottom, &which_bottom, 0);
-      // break;
     }
   }
+  // printf(" ");
+  delay__ms(50);
 
   IO_pins_value_write(2);                      // write 1101 to keypad
   int *c2 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
+    // printf("%d", c2[i]);
     if (c2[i] != 1) {
       // fprintf(stderr, "%c", key[4 + i]);
       which_bottom = key[4 + i];
       xQueueSend(Q_keypad_bottom, &which_bottom, 0);
-      // break;
     }
   }
+  // printf(" ");
+  delay__ms(50);
 
   IO_pins_value_write(3);                      // write 1011 to keypad
   int *c3 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
+    // printf("%d", c3[i]);
     if (c3[i] != 1) {
-      // fprintf(stderr, "%c", key[8 + i]);
+      //(stderr, "%c", key[8 + i]);
       which_bottom = key[8 + i];
       xQueueSend(Q_keypad_bottom, &which_bottom, 0);
-      // break;
     }
   }
+  // printf(" ");
+  delay__ms(50);
 
   IO_pins_value_write(4);                      // write 0111 to keypad
   int *c4 = IO_pins_value_read(result_arrary); // read from key pad
   for (int i = 0; i < 4; i++) {
+    // printf("%d", c4[i]);
     if (c4[i] != 1) {
-      // which_bottom = key[12 + i];
-      // xQueueSend(Q_keypad_bottom, &which_bottom, 0);
+      // fprintf(stderr, "%c", key[12 + i]);
+      which_bottom = key[12 + i];
+      xQueueSend(Q_keypad_bottom, &which_bottom, 0);
     }
   }
+  // printf("\n");
 
-  vTaskDelay(150);
+  // vTaskDelay(150);
+  delay__ms(50);
   //}
   //}
 }

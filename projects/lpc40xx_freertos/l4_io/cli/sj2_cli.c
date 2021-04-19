@@ -14,7 +14,7 @@ static void sj2_cli__get_line(sl_string_t input_line);
 static void sj2_cli__handle_backspace_logic(sl_string_t input_line, char input_byte);
 
 void sj2_cli__init(void) {
-  const char *separator = "--------------------------------------------------------------------------------\r\n";
+  const char *separator = "\n-----------------------------------MP3 PROJECT-----------------------------------\r\n";
 
   static app_cli_s sj2_cli_struct;
   sj2_cli_struct = app_cli__initialize(4, sj2_cli__output_function, separator);
@@ -48,12 +48,13 @@ void sj2_cli__init(void) {
                                                                          "LOL",
                                              .app_cli_handler = cli__mp3_play}; ///<--my MP3 task here
   // Add your CLI commands in descending sorted order to make them appear in sorted order
-  app_cli__add_command_handler(&sj2_cli_struct, &crash);
+
   app_cli__add_command_handler(&sj2_cli_struct, &mp3_song_name);   ///<--my MP3 task here
   app_cli__add_command_handler(&sj2_cli_struct, &my_task_control); ///<--my task here
   app_cli__add_command_handler(&sj2_cli_struct, &task_list);
   app_cli__add_command_handler(&sj2_cli_struct, &uart3_transmit);
   app_cli__add_command_handler(&sj2_cli_struct, &i2c);
+  app_cli__add_command_handler(&sj2_cli_struct, &crash);
 
   // In case other tasks are hogging the CPU, it would be useful to run the CLI
   // at high priority to at least be able to see what is going on

@@ -2,6 +2,7 @@
 #include "FreeRTOS.h"
 #include "gpio.h"
 #include "gpio_lab.h"
+#include "key_functions.h"
 #include "queue.h"
 #include "semphr.h"
 #include <stdbool.h>

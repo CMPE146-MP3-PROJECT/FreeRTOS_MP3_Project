@@ -35,6 +35,10 @@ void spi0__pin_init(void) {
 
   LPC_IOCON->P0_18 &= ~GPIO_pin_function_reset_mask;
   gpio__construct_with_function(GPIO__PORT_0, 18, GPIO__FUNCTION_2); // enable SSP0_MOSI
+
+  // gpio__construct_with_function(GPIO__PORT_0, 7, GPIO__FUNCTION_2); // enable SSP1_SCK
+  // gpio__construct_with_function(GPIO__PORT_0, 8, GPIO__FUNCTION_2); // enable SSP1_MISO
+  // gpio__construct_with_function(GPIO__PORT_0, 9, GPIO__FUNCTION_2); // enable SSP1_MOSI
 }
 
 //-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -52,6 +56,7 @@ void spi0__mp3_init(uint32_t max_spi_clock_mhz) {
   spi0__pin_init();                            // enable spi0 pins
   // a) Power on Peripheral
   Lpc_peripheral_power_control(LPC_PCSSP0, power_on); // power on SSP0
+  // Lpc_peripheral_power_control(LPC_PCSSP1, power_on);
   // b) Setup control registers CR0 and CR1
   LPC_SSP0->CR0 |= spi_data_size_8_bit_mask;
   // LPC_SSP0->CR1 &= ~spi_controller_bit_mask; // disable spi0 controller
@@ -65,15 +70,15 @@ void spi0__mp3_init(uint32_t max_spi_clock_mhz) {
   // while (max_spi_clock_mhz < (cur_cpu_clk_mhz / devider_prescalar) && devider_prescalar <= 254) {
   //   devider_prescalar += 2;
   // }
-  printf("pre_dev: 0x%X", devider_prescalar);
+  printf("  spi_clk_div: 0x%X", devider_prescalar);
   LPC_SSP0->CPSR = devider_prescalar;
 }
 
 uint8_t spi0__mp3_exchange_byte(uint8_t data_out) {
   // if (LPC_SSP2->SR & (1 << 1)) { // test if Transmit FIFO is Full
   uint8_t spi_channel_busy_indication = (1 << 4); //(1 << 4); 1 = busy, 0 = free.
-  LPC_SSP0->DR = data_out;                        // write data to DR ( 1 byte data + 1 byte endFillByte)
-  while (LPC_SSP0->SR & spi_channel_busy_indication) {
+  LPC_SSP0->DR = (uint16_t)data_out;
+  while (LPC_SSP0->SR & (1 << 4)) {
     ; // Wait until SSP is free
   }
   return (uint8_t)(LPC_SSP0->DR & 0xFF);

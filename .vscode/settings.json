@@ -74,6 +74,12 @@
         "corecrt.h": "c",
         "clock.h": "c",
         "stdlib.h": "c",
-        "keypad.h": "c"
+        "keypad.h": "c",
+        "queue.h": "c",
+        "key_functions.h": "c",
+        "dac_functions.h": "c",
+        "oled.h": "c",
+        "queue": "c",
+        "stack": "c"
     }
 }
