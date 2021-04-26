@@ -24,26 +24,36 @@
 // #include "uart.h"
 // #include "uart_lab.h"
 #include "DAC_functions.h"
+#include "OLED.h"
+#include "OLED_spi.h"
 #include "keypad.h"
 #include "mp3_codec_spi.h"
-
-/******************************************************************************************/
 /***************************************MP3 PROJECT****************************************/
+
+/***********************************variable definitions***********************************/
 #define SD_MP3_FILE_READ_WRITE_TEST 0
 #define MP3_DECODER_STARTUP 1
 
 #if MP3_DECODER_STARTUP
 
-typedef char songname_t[16];
+// typedef char songname_t[16];
 typedef char songname[32];
 typedef uint8_t song_data_t[512];
+char byte_128_metadata[128];
+// extern static song_memory_t list_of_songs[32];
+// extern static size_t number_of_songs;
 
 QueueHandle_t Q_songname;
 QueueHandle_t Q_songdata;
-// QueueHandle_t Q_keypad_bottom;
+QueueHandle_t Q_key_to_OLED;
 
 static SemaphoreHandle_t song_playing_indication;
 SemaphoreHandle_t key_press_indication;
+
+bool song_play_status = false;
+bool SKIP_status = false;
+bool main_page_status;
+/******************************************************************************************/
 
 app_cli_status_e cli__mp3_play(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
                                app_cli__print_string_function cli_output) {
@@ -68,32 +78,53 @@ void mp3_reader_task(void *p) {
   FIL song_file; /* [IN] File object */
   void *buff;    /* [OUT] Buffer to store read data */
   UINT btr;      /* [IN] Number of bytes to read */
-  UINT *br;      /* [OUT] Number of bytes read */
 
-  static UINT total_bytes_read = 0;
+  UINT *br; /* [OUT] Number of bytes read */
+  UINT *br_mata;
+
+  // static UINT total_bytes_read = 0;
   FRESULT f_result; /* FatFs function common result code */
   while (1) {
-    if (xQueueReceive(Q_songname, &song_file_name, 1000)) {
+    if (xQueueReceive(Q_songname, &song_file_name, 100)) {
       fprintf(stderr, "\n...Now playing: \"%s\"\n", song_file_name);
       // xSemaphoreGive(song_playing_indication);
       f_result = f_open(&song_file, song_file_name, FA_READ); // open_file();
       if (FR_OK == f_result) {
+
+        song_play_status = true;
+        SKIP_status = false;
+        main_page_status = false;
+        f_read(&song_file, byte_128_metadata, sizeof(byte_128_metadata), &br_mata);
+
         while (f_eof(&song_file) == 0) { // while not reachh the end of the file
           if (xSemaphoreTake(next_song, 0)) {
             song_file.fptr = song_file.obj.objsize;
+            fprintf(stderr, "\rskip song...\n");
           }
-          f_read(&song_file, byte_512_song_data, sizeof(byte_512_song_data), &br);
-          // fprintf(stderr, "song data: %s\n", byte_512_song_data);
 
+          if (xSemaphoreTake(rewind_song, 0)) {
+            // f_rewind(song_file.fptr); ///don't know why cannot work??
+            song_file.fptr = 0;
+            fprintf(stderr, "\rrewind song...\n");
+          }
+
+          f_read(&song_file, byte_512_song_data, sizeof(byte_512_song_data), &br);
+          // fprintf(stderr, "song data: %x\n", byte_512_song_data[1]);
           xQueueSend(Q_songdata, &byte_512_song_data, portMAX_DELAY);
         }
         f_close(&song_file);
+        song_play_status = false;
+
       } else {
-        fprintf(stderr, "ERROR: Failed to open: %s\n", song_file_name);
+        fprintf(stderr, "ERROR: Failed to open: %s\n", song_file_name[3]);
       }
     } else {
-      fprintf(stderr, "\rwaiting for song name...");
-      fflush(stdout);
+      // fprintf(stderr, "\rwaiting for song name...");
+      // fflush(stdout);
+      if (!main_page_status) {
+        main_page_status = true;
+        OLED_song_end_play_page();
+      }
     }
   }
 }
@@ -124,6 +155,7 @@ void mp3_player_task(void *p) {
         for (int j = byte_sent_number; j < (byte_sent_number + byte_send_per_time); j++) {
           // spi_send_from_main_to_mp3_decoder(byte_512_song_data[i]);
           spi0__mp3_exchange_byte(byte_512_song_data[j]);
+          // fprintf(stderr, "%x\n", byte_512_song_data[j]);
           // puts("playing...");
           // SCI_read_volume();
         }
@@ -199,12 +231,28 @@ void key_press_detect(void) {
     }
   }
 }
+
+// typedef enum {
+//   Idle_State,
+//   Play_State,
+// } OLED_State;
+
+// typedef struct {
+//   int state;
+// } OLED_fsm;
+
+// static OLED_fsm f;
+
 void key_press_ISR(void) {
   char key = 0;
+  // f.state = Idle_State;
+
   while (1) {
     if (xQueueReceive(Q_keypad_bottom, &key, portMAX_DELAY)) {
       // fprintf(stderr, "you just pressed: %c\n", key);
       key_functions(key);
+      // xQueueSend(Q_key_to_OLED, &key, 10); // send to OLED driver and take actions
+      OLED_Finte_State_Machine(key);
     }
     // else {
     //   //fprintf(stderr, "no key has been pressed\n");
@@ -214,7 +262,7 @@ void key_press_ISR(void) {
 
 int main(void) {
   /******************define system queues*********************/
-  Q_songname = xQueueCreate(3, sizeof(songname));
+  Q_songname = xQueueCreate(1, sizeof(songname));
   Q_songdata = xQueueCreate(1, 512);
   Q_keypad_bottom = xQueueCreate(1, sizeof(char));
   Q_key_to_OLED = xQueueCreate(1, sizeof(char)); // should it have more space?
@@ -223,6 +271,7 @@ int main(void) {
   song_playing_indication = xSemaphoreCreateBinary();
   key_press_indication = xSemaphoreCreateBinary();
   next_song = xSemaphoreCreateBinary();
+  rewind_song = xSemaphoreCreateBinary();
   /***********************************************************/
   /***************system interrupt initialize*****************/
   static port_pin_s system_input_interrupt_pin = {0, 1};
@@ -230,21 +279,31 @@ int main(void) {
   lpc_peripheral__enable_interrupt(GPIO_IRQn, gpiox__interrupt_dispatcher, "unused");
   /***********************************************************/
   /*****************system drivers startup********************/
-  const uint32_t spi_clock_mhz = 1;
+  const uint32_t spi0_clock_mhz = 1;
+  const uint32_t spi1_clock_mhz = 24;
   sj2_cli__init();
   key_pins_init();
-  spi0__mp3_init(spi_clock_mhz);
+  spi0__mp3_init(spi0_clock_mhz);
+  spi1__OLED_init(spi1_clock_mhz);
   // ssp2__lab_init(spi_clock_mhz);
   SCI_enable_DAC();
   system_init_count();
   static port_pin_s cli_task_led = {2, 3};
   /***********************************************************/
+  /*********************mp3 songs list************************/
+  oled_songname_print();
+  // song_list__populate();
+  // for (size_t song_number = 0; song_number < song_list__get_item_count(); song_number++) {
+  //   printf("Song %2d: %s\n", (1 + song_number), song_list__get_name_for_item(song_number));
+  // }
+  /***********************************************************/
 
   xTaskCreate(system_led, "system_led", (512U * 4) / sizeof(void *), NULL, 1, NULL);
   xTaskCreate(mp3_reader_task, "send_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 3, NULL);
   xTaskCreate(mp3_player_task, "play_song", (2000 + sizeof(song_data_t)) / sizeof(void *), NULL, 2, NULL);
-  xTaskCreate(key_press_detect, "key_detect", (512U * 4) / sizeof(void *), NULL, 2, NULL);
-  xTaskCreate(key_press_ISR, "key_intr", (512U * 4) / sizeof(void *), NULL, 2, NULL);
+  xTaskCreate(key_press_detect, "key_detect", (512U * 4) / sizeof(void *), NULL, 3, NULL);
+  xTaskCreate(key_press_ISR, "key_intr", (512U * 4) / sizeof(void *), NULL, 3, NULL);
+  // xTaskCreate(got_key, "OLED", (512U * 4) / sizeof(void *), NULL, 2, NULL);
   vTaskStartScheduler();
 }
 #endif

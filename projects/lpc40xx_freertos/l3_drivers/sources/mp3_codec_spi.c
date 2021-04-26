@@ -70,7 +70,7 @@ void spi0__mp3_init(uint32_t max_spi_clock_mhz) {
   // while (max_spi_clock_mhz < (cur_cpu_clk_mhz / devider_prescalar) && devider_prescalar <= 254) {
   //   devider_prescalar += 2;
   // }
-  printf("  spi_clk_div: 0x%X", devider_prescalar);
+  printf("  spi0_clk_div: 0x%X", devider_prescalar);
   LPC_SSP0->CPSR = devider_prescalar;
 }
 

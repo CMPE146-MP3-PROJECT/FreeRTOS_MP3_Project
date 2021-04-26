@@ -80,6 +80,26 @@
         "dac_functions.h": "c",
         "oled.h": "c",
         "queue": "c",
-        "stack": "c"
+        "stack": "c",
+        "cstring": "c",
+        "string.h": "c",
+        "oled_spi.h": "c",
+        "font_8x8_basic.h": "c",
+        "task.h": "c",
+        "*.tcc": "c",
+        "bitset": "c",
+        "optional": "c",
+        "istream": "c",
+        "ostream": "c",
+        "streambuf": "c",
+        "iomanip": "c",
+        "ios": "c",
+        "iosfwd": "c",
+        "shared_mutex": "c",
+        "*.rh": "c",
+        "*.inc": "c",
+        "numeric": "c",
+        "xlocnum": "c",
+        "xstddef": "c"
     }
 }
