@@ -126,7 +126,7 @@ void OLED_print_string(uint8_t page, uint8_t upper_col, uint8_t lower_col, uint8
 
   OELD_transfer_command_byte(0x40);             // set display start line
   OELD_transfer_command_byte(0xB0 + page);      // 0xB0 setting page start address
-  OELD_transfer_command_byte(0x00 + lower_col); // 0x00 - 0x00 set lower columu start adderss
+  OELD_transfer_command_byte(0x00 + lower_col); // 0x00 - 0x0F set lower columu start adderss
   OELD_transfer_command_byte(0x10 + upper_col); // 0x10 - 0x1F set upper columu start adderss
   for (int i = 0; i < length; i++) {
     OLED_Send_Char(data[i]);

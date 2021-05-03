@@ -4,7 +4,8 @@ extern QueueHandle_t Q_key_to_OLED;
 extern QueueHandle_t Q_songname;
 extern bool song_play_status;
 extern bool SKIP_status;
-extern char byte_128_metadata[128];
+// extern char byte_128_metadata[128];
+extern Tag_s mp3_tag;
 
 static song_memory_t list_of_songs[32]; /// 128 locations 2-demention char array,
 /// each array location contain 32 byte.
@@ -127,7 +128,7 @@ static int state = Idle_State; // has to be declared outside of the state machin
 static int arrow_location = 2;
 static size_t song_index = 0;
 
-#define OLED__ENABLE_DEBUGGING 1
+#define OLED__ENABLE_DEBUGGING 0
 
 #if OLED__ENABLE_DEBUGGING
 #include <stdio.h>
@@ -258,13 +259,19 @@ static void song_page_roll(bool up_or_down) {
     }
   }
 }
-
-// static void print_song_list_page(void) {
-//   for (size_t song_number = 0; song_number < 6; song_number++) {
-//     // fprintf(stderr, "Song %2d: %s\n", (1 + song_number), song_list__get_name_for_item(song_number));
-//     OLED_print_string((uint8_t)song_number + 2, 1, 0, song_list__get_name_for_item(song_number), 16);
-//   }
-// }
+// fprintf(stderr, "mp3 name: %s\n", mp3_tag.trackName);
+// fprintf(stderr, "artist Name: %s\n", mp3_tag.artistName);
+// fprintf(stderr, "album Name: %s\n", mp3_tag.albumName);
+// fprintf(stderr, "year: %s\n", mp3_tag.year);
+void OLED_print_song_info(void) {
+  OLED_print_string(1, 0, 0, "----------------", 16);
+  OLED_print_string(2, 0, 0, mp3_tag.trackName, 16);
+  OLED_print_string(3, 0, 0, " Artist Name:   ", 16);
+  OLED_print_string(4, 0, 0, mp3_tag.artistName, 16);
+  OLED_print_string(5, 0, 0, " Album Name:    ", 16);
+  OLED_print_string(6, 0, 0, mp3_tag.albumName, 16);
+  OLED_print_string(7, 0, 0, mp3_tag.year, 16);
+}
 
 void OLED_Finte_State_Machine(char key) {
   // OLED__DEBUG_PRINTF("current state: %d\n", state);
@@ -281,8 +288,8 @@ void OLED_Finte_State_Machine(char key) {
             // song_index--;
             // song_page_roll(0);
 
-            printf(" 1 song index: %d\n", song_index);
-            printf(" 1 arrow location: %d\n", arrow_location);
+            OLED__DEBUG_PRINTF(" 1 song index: %d", song_index);
+            OLED__DEBUG_PRINTF(" 1 arrow location: %d", arrow_location);
             break;
           } else if (arrow_location > 2) {
             OLED_print_string(arrow_location, 0, 0, "  ", 2);
@@ -290,8 +297,8 @@ void OLED_Finte_State_Machine(char key) {
             arrow_location--;
             song_index--;
             // song_page_roll(0);
-            printf(" 2 song index: %d\n", song_index);
-            printf(" 2 arrow location: %d\n", arrow_location);
+            OLED__DEBUG_PRINTF(" 2 song index: %d", song_index);
+            OLED__DEBUG_PRINTF(" 2 arrow location: %d", arrow_location);
             // state = Idle_State;
             break;
           }
@@ -299,12 +306,12 @@ void OLED_Finte_State_Machine(char key) {
           song_page_roll(0);
           OLED_print_string(arrow_location, 0, 0, ">>", 2);
           song_index--;
-          printf(" 3 song index: %d\n", song_index);
-          printf(" 3 arrow location: %d\n", arrow_location);
+          OLED__DEBUG_PRINTF(" 3 song index: %d", song_index);
+          OLED__DEBUG_PRINTF(" 3 arrow location: %d", arrow_location);
           break;
         }
       } else
-        fprintf(stderr, "song index is %d\n", song_index);
+        OLED__DEBUG_PRINTF(stderr, "song index is %d", song_index);
       break;
 
     case '8': // move down the arrow
@@ -318,21 +325,21 @@ void OLED_Finte_State_Machine(char key) {
           // OLED_print_string((arrow_location - 6), 0, 0, ">>", 2);
           OLED_print_string(arrow_location, 0, 0, ">>", 2);
           song_index++;
-          printf(" 4 song index: %d\n", song_index);
-          printf(" 4 arrow location: %d\n", arrow_location);
+          OLED__DEBUG_PRINTF(" 4 song index: %d", song_index);
+          OLED__DEBUG_PRINTF(" 4 arrow location: %d", arrow_location);
           break;
         } else if (arrow_location < 7) {
           OLED_print_string(arrow_location, 0, 0, "  ", 2);
           OLED_print_string((arrow_location + 1), 0, 0, ">>", 2);
           arrow_location++;
           song_index++;
-          printf(" 5 song index: %d\n", song_index);
-          printf(" 5 arrow location: %d\n", arrow_location);
+          OLED__DEBUG_PRINTF(" 5 song index: %d", song_index);
+          OLED__DEBUG_PRINTF(" 5 arrow location: %d", arrow_location);
           // state = Idle_State;
           break;
         }
       } else
-        fprintf(stderr, "there are only %d songs\n", song_index);
+        OLED__DEBUG_PRINTF("there are only %d songs", song_index);
       break;
     case '1': // vol--
       OLED__DEBUG_PRINTF(" state:%d vol --", state);
@@ -398,6 +405,8 @@ void OLED_Finte_State_Machine(char key) {
       break;
 
     case '4':
+      OLED_print_song_info();
+      state = Info_State;
       break;
 
     case '5':
@@ -438,12 +447,23 @@ void OLED_Finte_State_Machine(char key) {
       break;
 
     case '0':
-      // asciiToSentence(&byte_128_metadata, 128);
-      // for (int i = 0; i < 129; i++)
-      //   // sprintf(&metadata[i], "%c", byte_128_metadata[i]);
-      //   fprintf(stderr, "%c", byte_128_metadata[i]);
-      string_char(&byte_128_metadata);
-      //}
+      // for (int i = 0; i < 3; i++)
+      //   fprintf(stderr, "mp3 tag: %c\n", mp3_tag.tagMark[i]);
+
+      // for (int i = 0; i < 30; i++)
+      //   fprintf(stderr, "mp3 name: %c\n", mp3_tag.trackName[i]);
+
+      // for (int i = 0; i < 30; i++)
+      //   fprintf(stderr, "mp3 name: %c\n", mp3_tag.artistName[i]);
+
+      // for (int i = 0; i < 30; i++)
+      //   fprintf(stderr, "mp3 name: %c\n", mp3_tag.albumName[i]);
+
+      // fprintf(stderr, "\nmp3 tag: %s\n", mp3_tag.tagMark);
+      fprintf(stderr, "mp3 name: %s\n", mp3_tag.trackName);
+      fprintf(stderr, "artist Name: %s\n", mp3_tag.artistName);
+      fprintf(stderr, "album Name: %s\n", mp3_tag.albumName);
+      fprintf(stderr, "year: %s\n", mp3_tag.year);
 
       break;
 
@@ -491,6 +511,11 @@ void OLED_Finte_State_Machine(char key) {
       break;
 
     case '6':
+      print_now_playing_page(1);
+      print_play_pause_icon(1);
+      OLED_Horizontal_Scroll(3, 3, 7, 0x27, 1);
+
+      state = Play_State;
       break;
 
     case 'B':

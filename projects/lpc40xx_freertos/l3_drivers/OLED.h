@@ -12,6 +12,16 @@ SemaphoreHandle_t next_song;
 SemaphoreHandle_t rewind_song;
 typedef char song_memory_t[128];
 
+typedef struct {
+  char tagMark[3];
+  char trackName[30];
+  char artistName[30];
+  char albumName[30];
+  char year[4];
+  char comment[30];
+  char genre;
+} Tag_s;
+
 /* Do not declare variables in a header file */
 #if 0
 static song_memory_t list_of_songs[32];

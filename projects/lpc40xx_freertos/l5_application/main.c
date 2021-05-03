@@ -39,7 +39,7 @@
 // typedef char songname_t[16];
 typedef char songname[32];
 typedef uint8_t song_data_t[512];
-char byte_128_metadata[128];
+// char byte_128_metadata[128];
 // extern static song_memory_t list_of_songs[32];
 // extern static size_t number_of_songs;
 
@@ -53,6 +53,9 @@ SemaphoreHandle_t key_press_indication;
 bool song_play_status = false;
 bool SKIP_status = false;
 bool main_page_status;
+
+Tag_s mp3_tag;
+int bufLength = 129;
 /******************************************************************************************/
 
 app_cli_status_e cli__mp3_play(app_cli__argument_t argument, sl_string_t user_input_minus_command_name,
@@ -94,7 +97,13 @@ void mp3_reader_task(void *p) {
         song_play_status = true;
         SKIP_status = false;
         main_page_status = false;
-        f_read(&song_file, byte_128_metadata, sizeof(byte_128_metadata), &br_mata);
+
+        long fileLength = f_size(&song_file);
+        // song_file.fptr = song_file.obj.objsize - bufLength + 1;
+        f_lseek(&song_file, fileLength - bufLength + 1);
+        f_read(&song_file, &mp3_tag, sizeof(Tag_s), &br_mata);
+        f_lseek(&song_file, 0);
+        // song_file.fptr = 0;
 
         while (f_eof(&song_file) == 0) { // while not reachh the end of the file
           if (xSemaphoreTake(next_song, 0)) {
