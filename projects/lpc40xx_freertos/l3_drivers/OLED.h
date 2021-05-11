@@ -40,4 +40,8 @@ void add_that_song_to_queue();
 void print_now_playing_page(bool play_pause);
 void print_play_pause_icon(bool play_pause);
 
+void OLED_print_volume_value(int value);
+void OLED_print_bass_value(int value);
+void OELD_print_treble_value(int value);
+
 void OLED_song_end_play_page(void);

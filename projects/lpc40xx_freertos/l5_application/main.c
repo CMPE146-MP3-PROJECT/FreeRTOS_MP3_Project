@@ -289,7 +289,7 @@ int main(void) {
   /***********************************************************/
   /*****************system drivers startup********************/
   const uint32_t spi0_clock_mhz = 1;
-  const uint32_t spi1_clock_mhz = 24;
+  const uint32_t spi1_clock_mhz = 1;
   sj2_cli__init();
   key_pins_init();
   spi0__mp3_init(spi0_clock_mhz);

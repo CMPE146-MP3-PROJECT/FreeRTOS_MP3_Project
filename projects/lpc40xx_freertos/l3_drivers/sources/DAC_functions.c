@@ -60,11 +60,11 @@ static bool play_pause_status = true;
 static bool play_pause_status_OLED = true;
 /***********************************************/
 /*************for volume control****************/
-static uint16_t volume_value = 0x2020;
+volatile uint16_t volume_value = 0x2020;
 static uint16_t volume_mask = 0x0202;
 /***********************************************/
 /***********for bass&treble control*************/
-static uint16_t bass_treble_value = 0x0108;
+volatile uint16_t bass_treble_value = 0x0108;
 static uint16_t bass_mask = 0x0010;
 static uint16_t treble_mask = 0x1000;
 /***********************************************/
@@ -177,6 +177,7 @@ void DAC_volume_control(int plus_or_mins) {
       volume_value = volume_value + volume_mask;
       SCI_set_volume(volume_value);
       fprintf(stderr, "  volume: L: -%ddB R: -%ddB\n", (volume_value >> 8), (volume_value & 0xFF));
+      // OLED_print_volume_value(volume_value & 0xFF);
       break;
     }
 
@@ -188,6 +189,7 @@ void DAC_volume_control(int plus_or_mins) {
       volume_value = volume_value - volume_mask;
       SCI_set_volume(volume_value);
       fprintf(stderr, "  volume: L: -%ddB R: -%ddB\n", (volume_value >> 8), (volume_value & 0xFF));
+      // OLED_print_volume_value(volume_value & 0xFF);
     }
     break;
   }
@@ -226,6 +228,7 @@ void DAC_bass_control(int plus_or_mins) {
 
 void DAC_treble_control(int plus_or_mins) {
   uint8_t treble_value = ((bass_treble_value >> 12) & 0xF);
+  char str[13];
   switch (plus_or_mins) {
   case 0:
     // fprintf(stderr, "test value: %d", treble_value);
@@ -234,19 +237,26 @@ void DAC_treble_control(int plus_or_mins) {
       if (treble_value < 0x8) { //+7 +6 +5 +4 +3 +2 +1
         bass_treble_value = bass_treble_value - treble_mask;
         SCI_set_bass_treble(bass_treble_value);
-        fprintf(stderr, "  treble: +%ddB\n", (((bass_treble_value >> 12) & 0xF)));
+        fprintf(stderr, "  treble: +%ddB\n", (bass_treble_value >> 12) & 0xF);
+        sprintf(str, "treble: +%ddB", (bass_treble_value >> 12) & 0xF);
       } else if (treble_value == 0x8) { //+8
         fprintf(stderr, "  treble: -8dB\n");
+        sprintf(str, "treble: -8dB");
       } else if (treble_value > 0x8) { //-1 -2 -3 -4 -5 -6 -7 -8
         bass_treble_value = bass_treble_value - treble_mask;
         SCI_set_bass_treble(bass_treble_value);
-        fprintf(stderr, "  treble: %ddB\n", (((bass_treble_value >> 12) & 0xF) - 16));
+        fprintf(stderr, "  treble: %ddB\n", ((bass_treble_value >> 12) & 0xF) - 16);
+        sprintf(str, "treble: %ddB", ((bass_treble_value >> 12) & 0xF) - 16);
       }
     } else if (treble_value == 0x0) { // 0
       bass_treble_value = bass_treble_value - treble_mask;
       SCI_set_bass_treble(bass_treble_value);
-      fprintf(stderr, "  treble: %ddB\n", (((bass_treble_value >> 12) & 0xF) - 16));
+      fprintf(stderr, "  treble: %ddB\n", ((bass_treble_value >> 12) & 0xF) - 16);
+      sprintf(str, "treble: %ddB", ((bass_treble_value >> 12) & 0xF) - 16);
     }
+    OLED_print_string(7, 0, 0, str, 14);
+    vTaskDelay(300);
+    OLED_print_string(7, 0, 0, "             ", 14);
     break;
 
   case 1:
@@ -254,25 +264,33 @@ void DAC_treble_control(int plus_or_mins) {
       if (treble_value < 0x7) { //+1 +2 +3 +4 +5 +6
         bass_treble_value = bass_treble_value + treble_mask;
         SCI_set_bass_treble(bass_treble_value);
-        fprintf(stderr, "  treble: +%ddB\n", (((bass_treble_value >> 12) & 0xF)));
+        fprintf(stderr, "  treble: +%ddB\n", (bass_treble_value >> 12) & 0xF);
+        sprintf(str, "treble: +%ddB", (bass_treble_value >> 12) & 0xF);
       } else if (treble_value == 0x7) { //+7
         fprintf(stderr, "  treble: +7dB\n");
+        sprintf(str, "treble: +7dB");
       } else if (treble_value > 7) {
         if (treble_value < 0xF) { // -7 -6 -5 -4 -3 -2
           bass_treble_value = bass_treble_value + treble_mask;
           SCI_set_bass_treble(bass_treble_value);
-          fprintf(stderr, "  treble: %ddB\n", (((bass_treble_value >> 12) & 0xF) - 16));
+          fprintf(stderr, "  treble: %ddB\n", ((bass_treble_value >> 12) & 0xF) - 16);
+          sprintf(str, "treble: %ddB", ((bass_treble_value >> 12) & 0xF) - 16);
         } else if (treble_value == 0xF) { //-1
           bass_treble_value = bass_treble_value + treble_mask;
           SCI_set_bass_treble(bass_treble_value);
           fprintf(stderr, "  treble: +0dB\n");
+          sprintf(str, "treble: +0dB");
         }
       }
     } else if (treble_value == 0x0) { // +0
       bass_treble_value = bass_treble_value + treble_mask;
       SCI_set_bass_treble(bass_treble_value);
-      fprintf(stderr, "  treble: +%ddB\n", ((bass_treble_value >> 12) & 0xF));
+      fprintf(stderr, "  treble: +%ddB\n", (bass_treble_value >> 12) & 0xF);
+      sprintf(str, "treble: +%ddB", (bass_treble_value >> 12) & 0xF);
     }
+    OLED_print_string(7, 0, 0, str, 14);
+    vTaskDelay(300);
+    OLED_print_string(7, 0, 0, "             ", 14);
     break;
   }
 }

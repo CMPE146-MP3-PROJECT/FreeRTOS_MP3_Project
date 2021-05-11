@@ -64,7 +64,7 @@ key_functions(char key_detected) {
     break;
 
   case 'A': // increase bass
-    DAC_bass_control(plus);
+    // DAC_bass_control(plus);
     break;
 
   case '4':
@@ -86,7 +86,7 @@ key_functions(char key_detected) {
   case '6':
     break;
   case 'B': // decrease bass
-    DAC_bass_control(minus);
+    // DAC_bass_control(minus);
     break;
 
   case '7':
@@ -100,7 +100,7 @@ key_functions(char key_detected) {
     break;
 
   case 'C':
-    DAC_treble_control(plus);
+    // DAC_treble_control(plus);
     break;
 
   case '*':
@@ -125,7 +125,7 @@ key_functions(char key_detected) {
     break;
 
   case 'D':
-    DAC_treble_control(minus);
+    // DAC_treble_control(minus);
     break;
   }
 }

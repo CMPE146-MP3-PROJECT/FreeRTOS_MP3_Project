@@ -7,6 +7,9 @@ extern bool SKIP_status;
 // extern char byte_128_metadata[128];
 extern Tag_s mp3_tag;
 
+extern uint16_t volume_value;
+extern uint16_t bass_treble_value;
+
 static song_memory_t list_of_songs[32]; /// 128 locations 2-demention char array,
 /// each array location contain 32 byte.
 static size_t number_of_songs;
@@ -248,6 +251,31 @@ static void OLED_print_treble(bool plus_or_minus) {
   }
 }
 
+void OLED_print_volume_value(int value) {
+  // char dB[1] = 'dB';
+  char str[12];
+  sprintf(str, "volume: -%ddB", value);
+  OLED_print_string(7, 0, 0, str, 13);
+  vTaskDelay(300);
+  OLED_print_string(7, 0, 0, "             ", 13);
+}
+
+void OLED_print_bass_value(int value) {
+  char str[12];
+  sprintf(str, "bass: +%ddB", value);
+  OLED_print_string(7, 0, 0, str, 13);
+  vTaskDelay(300);
+  OLED_print_string(7, 0, 0, "             ", 13);
+}
+
+void OELD_print_treble_value(int value) {
+  char str[13];
+  sprintf(str, "treble: %ddB", value);
+  OLED_print_string(7, 0, 0, str, 14);
+  vTaskDelay(300);
+  OLED_print_string(7, 0, 0, "             ", 14);
+}
+
 static void song_page_roll(bool up_or_down) {
   if (up_or_down) { // roll up to see next song
     for (size_t count = 6; count > 0; count--) {
@@ -385,7 +413,8 @@ void OLED_Finte_State_Machine(char key) {
     switch (key) {
     case '1': // vol--
       OLED__DEBUG_PRINTF(" state:%d vol --", state);
-      OLED_print_volume(0);
+      // OLED_print_volume(0);
+      OLED_print_volume_value(volume_value & 0xFF);
       OLED_Horizontal_Scroll(3, 3, 7, 0x27, 1);
       break;
 
@@ -394,13 +423,16 @@ void OLED_Finte_State_Machine(char key) {
 
     case '3': // vol++
       OLED__DEBUG_PRINTF(" state:%d vol ++", state);
-      OLED_print_volume(1);
+      // OLED_print_volume(1);
+      OLED_print_volume_value(volume_value & 0xFF);
       OLED_Horizontal_Scroll(3, 3, 7, 0x27, 1);
       break;
 
     case 'A':
       OLED__DEBUG_PRINTF(" state:%d bass ++", state);
-      OLED_print_bass(1);
+      // OLED_print_bass(1);
+      DAC_bass_control(1);
+      OLED_print_bass_value((bass_treble_value >> 4) & 0xF);
       OLED_Horizontal_Scroll(3, 3, 7, 0x27, 1);
       break;
 
@@ -418,7 +450,9 @@ void OLED_Finte_State_Machine(char key) {
 
     case 'B':
       OLED__DEBUG_PRINTF(" state:%d bass --", state);
-      OLED_print_bass(0);
+      // OLED_print_bass(0);
+      DAC_bass_control(0);
+      OLED_print_bass_value((bass_treble_value >> 4) & 0xF);
       OLED_Horizontal_Scroll(3, 3, 7, 0x27, 1);
       break;
 
@@ -439,7 +473,8 @@ void OLED_Finte_State_Machine(char key) {
 
     case 'C':
       OLED__DEBUG_PRINTF(" state:%d treble ++", state);
-      OLED_print_treble(1);
+      // OLED_print_treble(1);
+      DAC_treble_control(1);
       OLED_Horizontal_Scroll(3, 3, 7, 0x27, 1);
       break;
 
@@ -477,7 +512,8 @@ void OLED_Finte_State_Machine(char key) {
 
     case 'D':
       OLED__DEBUG_PRINTF(" state:%d treble --", state);
-      OLED_print_treble(0);
+      // OLED_print_treble(0);
+      DAC_treble_control(0);
       OLED_Horizontal_Scroll(3, 3, 7, 0x27, 1);
       break;
 
@@ -501,7 +537,7 @@ void OLED_Finte_State_Machine(char key) {
 
     case 'A':
       OLED__DEBUG_PRINTF(" state:%d bass ++", state);
-      OLED_print_bass(1);
+      // OLED_print_bass(1);
       break;
 
     case '4':
@@ -520,7 +556,7 @@ void OLED_Finte_State_Machine(char key) {
 
     case 'B':
       OLED__DEBUG_PRINTF(" state:%d bass --", state);
-      OLED_print_bass(0);
+      // OLED_print_bass(0);
       break;
 
     case '7':
@@ -534,7 +570,7 @@ void OLED_Finte_State_Machine(char key) {
 
     case 'C':
       OLED__DEBUG_PRINTF(" state:%d treble ++", state);
-      OLED_print_treble(1);
+      // OLED_print_treble(1);
       break;
 
     case '*':
@@ -548,7 +584,7 @@ void OLED_Finte_State_Machine(char key) {
 
     case 'D':
       OLED__DEBUG_PRINTF(" state:%d treble --", state);
-      OLED_print_treble(0);
+      // OLED_print_treble(0);
       break;
 
     default:
