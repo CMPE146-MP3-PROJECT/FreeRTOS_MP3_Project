@@ -11,6 +11,7 @@
 * Programmable-SoC: SJTwo board from SCE.SJSU;
 * MP3 decoder: Adafruit VS1053 Codec v4, [you can download datasheet here](https://cdn-shop.adafruit.com/datasheets/vs1053.pdf).
 * Main OLED display controller: SSD1306;
+* System control unit: 4 x 4 Matrix Keypad
 
 ![free-rtos-featured-1](https://user-images.githubusercontent.com/60235970/114663901-d879c180-9caf-11eb-99f8-07a139057adf.jpg)
 
