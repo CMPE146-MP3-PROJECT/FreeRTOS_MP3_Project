@@ -18,3 +18,6 @@
 
 ## Software level design:
 ![software_level_design](https://user-images.githubusercontent.com/60235970/118579435-f15c1380-b742-11eb-9877-57b4fff06f68.png)
+
+## MP3 player system Assemble:
+![mp3-assemble](https://user-images.githubusercontent.com/60235970/137086012-dfc3f29b-78d3-43da-a9a3-04417e4c72a5.png)
