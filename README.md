@@ -1,6 +1,7 @@
 
 # lpc40xx_FreeRTOS_MP3_Project
 * `MP3 player` based on Realtime Embedded System; 
+* Project source code is in Zhaoqin Li branch
 ## Software info:
 * Main OS: FreeROTS V8.2.0;
 * Main CPU: LPC4078F from NXP Semiconductors; 
