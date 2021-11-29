@@ -16,7 +16,7 @@
 <img src=https://user-images.githubusercontent.com/60235970/114663901-d879c180-9caf-11eb-99f8-07a139057adf.jpg alt="image1" width="400"/>
 
 ## Hardware level design:
-![final_MP3_design-hardware_level_design](https://user-images.githubusercontent.com/60235970/118579374-d093be00-b742-11eb-9232-2e270ec7b6e3.png)
+<img src=https://user-images.githubusercontent.com/60235970/143958514-da04ff2e-c7f7-4b98-bc2d-e45016bf42fe.png alt="hw_level_design" width = "700"/>
 
 ## Software level design:
 ![software_level_design](https://user-images.githubusercontent.com/60235970/118579435-f15c1380-b742-11eb-9877-57b4fff06f68.png)
